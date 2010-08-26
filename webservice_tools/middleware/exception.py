@@ -1,5 +1,5 @@
 
-from server_tools.response_util import ResponseObject
+from webservice_tools.response_util import ResponseObject
 import sys
 class WebServiceException():
     """
