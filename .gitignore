@@ -1,0 +1,7 @@
+build
+.project
+.pydevproject
+*.egg
+*.egg-info
+*.pyc
+
