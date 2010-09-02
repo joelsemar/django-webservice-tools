@@ -234,19 +234,19 @@ def toXML(obj, objname, nodePrefix='', isCdata=False):
     return getXML(obj, objname, nodePrefix, isCdata)
 
 
-def flatten(list):
+def flatten(seq):
     """
     Flattens an array or tuple into a 1d list
     """
 
     ret = []
-    def _flatten(list):
-        for i in list:
+    def _flatten(seq):
+        for i in seq:
             if isinstance(i, (list, tuple)):
                 _flatten(i)
             else:
                 ret.append(i)
         return ret
     
-    return _flatten(list)
+    return _flatten(seq)
         
