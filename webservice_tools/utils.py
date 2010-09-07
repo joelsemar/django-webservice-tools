@@ -5,9 +5,13 @@ General utils
 import types
 import re
 import xml.sax.handler
-
+import socket
+import urllib
+import urllib2
+import simplejson
 JSON_INDENT = 4
-
+GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
+GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
 
 
 def toDict(obj, r=4):
@@ -250,3 +254,24 @@ def flatten(seq):
     
     return _flatten(seq)
 
+
+class GeoCode():
+    
+    def __init__(self, address, apiKey):
+        self.maxRetries = 3
+        self.timeout = 10
+        self.socket.setdefaulttimeout(self.timeout)
+        self.query = urllib.urlencode({'q': address})
+
+    
+    def getCoords(self):
+        try:
+            response =  simplejson.loads(urllib2.urlopen(GOOGLE_API_URL % self.apiKey + '&' + self.query).read())
+            coordinates =  response['Placemark'][0]['Point']['coordinates'][0:2]
+            return tuple([float(n) for n in coordinates])
+        except:
+            if self.maxRetries:
+                self.maxRetries -= 1
+                return self.getCoords()
+            return {}
+            
