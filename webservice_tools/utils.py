@@ -249,4 +249,4 @@ def flatten(seq):
         return ret
     
     return _flatten(seq)
-        
+
