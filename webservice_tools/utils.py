@@ -260,9 +260,10 @@ class GeoCode():
     def __init__(self, address, apiKey):
         self.maxRetries = 3
         self.timeout = 10
-        self.socket.setdefaulttimeout(self.timeout)
+        self.apiKey = apiKey
         self.query = urllib.urlencode({'q': address})
-
+        
+        socket.setdefaulttimeout(self.timeout)
     
     def getCoords(self):
         try:
