@@ -242,7 +242,7 @@ def flatten(seq):
     """
     Flattens an array or tuple into a 1d list
     """
-
+    
     ret = []
     def _flatten(seq):
         for i in seq:
@@ -251,6 +251,9 @@ def flatten(seq):
             else:
                 ret.append(i)
         return ret
+    
+    if isinstance(seq, tuple):
+        return tuple(_flatten(seq))
     
     return _flatten(seq)
 

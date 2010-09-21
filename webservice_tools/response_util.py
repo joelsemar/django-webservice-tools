@@ -45,6 +45,11 @@ class ResponseObject():
         self._data.update(kwargs)
     
     
+    def __getitem__(self, key):
+        return self._data[key]
+        
+        
+        
     def get(self, key):
         return self._data[key]
     
@@ -54,7 +59,10 @@ class ResponseObject():
         self._status = status
     
     
-    def send(self):
+    def send(self, status=None):
+        
+        if status:
+            self.setStatus(status)
         responseDict = {}
         responseDict['errors'] = self._errors
         responseDict['success'] = self.success
