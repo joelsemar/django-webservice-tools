@@ -3,16 +3,26 @@ import sys
 import pydoc
 from django.core.management.base import BaseCommand, CommandError
 class Command(BaseCommand):
+    """
+    Generates HTML docs for a project using pydoc
+    Requires 2 arguments, the first is the path to the python package you want documented
+    The second is the path to where you want the docs written to (will be created if not there)
+    """
     def handle(self, *args, **options):
         moduleDir =  args[0]
         docDir =  args[1]
         origDir = os.getcwd() 
         sys.path.append(moduleDir)
-        os.chdir(docDir)
-        os.system('rm *.html')
-        print 'Building docs..'
+        try:
+            os.chdir(docDir)
+            os.system('rm *.html')
+        except OSError:
+            os.mkdir(docDir)
+            os.chdir(docDir)
+        
+        print 'Building docs...'
         pydoc.writedocs(moduleDir)
-        os.chdir(moduleDir)
+        # attempt to add the new docs to git
         os.system('git add .')
         os.chdir(origDir)
         
