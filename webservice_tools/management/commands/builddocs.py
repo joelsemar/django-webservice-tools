@@ -15,7 +15,6 @@ class Command(BaseCommand):
         sys.path.append(moduleDir)
         try:
             os.chdir(docDir)
-            os.system('rm *.html')
         except OSError:
             os.mkdir(docDir)
             os.chdir(docDir)
@@ -23,7 +22,8 @@ class Command(BaseCommand):
         print 'Building docs...'
         pydoc.writedocs(moduleDir)
         # attempt to add the new docs to git
-        os.system('git add .')
+        os.chdir(moduleDir)
+        os.system('find . -name *.html |xargs git add')
         os.chdir(origDir)
         
         

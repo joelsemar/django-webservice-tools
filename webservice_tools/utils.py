@@ -12,7 +12,7 @@ import simplejson
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
-
+GOOGLE_REVERSE_URL = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false%key=%s'
 
 def toDict(obj, r=4):
     """ 
@@ -277,5 +277,26 @@ class GeoCode():
             if self.maxRetries:
                 self.maxRetries -= 1
                 return self.getCoords()
+            return {}
+            
+        
+class ReverseGeoCode():      
+
+    def __init__(self, latlng, apiKey):
+        self.maxRetries = 3
+        self.timeout = 10
+        self.apiKey = apiKey
+        self.query = urllib.urlencode({'q': latlng})
+        
+        socket.setdefaulttimeout(self.timeout)
+    
+    def getAddress(self):
+        try:
+            response =  simplejson.loads(urllib2.urlopen(GOOGLE_REVERSE_URL % self.apiKey + '&' + self.query).read())
+            return response['results']
+        except:
+            if self.maxRetries:
+                self.maxRetries -= 1
+                return self.getAddress()
             return {}
             
