@@ -59,10 +59,14 @@ class ResponseObject():
         self._status = status
     
     
-    def send(self, status=None):
+    def send(self, errors=None, status=None):
         
         if status:
             self.setStatus(status)
+            
+        if errors:
+            self.addErrors(errors)
+            
         responseDict = {}
         responseDict['errors'] = self._errors
         responseDict['success'] = self.success
