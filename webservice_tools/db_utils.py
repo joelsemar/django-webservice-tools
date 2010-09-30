@@ -1,5 +1,7 @@
 from django.contrib.gis.db import models
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.fields.files import ImageField, ImageFieldFile
+from django.conf import settings
 class SoftDeleteManager(models.Manager):
     """
     Model manager that auto filters out instances with <field>=False
@@ -34,3 +36,19 @@ def isDirty(model, fieldName):
         raise Exception("A serious error has occurred in db_utils.isDirty(). A model instance was passed that doesn't exist.")
     
     return entryInDB.__dict__[fieldName] != model.__dict__[fieldName]    
+
+
+
+class ThumbFieldFile(ImageFieldFile):
+    
+    def save(self, *args, **kwargs):
+        from PIL import Image
+        super(ImageFieldFile, self).save(*args, **kwargs)
+        filename = self.path
+        imageFile = Image.open(filename)
+        imageFile = imageFile.resize(settings.DEFAULT_THUMB_SIZE, Image.ANTIALIAS)
+        imageFile.save(filename)
+        
+class ThumbField(ImageField):
+    
+    attr_class = ThumbFieldFile
