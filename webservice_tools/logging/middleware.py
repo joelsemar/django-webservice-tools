@@ -13,13 +13,11 @@ class LoggingMiddleware(object):
                 msg += "REQUEST GET: %s" % toDict(request.GET)
             if request.POST:
                 msg += "REQUEST POST: %s" % toDict(request.POST)
-            if request.PUT:
-                msg += "REQUEST PUT: %s" % toDict(request.PUT)
         except:
             pass
             
         logging.debug(log % {'request': msg,
                              'method': request.method,
-                             'response': response,
+                             'response': str(response)[:5000],
                              'url': request.path})
         return response
