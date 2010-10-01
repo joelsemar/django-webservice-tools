@@ -2,6 +2,7 @@ from django.contrib.gis.db import models
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.fields.files import ImageField, ImageFieldFile
 from django.conf import settings
+from PIL import Image
 class SoftDeleteManager(models.Manager):
     """
     Model manager that auto filters out instances with <field>=False
@@ -42,7 +43,6 @@ def isDirty(model, fieldName):
 class ThumbFieldFile(ImageFieldFile):
     
     def save(self, *args, **kwargs):
-        from PIL import Image
         super(ImageFieldFile, self).save(*args, **kwargs)
         filename = self.path
         imageFile = Image.open(filename)
