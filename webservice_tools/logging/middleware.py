@@ -3,7 +3,7 @@ from webservice_tools.utils import toDict
 class LoggingMiddleware(object):
     
     def process_response(self, request, response):
-        if 'text/html' in response['Content-Type']:
+        if 'html' in response['Content-Type'] or 'javascript' in response['Content-Type']:
             return response
         
         log = "-------------------------------------\n%(request)s\nHANDLER: %(method)s %(url)s\nRESPONSE\n%(response)s\n-------------------------------------\n" 
