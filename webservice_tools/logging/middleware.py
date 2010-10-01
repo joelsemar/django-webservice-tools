@@ -13,6 +13,8 @@ class LoggingMiddleware(object):
                 msg += "REQUEST GET: %s" % toDict(request.GET)
             if request.POST:
                 msg += "REQUEST POST: %s" % toDict(request.POST)
+            if request.PUT:
+                msg += "REQUEST PUT: %s" % toDict(request.PUT)
         except:
             pass
             
