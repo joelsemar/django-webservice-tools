@@ -2,6 +2,7 @@ import simplejson
 from django.core import serializers
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.http import HttpResponse
+from webservice_tools.logging import logging
 import utils
 JSON_INDENT = 4
 
@@ -82,20 +83,20 @@ class ResponseObject():
     def _sendJSON(self, responseDict):
         serializer = JSONSerializer()
         responseDict = self._prepareData(serializer, responseDict)
-        return HttpResponse(simplejson.dumps(responseDict,
-                                             cls=DateTimeAwareJSONEncoder,
-                                             ensure_ascii=True,
-                                             indent=JSON_INDENT), status=self._status)
+        content = simplejson.dumps(responseDict, cls=DateTimeAwareJSONEncoder,
+                                   ensure_ascii=True, indent=JSON_INDENT)
+        return HttpResponse(content, mimetype='application/json', status=self._status)
         
     def _sendXML(self, responseDict):
         serializer = XMLSerializer()
         responseDict = self._prepareData(serializer, responseDict)
-        return HttpResponse(utils.toXML(responseDict, 'response'), status=self._status)
+        content = utils.toXML(responseDict, 'response')
+        return HttpResponse(content, mimetype='application/xml',  status=self._status)
     
     
     def _prepareData(self, serializer, responseDict):
         for key, value in self._data.iteritems():
-            if 'QuerySet' in str(type(value)):
+            if 'QuerySet' in str(type(value) or isinstance(value, (list, tuple))):
                 responseDict['data'][key] = [utils.toDict(o) for o in value]
             else:
                 responseDict['data'][key] = utils.toDict(value)
