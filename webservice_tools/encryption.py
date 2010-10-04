@@ -1,4 +1,5 @@
 import base64
+import os
 from Crypto.Cipher import AES
 from django.core.cache import cache
 ENCRYPTION_PADDING = ' '
@@ -11,7 +12,6 @@ def encryptData(data):
     data: The data to encrypt, in plain-text format
     returns: The encrypted data, encoded in base64 format
     """
-    from Crypto.Cipher import AES
     encryptionObject = _getEncryptionObject()
     
     if not encryptionObject:
@@ -49,12 +49,12 @@ def _getEncryptionObject():
     Gets the Encryption Object which is used to encrypt/decrypt data
     The encryption key is cached.
     """
-    from Crypto.Cipher import AES
-    
     key = cache.get(ENCRYPTION_OBJECT_KEY)
     if key is None:
-        key = open('dbkey').read()
+        try:
+            key = open('%s/dbkey' % os.getcwd()).read()
+        except IOError:
+            key = 'H3YY!H0pp3d0u70f7h47h0u$3w!7hmY>'
         cache.set(ENCRYPTION_OBJECT_KEY, key)
-    
     return AES.new(key, AES.MODE_ECB)
 
