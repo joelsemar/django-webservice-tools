@@ -309,3 +309,29 @@ def generateNewPassword():
            passwordpieces.PASSWORD_SPECIAL_CHARACTERS[random.randint(0, len(passwordpieces.PASSWORD_SPECIAL_CHARACTERS) - 1)] + \
            passwordpieces.PASSWORD_WORDS[random.randint(0, len(passwordpieces.PASSWORD_WORDS) - 1)] + \
            passwordpieces.PASSWORD_SPECIAL_CHARACTERS[random.randint(0, len(passwordpieces.PASSWORD_SPECIAL_CHARACTERS) - 1)]
+           
+           
+def friendlyURLEncode(data):
+    # makes sure that for every item in your data dictionary that is of unicode type, it is first UTF-8
+    # encoded before passing it in to urllib.urlencode()
+    data = dict([(k,v.encode('utf-8') if type(v) is types.UnicodeType else v) for (k,v) in data.items()])
+    return urllib.urlencode(data)
+
+
+def truncate(s, length, etc=u"..."):
+    """Truncate a string to the given length.
+    
+    s: The string to truncate
+    length: The length to truncate to, INCLUDING the length of etc
+    etc: If truncation is necessary, append the value of "etc".
+    """
+    assert isinstance(s, basestring)
+    assert length
+    
+    if len(s) < length:
+        return s
+    elif len(etc) >= length:
+        return s[:length]
+    else:
+        return s[:length - len(etc)] + unicode(etc)
+

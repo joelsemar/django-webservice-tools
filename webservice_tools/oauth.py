@@ -676,6 +676,6 @@ def makeOauthRequestObject(url, credentials, token=None, callback=None, verifier
 def fetchResponse(oauth_request, server):
     #just a utility function for sending our  oauth requests
     connection = httplib.HTTPSConnection(server)
-    url = oauth_request.http_url()
-    connection.request(oauth_request.http_method, url, headers=oauth_request.to_header())
+    url = oauth_request.to_url()
+    connection.request(oauth_request.http_method, url)
     return connection.getresponse()

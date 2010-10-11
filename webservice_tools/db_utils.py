@@ -1,3 +1,4 @@
+import re
 from django.contrib.gis.db import models
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.fields.files import ImageField, ImageFieldFile
@@ -35,8 +36,7 @@ def isDirty(model, fieldName):
         entryInDB = model.__class__.objects.get(id=model.id)
     except ObjectDoesNotExist:
         raise Exception("A serious error has occurred in db_utils.isDirty(). A model instance was passed that doesn't exist.")
-    
-    return entryInDB.__dict__[fieldName] != model.__dict__[fieldName]    
+    return re.sub('[\r\n\ ]+', '', entryInDB.__dict__[fieldName]) != re.sub('[\r\n\ ]+', '', model.__dict__[fieldName])    
 
 
 
