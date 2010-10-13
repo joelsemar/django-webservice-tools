@@ -22,6 +22,7 @@ class SSLRedirect:
     """
     
     def process_view(self, request, view_func, view_args, view_kwargs):
+        import pydevd;pydevd.settrace('127.0.0.1 ')
         if SSL in view_kwargs:
             secure = view_kwargs[SSL]
             del view_kwargs[SSL]
