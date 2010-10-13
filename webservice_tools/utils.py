@@ -338,6 +338,6 @@ def truncate(s, length, etc=u"..."):
 
 
 def formatPhoneNumber(number):
-    m = re.search("\+1(\d{3})(\d{3})(\d{4})", number)
+    m = re.search("\+?1?(\d{3})(\d{3})(\d{4})", number)
     if m:
         return u"%s-%s-%s" % m.groups()
