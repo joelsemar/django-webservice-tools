@@ -12,7 +12,6 @@ import sys
 import urllib
 import urllib2
 import uuid
-from twisted.web import xmlrpc
 from webservice_tools import utils
 #Project specific deps
 
@@ -470,21 +469,3 @@ def _to_dict(s):
                 state = NAME
     return result
 
-
-
-#########
-# XMLRPCProvider
-#########
-class XMLRPCProvider(xmlrpc.XMLRPC):
-    def __init__(self):
-        xmlrpc.XMLRPC.__init__(self, allowNone=True) #IGNORE:E1002
-
-
-    def xmlrpc_do_direct_payment(self, apiMode, user, password, merchantUser, siteDomain, amount,
-        ccNumber, expMo, expYear, firstName, lastName, ccType, street1, street2, city, state, postalCode,
-        countryCode, cvv2):
-
-        payPal = PayPal(apiMode, user, password, merchantUser=merchantUser, siteDomain=siteDomain)
-        
-        return payPal.do_direct_payment(amount, ccNumber, expMo, expYear, firstName, lastName, ccType,
-            street1, street2, city, state, postalCode, countryCode, cvv2=cvv2)
