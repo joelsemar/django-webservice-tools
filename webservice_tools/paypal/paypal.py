@@ -47,9 +47,9 @@ class PayPal:
     
     # Example usage: ===============
     #    paypal = util.PayPal('sandbox', user, password, signature)
-    #    ppToken = paypal.setExpressCheckout(100)
-    #    expressToken = paypal.getExpressCheckoutDetails(ppToken)
-    #    HttpResponseRedirect(paypal.getExpressCheckoutURL(expressToken)) ## django specific http redirect call for payment
+    #    ppToken = paypal.set_express_checkout(100)
+    #    expressToken = paypal.get_express_checkout_details(ppToken)
+    #    HttpResponseRedirect(paypal.get_express_checkout_url(expressToken)) ## django specific http redirect call for payment
     """
     _apiMode = '' 
     _user = ''
@@ -93,7 +93,7 @@ class PayPal:
         }    
 
 
-    def _makeRequest(self, headers, params):
+    def _make_request(self, headers, params):
         #paramsString = urllib.urlencode(params)
         #paramsString = paramsString.replace('+', ' ')
         #print "request params", params
@@ -110,7 +110,7 @@ class PayPal:
         return data
         
         
-    def _makeResponseDict(self, responseData):
+    def _make_response_dict(self, responseData):
         """Out of the paypal response, makes a python dict. All entries are forced down to lowercase, and
         all text is unquoted.
         """
@@ -124,7 +124,7 @@ class PayPal:
 
     # API METHODS
     #TODO: don't allow & and = symbols to be used in any parameters we send to the server!
-    def setExpressCheckout(self, amount, userLocaleCode='US'):
+    def set_express_checkout(self, amount, userLocaleCode='US'):
         """
         @return: The TOKEN value from the result of the call
         """
@@ -150,13 +150,13 @@ class PayPal:
             LOCALECODE=userLocaleCode,
         )
         
-        responseData = self._makeRequest(headers, params)
-        response = self._makeResponseDict(responseData)
+        responseData = self._make_request(headers, params)
+        response = self._make_response_dict(responseData)
         assert 'token' in response
         return response['token']
     
     
-    def getExpressCheckoutDetails(self, token):
+    def get_express_checkout_details(self, token):
         assert isinstance(token, str)
         
         headers = { 'X-VPS-REQUEST-ID': uuid.uuid4(), }
@@ -173,11 +173,11 @@ class PayPal:
             TOKEN=token,
         )
 
-        responseData = self._makeRequest(headers, params)
-        return self._makeResponseDict(responseData)
+        responseData = self._make_request(headers, params)
+        return self._make_response_dict(responseData)
     
     
-    def doExpressCheckoutPayment(self, token, payerID, amount):
+    def do_express_checkout_payment(self, token, payerID, amount):
         assert isinstance(token, str)
         assert isinstance(payerID, str)
         assert isinstance(amount, str)
@@ -203,18 +203,18 @@ class PayPal:
             L_DESCn=utils.truncate('%s SERVICE' % self._siteDomain, 127, etc=''),
         )
 
-        responseData = self._makeRequest(headers, params)
-        return self._makeResponseDict(responseData)
+        responseData = self._make_request(headers, params)
+        return self._make_response_dict(responseData)
         
         
-    def getExpressCheckoutURL(self, paypalToken):
+    def get_express_checkout_url(self, paypalToken):
         if self._apiMode == 'sandbox':
             return self.PAYPAL_EXPRESS_CHECKOUT_URL_SANDBOX + paypalToken
         else:
             return self.PAYPAL_EXPRESS_CHECKOUT_URL_LIVE + paypalToken
 
 
-    def doDirectPayment(self, amount, acct, expMo, expYear, firstName='', lastName='', ccType='', street1='',
+    def do_direct_payment(self, amount, acct, expMo, expYear, firstName='', lastName='', ccType='', street1='',
     street2='', city='', state='', postalCode='', countryCode='', cvv2=None):
         
         assert isinstance(amount, str)
@@ -263,11 +263,11 @@ class PayPal:
         if cvv2:
             params['CVV2'] = cvv2
             
-        responseData = self._makeRequest(headers, params)
-        return self._makeResponseDict(responseData)
+        responseData = self._make_request(headers, params)
+        return self._make_response_dict(responseData)
 
 
-    def doReferencePayment(self, amount, pnRef):
+    def do_reference_payment(self, amount, pnRef):
         assert isinstance(amount, str)
         assert isinstance(pnRef, str)
         
@@ -289,11 +289,11 @@ class PayPal:
             AMT=amount,
             #^ use userID instead of username b/c username can have underscores and this is an alphanumeric field only
         )
-        responseData = self._makeRequest(headers, params)
-        return self._makeResponseDict(responseData)
+        responseData = self._make_request(headers, params)
+        return self._make_response_dict(responseData)
 
 
-    def doMassPayment(self, paymentList):
+    def do_mass_payment(self, paymentList):
         
         assert len(paymentList)
         
@@ -480,11 +480,11 @@ class XMLRPCProvider(xmlrpc.XMLRPC):
         xmlrpc.XMLRPC.__init__(self, allowNone=True) #IGNORE:E1002
 
 
-    def xmlrpc_doDirectPayment(self, apiMode, user, password, merchantUser, siteDomain, amount,
+    def xmlrpc_do_direct_payment(self, apiMode, user, password, merchantUser, siteDomain, amount,
         ccNumber, expMo, expYear, firstName, lastName, ccType, street1, street2, city, state, postalCode,
         countryCode, cvv2):
 
         payPal = PayPal(apiMode, user, password, merchantUser=merchantUser, siteDomain=siteDomain)
         
-        return payPal.doDirectPayment(amount, ccNumber, expMo, expYear, firstName, lastName, ccType,
+        return payPal.do_direct_payment(amount, ccNumber, expMo, expYear, firstName, lastName, ccType,
             street1, street2, city, state, postalCode, countryCode, cvv2=cvv2)
