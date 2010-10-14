@@ -3,7 +3,6 @@
 Paypal related logic
 
 """
-
 #############################
 #MODULE DEPENDENCIES
 #############################
@@ -14,9 +13,6 @@ import urllib2
 import uuid
 from webservice_tools import utils
 #Project specific deps
-
-
-
 #############################
 #MODULE-LEVEL VARIABLES
 #############################
