@@ -13,6 +13,8 @@ class LoggingMiddleware(object):
                 msg += "REQUEST GET: %s" % toDict(request.GET)
             if request.POST:
                 msg += "REQUEST POST: %s" % toDict(request.POST)
+            if request.FILES:
+                msg += 'FILES: %s' % ','.join([f.name for f in request.FILES])
         except:
             pass
             
