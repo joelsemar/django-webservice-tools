@@ -6,7 +6,7 @@ class LoggingMiddleware(object):
         if 'html' in response['Content-Type'] or 'javascript' in response['Content-Type']:
             return response
         
-        log = "-------------------------------------\n%(request)s\nHANDLER: %(method)s %(url)s\nRESPONSE\n%(response)s\n-------------------------------------\n" 
+        log = "-------------------------------------\n%(request)s\n%(headers)s\nHANDLER: %(method)s %(url)s\nRESPONSE\n%(response)s\n-------------------------------------\n" 
         msg = ""
         try:
             if request.GET:
@@ -17,8 +17,12 @@ class LoggingMiddleware(object):
                 msg += 'FILES: %s' % ','.join([f.name for f in request.FILES])
         except:
             pass
-            
+        
+        headers = ''
+        for k, v in request.META.iteritems():
+            headers += '%s: %s\n' % (k,v )
         logging.debug(log % {'request': msg,
+                             'headers': headers, 
                              'method': request.method,
                              'response': str(response)[:5000],
                              'url': request.path})
