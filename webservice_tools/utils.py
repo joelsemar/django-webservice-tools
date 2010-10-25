@@ -260,6 +260,13 @@ def flatten(seq):
     return _flatten(seq)
 
 
+class GeoCodeError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+    def __str__(self):
+        return repr(self.msg)
+
+
 class GeoCode():
     
     def __init__(self, address, apiKey):
@@ -279,7 +286,7 @@ class GeoCode():
             if self.maxRetries:
                 self.maxRetries -= 1
                 return self.getCoords()
-            return {}
+            raise GeoCodeError("Invalid address")
             
         
 class ReverseGeoCode():      
@@ -300,7 +307,7 @@ class ReverseGeoCode():
             if self.maxRetries:
                 self.maxRetries -= 1
                 return self.getAddress()
-            return {}
+            raise GeoCodeError
             
             
 def generateNewPassword():
@@ -341,3 +348,6 @@ def formatPhoneNumber(number):
     m = re.search("\+?1?(\d{3})(\d{3})(\d{4})", number)
     if m:
         return u"(%s) %s-%s" % m.groups()
+    
+
+
