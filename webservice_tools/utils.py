@@ -11,6 +11,9 @@ import urllib
 import urllib2
 import simplejson
 import passwordpieces
+import base64
+from django.utils import encoding
+
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
@@ -350,4 +353,50 @@ def formatPhoneNumber(number):
         return u"(%s) %s-%s" % m.groups()
     
 
-
+def makeAPICall(domain, apiHandler, postData=None, userName=None, password=None, secure=False,
+    timeout=5, deserializeAs='json'):
+    """
+    @see: L{makeAPICall} 
+    """
+    assert deserializeAs in ('xml', 'json', 'utf-8', 'skip', None)
+    requestType = secure and "https" or "http"
+    
+    url = "%s://%s/%s" % (requestType, domain, encoding.iri_to_uri(apiHandler))
+    
+    req = urllib2.Request(url)
+    
+    if userName is not None and password is not None:
+        base64String = base64.encodestring('%s:%s' % (userName, password)).rstrip('\n')
+        authheader = 'Basic %s' % base64String
+        req.add_header('Authorization', authheader)
+            
+    defaultTimeout = socket.getdefaulttimeout()
+    try:
+        socket.setdefaulttimeout(timeout)
+        if postData:
+            params = friendlyURLEncode(postData)
+            response = urllib2.urlopen(req, params)
+      
+        else:
+            response = urllib2.urlopen(req)
+            
+        if deserializeAs == 'json':
+            response = simplejson.load(response, encoding='utf-8')
+        
+        elif deserializeAs == 'xml':
+            response = response.read().decode('utf-8')
+            response = fromXML(response)
+        
+        elif deserializeAs == 'utf-8': #skip
+            response = response.read().decode('utf-8')
+        
+        elif deserializeAs == None: # don't decode
+            response = response.read()
+        
+        elif deserializeAs == "skip":
+            pass
+            
+    finally:
+        socket.setdefaulttimeout(defaultTimeout)
+        
+    return response

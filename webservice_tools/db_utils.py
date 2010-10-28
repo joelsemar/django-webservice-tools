@@ -1,9 +1,16 @@
 import re
+import datetime
 from django.contrib.gis.db import models
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.fields.files import ImageField, ImageFieldFile
 from django.conf import settings
-from PIL import Image
+
+#may or may not be installed on the server
+try:
+    from PIL import Image
+except:
+    pass
+
 class SoftDeleteManager(models.Manager):
     """
     Model manager that auto filters out instances with <field>=False
@@ -26,7 +33,27 @@ class SoftDeleteManager(models.Manager):
         #returns only deleted objects
         return super(SoftDeleteManager, self).get_query_set().exclude(**self.queryKwargs)
     
+
+class ExpirationModelManager(models.Manager):
+    """
+    Manager auto filters out instances that expired, 
+    meaning the datetime at <field> happened before the date arrived at by evaluating:
+         datetime.datetime.utcnow() - <delta> where delta is a datetime.timedelta object
+         e.g.: objects = ExpirationModelManager(datetime.timedelta(days=30), field='purchased_on')
+    """
+    def __init__(self, delta, field='when_created'):
+        self.keywordArg = '%s__gte' % field
+        self.delta = delta
+        
+    def get_query_set(self):
+        expiration_date = datetime.datetime.utcnow() - self.delta
+        return super(ExpirationModelManager, self).get_query_set().filter(**{self.keywordArg: expiration_date})
+
+    def all_with_expired(self):
+        #returns all objects, expired or not or not
+        return super(ExpirationModelManager, self).get_query_set()
     
+
 def isDirty(model, fieldName):
     """
     Compares a given model instance with the DB and tells you whether or not it has been altered since the last save()
