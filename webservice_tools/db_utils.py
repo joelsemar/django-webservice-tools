@@ -34,7 +34,7 @@ class SoftDeleteManager(models.Manager):
         return super(SoftDeleteManager, self).get_query_set().exclude(**self.queryKwargs)
     
 
-class ExpirationModelManager(models.Manager):
+class ExpirationManager(models.Manager):
     """
     Manager auto filters out instances that expired, 
     meaning the datetime at <field> happened before the date arrived at by evaluating:
