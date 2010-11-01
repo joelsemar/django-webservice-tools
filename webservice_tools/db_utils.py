@@ -37,21 +37,19 @@ class SoftDeleteManager(models.Manager):
 class ExpirationManager(models.Manager):
     """
     Manager auto filters out instances that expired, 
-    meaning the datetime at <field> happened before the date arrived at by evaluating:
-         datetime.datetime.utcnow() - <delta> where delta is a datetime.timedelta object
-         e.g.: objects = ExpirationModelManager(datetime.timedelta(days=30), field='purchased_on')
+    Using the provided DateTimeField, (defaults to 'expires') doesn't get return if that time has passed
     """
-    def __init__(self, delta, field='when_created'):
-        self.keywordArg = '%s__gte' % field
-        self.delta = delta
-        
+    def __init__(self, field='expires'):
+        self.kwarg = '%s__gte' % field
+        super(ExpirationManager, self).__init__()
+
     def get_query_set(self):
-        expiration_date = datetime.datetime.utcnow() - self.delta
-        return super(ExpirationModelManager, self).get_query_set().filter(**{self.keywordArg: expiration_date})
+        now = datetime.datetime.utcnow()
+        return super(ExpirationManager, self).get_query_set().filter(**{self.kwarg: now})
 
     def all_with_expired(self):
         #returns all objects, expired or not or not
-        return super(ExpirationModelManager, self).get_query_set()
+        return super(ExpirationManager, self).get_query_set()
     
 
 def isDirty(model, fieldName):

@@ -353,7 +353,7 @@ def formatPhoneNumber(number):
         return u"(%s) %s-%s" % m.groups()
     
 
-def makeAPICall(domain, apiHandler, postData=None, userName=None, password=None, secure=False,
+def makeAPICall(domain, apiHandler, postData=None, rawPostData=None, userName=None, password=None, secure=False,
     timeout=5, deserializeAs='json'):
     """
     @see: L{makeAPICall} 
@@ -376,7 +376,10 @@ def makeAPICall(domain, apiHandler, postData=None, userName=None, password=None,
         if postData:
             params = friendlyURLEncode(postData)
             response = urllib2.urlopen(req, params)
-      
+        
+        elif rawPostData:
+            response = urllib2.urlopen(req, rawPostData)
+            
         else:
             response = urllib2.urlopen(req)
             
