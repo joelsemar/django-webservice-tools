@@ -409,9 +409,8 @@ The following 2 function are used to sort ratings based on info found here:
 http://www.evanmiller.org/how-not-to-sort-by-average-rating.html
 """
 def pnormaldist(qn):
-    b = [1.570796288, 0.03706987906, -0.8364353589e-3,
-         -0.2250947176e-3, 0.6841218299e-5, 0.5824238515e-5,
-         -0.104527497e-5, 0.8360937017e-7, -0.3231081277e-8,
+    b = [1.570796288, 0.03706987906, -0.8364353589e-3, -0.2250947176e-3, 0.6841218299e-5, 0.5824238515e-5,
+         - 0.104527497e-5, 0.8360937017e-7, -0.3231081277e-8,
          0.3657763036e-10, 0.6936233982e-12]
     
     if (qn < 0.0 or 1.0 < qn or qn == 0.5):
@@ -423,7 +422,7 @@ def pnormaldist(qn):
     
     w3 = -math.log(4.0 * w1 * (1.0 - w1))
     w1 = b[0]
-    for i in range(10):
+    for i in range(1, 11):
         w1 += b[i] * w3 ** i;
     
     if qn > 0.5:
@@ -442,7 +441,8 @@ def ci_lower_bound(pos, n, power=0.10):
         return 0
     z = pnormaldist(1 - power / 2)
     phat = 1.0 * pos / n
-    return (phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / (1 + z * z / n)))
+    
+    return (phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)
 
 
 
