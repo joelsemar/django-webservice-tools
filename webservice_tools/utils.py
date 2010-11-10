@@ -52,7 +52,7 @@ def strToBool(str):
     if not isinstance(str, basestring):
         raise TypeError
     
-    return str in ['1', 'True', 'true', 't', 'T', 'YES', 'Yes', 'Y', 'y']
+    return str in ['1', 'True', 'TRUE', 'true', 't', 'T', 'YES', 'Yes', 'Y', 'y']
         
     
 def fromXML(src):
