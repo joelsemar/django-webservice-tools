@@ -38,8 +38,6 @@ def toDict(obj, r=4):
     for k, v in generator:
         if k.startswith('_') or k.endswith('_set'): # ignore 'private' keys
             continue
-        if hasattr(v, 'values'):
-            ret[k] = list(v.values())
         elif type(v) is types.ObjectType or hasattr(v, '__dict__'):
             ret[k] = toDict(v, r - 1)
         elif hasattr(v, 'id'):

@@ -96,9 +96,7 @@ class ResponseObject():
     
     def _prepareData(self, serializer, responseDict):
         for key, value in self._data.iteritems():
-            if hasattr(value, 'values'):
-                responseDict['data'][key] = list(value.values())
-            elif isinstance(value, (list, tuple)):
+            if 'QuerySet' in str(type(value) or isinstance(value, (list, tuple))):
                 responseDict['data'][key] = [utils.toDict(o) for o in value]
             else:
                 responseDict['data'][key] = utils.toDict(value)
