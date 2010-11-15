@@ -17,7 +17,7 @@ def resetPass(request, dataFormat='json'):
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
-        response.addErrors('That user does not appear to exist')
+        response.addErrors(errors='That user does not appear to exist', status=404)
         return response.send()
     
     newPassword = generateNewPassword()
