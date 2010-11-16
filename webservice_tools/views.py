@@ -27,6 +27,7 @@ def resetPass(request, dataFormat='json'):
               'Your password has been successfully reset, your new password is "%s", please change as soon as possible' % newPassword,
               '%s' % sent_from, [user.email, ])
     
+    request.session['RESET_PASS'] = True
     return response.send()
     
 
