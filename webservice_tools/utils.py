@@ -447,5 +447,3 @@ def ci_lower_bound(pos, n, power=0.10):
     return (phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)
 
 
-
- 
