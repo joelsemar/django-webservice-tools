@@ -405,6 +405,11 @@ def makeAPICall(domain, apiHandler, postData=None, rawPostData=None, userName=No
         socket.setdefaulttimeout(defaultTimeout)
         
     return response
+
+
+def is_valid_email(email):
+    return re.match(EMAIL_REGEX, email)
+
 """
 
 The following 2 function are used to sort ratings based on info found here:
