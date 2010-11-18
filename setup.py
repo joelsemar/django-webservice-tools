@@ -4,7 +4,6 @@ setup(
     name='django-webservice-tools',
     version=__import__('webservice_tools').__version__,
     description='A generic toolbox for building webservices',
-    # Get more strings from http://www.python.org/pypi?:action=list_classifiers
     author='Joel Semar',
     license='BSD',
     packages=find_packages(exclude=['ez_setup']),

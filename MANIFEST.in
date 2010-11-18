@@ -1,0 +1,2 @@
+include README
+recursive-include webservice_tools/templates *

@@ -1,0 +1,97 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <style type='text/css'>
+            .spaced {
+                margin-top: 5px;
+            }
+        </style>
+        <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.1/adapter/ext/ext-base.js">
+        </script>
+        <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.1/ext-all.js">
+        </script>
+        <script type='text/javascript'>
+            var paramTemplate = new Ext.Template("Name: <input type='text' class='paramName spaced' id='paramName_{paramID}'></input>", " Value:<input type='text' class='paramVal spaced' size='75' id='paramVal_{paramID}'></input><br/>")
+            
+            
+            function sendCall(){
+                var url = Ext.get('baseURL').getValue() + Ext.get('url').getValue();
+                var paramObject = {};
+                var paramNames = Ext.select('.paramName');
+                var requestMethod = Ext.get('method').getValue();
+                for (var i = 0; i < paramNames.getCount(); i++) {
+                    var p = paramNames.elements[i];
+                    var id = p.id.split('_')[1];
+                    var v = Ext.get('paramVal_' + id);
+                    if (p.value) {
+                        paramObject[p.value] = v.getValue();
+                    }
+                }
+                
+                Ext.Ajax.request({
+                    method: requestMethod,
+                    url: url,
+                    params: paramObject,
+                    callback: function(o, s, responseObject){
+                        Ext.get('result').update(responseObject.responseText);
+                        var paramDiv = Ext.get('recentParams');
+                        var urlDiv = Ext.get('recentURLs');
+                        if (paramObject !== '{}') {
+                            paramDiv.update(paramDiv.dom.innerHTML + '<br/>' + Ext.util.JSON.encode(paramObject));
+                        }
+                        urlDiv.update(urlDiv.dom.innerHTML + '<br/>' + url);
+                    }
+                });
+            }
+            
+            function addFileUploadField(){
+                var paramName = prompt('Param name for this filed');
+                fileUploadTemplate.append('params', {
+                    paramName: paramName
+                });
+                
+            }
+            
+            Ext.onReady(function(){
+                paramTemplate.append('params', {
+                    paramID: '1'
+                })
+            });
+        </script>
+    </head>
+</html>
+<body>
+    BaseURL:<input type='text' id='baseURL' value='{{baseURL}}'>
+    </input>
+    <br/>
+    Api Call:<input type='text' id='url'>
+    </input>
+    <br/>
+    Params 
+    <button type='button' onclick="paramTemplate.append('params', {paramID: Ext.select('.paramName').getCount()+1})">
+        add param
+    </button>
+    <br/>
+    <div id='params'>
+    </div>
+    <br/>
+    <select id='method'>
+        <option value='POST'>POST</option>
+        <option value='GET'>GET</option>
+        <option value='DELETE'>DELETE</option>
+        <option value='PUT'>PUT</option>
+    </select>
+    <button type='button' onclick='sendCall()'>
+        Send
+    </button>
+    <div id='result'>
+    </div>
+    <h3>Recent Params</h3>
+    <a href='#' onclick="Ext.fly('recentParams').update('');">clear</a>
+    <div id='recentParams'>
+    </div>
+    <h3>Recent URLS</h3>
+    <a href='#' onclick="Ext.fly('recentURLs').update('')">clear</a>
+    <div id='recentURLs'>
+    </div>
+</body>
