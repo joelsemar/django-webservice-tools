@@ -12,7 +12,10 @@ def resetPass(request, dataFormat='json'):
     username = request.POST.get('username')
     
     #email address of the first entry in the ADMINS tuple (you should set it to something meaningful)
-    sent_from = settings.ADMINS[0][1] 
+    try:
+        sent_from = settings.ADMINS[0][1]
+    except IndexError:
+        return response.send(errors="Please supply an ADMIN email address in settings.py", status=500) 
     
     try:
         user = User.objects.get(username=username)
