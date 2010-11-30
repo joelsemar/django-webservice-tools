@@ -5,6 +5,11 @@
             .spaced {
                 margin-top: 5px;
             }
+			#result{
+				background-color: #ddd;
+				width: 75%;
+				height: auto;
+			}
         </style>
         <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.1/adapter/ext/ext-base.js">
         </script>
@@ -32,8 +37,17 @@
                     method: requestMethod,
                     url: url,
                     params: paramObject,
+					headers: {
+						'Accept': Ext.get('dataFormat').getValue()
+					},
                     callback: function(o, s, responseObject){
-                        Ext.get('result').update(responseObject.responseText);
+                        if (responseObject.getResponseHeader('content-type').indexOf('xml') != -1) {
+                            data = formatXML(responseObject.responseText)
+                        }
+                        else {
+                            data = responseObject.responseText;
+                        }
+                        Ext.get('result').update(data);
                         var paramDiv = Ext.get('recentParams');
                         var urlDiv = Ext.get('recentURLs');
                         if (paramObject !== '{}') {
@@ -55,8 +69,15 @@
             Ext.onReady(function(){
                 paramTemplate.append('params', {
                     paramID: '1'
-                })
+                });
+                paramTemplate.append('params', {
+                    paramID: '2'
+                });
             });
+            function formatXML(string){
+                return string.replace(/>/g, "&gt;").replace(/</g, "&lt;")
+                
+            }
         </script>
     </head>
 </html>
@@ -81,11 +102,17 @@
         <option value='DELETE'>DELETE</option>
         <option value='PUT'>PUT</option>
     </select>
+	Accept Header:
+    <select id='dataFormat'>
+        <option value='application/json'>json</option>
+        <option value='text/xml'>xml</option>
+    </select>
+	<br />
     <button type='button' onclick='sendCall()'>
         Send
     </button>
-    <div id='result'>
-    </div>
+    <pre id='result'>
+	</pre>
     <h3>Recent Params</h3>
     <a href='#' onclick="Ext.fly('recentParams').update('');">clear</a>
     <div id='recentParams'>

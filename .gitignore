@@ -5,4 +5,4 @@ build
 *.egg-info
 *.pyc
 .settings
-
+.tmp_*

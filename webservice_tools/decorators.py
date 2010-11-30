@@ -1,9 +1,9 @@
-
+from functools import wraps
 from response_util import ResponseObject
 
 def login_required(fn):
+    @wraps(fn)
     def inner(*args, **kwargs):
-        
         response = ResponseObject(dataFormat=kwargs.get('dataFormat', 'json'))
         try:
             request = [a for a in args if hasattr(a, 'user')][0]

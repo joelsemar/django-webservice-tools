@@ -13,7 +13,7 @@ import simplejson
 import passwordpieces
 import base64
 from django.utils import encoding
-
+from xml.dom import minidom
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
@@ -236,13 +236,14 @@ def toXML(obj, objname, nodePrefix='', isCdata=False):
                 objXML = unicode(obj)
             if objXML and len(objXML) > 0:
                 if isCdata:
-                    return u"%s<%s><![CDATA[%s]]></%s>\n" % (nodePrefix, objname, objXML, objname)
+                    return u"%s<%s><![CDATA[%s]]></%s>" % (nodePrefix, objname, objXML, objname)
                 else:
-                    return u"%s<%s>%s</%s>\n" % (nodePrefix, objname, objXML, objname)
+                    return u"%s<%s>%s</%s>" % (nodePrefix, objname, objXML, objname)
             else:
-                return u"%s<%s/>\n" % (nodePrefix, objname)
+                return u"%s<%s/>" % (nodePrefix, objname)
     
-    return getXML(obj, objname, nodePrefix, isCdata)
+    return  getXML(obj, objname, nodePrefix, isCdata)
+    #return minidom.parseString(header % xml).toprettyxml()
 
 
 def flatten(seq):
@@ -300,7 +301,7 @@ class ReverseGeoCode():
         self.maxRetries = 3
         self.timeout = 10
         self.apiKey = apiKey
-        self.query = urllib.urlencode({'q': latlng})
+        self.query = urllib.urlencode({'latlng': latlng})
         
         socket.setdefaulttimeout(self.timeout)
     
@@ -412,7 +413,7 @@ def is_valid_email(email):
 
 """
 
-The following 2 function are used to sort ratings based on info found here:
+The following 2 functions are used to sort ratings based on info found here:
 http://www.evanmiller.org/how-not-to-sort-by-average-rating.html
 """
 def pnormaldist(qn):
