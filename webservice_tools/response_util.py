@@ -91,7 +91,8 @@ class ResponseObject():
         responseDict['data'] = {}
         responseDict['errors'] = self._errors
         responseDict['success'] = self.success
-        responseDict['messages'] = self._messages
+        if self._messages:
+            responseDict['messages'] = self._messages
         if self.doc:
             responseDict['doc'] = self.doc
         

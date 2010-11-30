@@ -5,11 +5,12 @@
             .spaced {
                 margin-top: 5px;
             }
-			#result{
-				background-color: #ddd;
-				width: 75%;
-				height: auto;
-			}
+            
+            #result {
+                background-color: #ddd;
+                width: 75%;
+                height: auto;
+            }
         </style>
         <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.1/adapter/ext/ext-base.js">
         </script>
@@ -32,14 +33,17 @@
                         paramObject[p.value] = v.getValue();
                     }
                 }
-                
+                var headers = {
+                    'Accept': Ext.get('dataFormat').getValue()
+                }
+                if (Ext.getDom('showdoc').checked) {
+                    headers['Show-Doc'] = true
+                }
                 Ext.Ajax.request({
                     method: requestMethod,
                     url: url,
                     params: paramObject,
-					headers: {
-						'Accept': Ext.get('dataFormat').getValue()
-					},
+                    headers: headers,
                     callback: function(o, s, responseObject){
                         if (responseObject.getResponseHeader('content-type').indexOf('xml') != -1) {
                             data = formatXML(responseObject.responseText)
@@ -102,12 +106,14 @@
         <option value='DELETE'>DELETE</option>
         <option value='PUT'>PUT</option>
     </select>
-	Accept Header:
+	<h3 style='margin:4px;'>Headers</h3>
+    Accept:
     <select id='dataFormat'>
         <option value='application/json'>application/json</option>
         <option value='text/xml'>text/xml</option>
-    </select>
-	<br />
+    </select><br/>
+    Show Doc: <input type='checkbox' name='showdoc' id='showdoc'/>
+    <br/>
     <button type='button' onclick='sendCall()'>
         Send
     </button>

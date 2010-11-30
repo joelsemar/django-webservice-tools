@@ -9,7 +9,7 @@ class ProvideResponse(object):
         Optionally provides the docstring to the view in debug mode
         """
         
-        if kwargs.get('dataFormat') or 'admin' in request.path:
+        if kwargs.get('dataFormat') or '/admin/' in request.path:
             return None
         
         if 'xml' in request.META.get('HTTP_ACCEPT', 'json'):
@@ -18,7 +18,7 @@ class ProvideResponse(object):
             data_format = 'json'
         
         kwargs['response'] = ResponseObject(dataFormat=data_format)
-        if settings.DEBUG:
+        if request.META.get("HTTP_SHOW_DOC"):
             if hasattr(view, 'callmap'):
                 doc = getattr(view.handler, view.callmap[request.method]).func_doc
             else:
