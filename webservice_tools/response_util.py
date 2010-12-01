@@ -113,7 +113,7 @@ class ResponseObject():
     def _sendXML(self, responseDict):
         responseDict = self._prepareData(responseDict)
         content =  utils.toXML(responseDict, 'response')
-        content =  minidom.parseString(content).toprettyxml()
+        content =  utils.prettyxml(minidom.parseString(content))
         return HttpResponse(content, mimetype='text/xml', status=self._status)
     
     

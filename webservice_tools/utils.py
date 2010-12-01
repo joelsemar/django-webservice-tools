@@ -13,7 +13,9 @@ import simplejson
 import passwordpieces
 import base64
 from django.utils import encoding
-from xml.dom import minidom
+from xml.dom.ext import PrettyPrint
+from StringIO import StringIO
+
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
@@ -452,4 +454,11 @@ def ci_lower_bound(pos, n, power=0.10):
     
     return (phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)
 
+from xml.dom.ext import PrettyPrint
+from StringIO import StringIO
 
+
+def prettyxml(node, encoding='utf-8'):
+    tmpStream = StringIO()
+    PrettyPrint(node, stream=tmpStream, encoding=encoding)
+    return tmpStream.getvalue()
