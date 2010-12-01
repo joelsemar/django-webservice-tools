@@ -358,8 +358,8 @@ def formatPhoneNumber(number):
         return u"(%s) %s-%s" % m.groups()
     
 
-def makeAPICall(domain, apiHandler, postData=None, rawPostData=None, userName=None, password=None, secure=False,
-    timeout=5, deserializeAs='json'):
+def makeAPICall(domain, apiHandler, postData=None, rawPostData=None, queryData=None, userName=None,
+                 password=None, secure=False, timeout=5, deserializeAs='json'):
     """
     @see: L{makeAPICall} 
     """
@@ -367,6 +367,10 @@ def makeAPICall(domain, apiHandler, postData=None, rawPostData=None, userName=No
     requestType = secure and "https" or "http"
     
     url = "%s://%s/%s" % (requestType, domain, encoding.iri_to_uri(apiHandler))
+    
+    if queryData:
+        queryString = urllib.urlencode(queryData)
+        url += "?" + queryString
     
     req = urllib2.Request(url)
     
@@ -454,8 +458,6 @@ def ci_lower_bound(pos, n, power=0.10):
     
     return (phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)
 
-from xml.dom.ext import PrettyPrint
-from StringIO import StringIO
 
 
 def prettyxml(node, encoding='utf-8'):
