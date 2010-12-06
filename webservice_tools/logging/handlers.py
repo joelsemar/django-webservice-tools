@@ -17,7 +17,7 @@ class MockHandler(logging.Handler):
 
 class DatabaseHandler(logging.Handler):
     def emit(self, record):
-        from jogging.models import Log
+        from webservice_tools.logging.models import Log
         
         if hasattr(record, 'source'):
             source = record.source
