@@ -6,11 +6,13 @@ from django.conf import settings
 from webservice_tools.response_util import ResponseObject
 
 
-
-def resetPass(request, dataFormat='json'):
-    response = ResponseObject(dataFormat=dataFormat)
-    username = request.POST.get('username')
+def newResetPass(request, response):
+    """
+    View for the newer api's, doesn't expect .json|.xml in the url, but rather a middleware to provide the 
+    response object based on the 'Accept' header
     
+    """
+    username = request.POST.get('username')
     #email address of the first entry in the ADMINS tuple (you should set it to something meaningful)
     try:
         sent_from = settings.ADMINS[0][1]
@@ -23,6 +25,9 @@ def resetPass(request, dataFormat='json'):
         response.addErrors(errors='That user does not appear to exist', status=404)
         return response.send()
     
+    if not user.email:
+        return response.send(errors="That user has not provided an email address")
+    
     newPassword = generateNewPassword()
     user.set_password(newPassword)
     user.save()
@@ -32,7 +37,17 @@ def resetPass(request, dataFormat='json'):
     
     request.session['RESET_PASS'] = True
     return response.send()
-    
+
+
+def resetPass(request, dataFormat='json'):
+    """
+    Clients working up against the older servers will expect to  call something like /resetpass.json
+    This form is now deprecated in favor of an 'accept' header and a middleware that provides the response object
+    Just leaving this here so the older apps can provide the dataFormat in the url without error
+
+    """
+    return newResetPass(request, ResponseObject(dataFormat=dataFormat))
+
 
 def changePass(request):
     
