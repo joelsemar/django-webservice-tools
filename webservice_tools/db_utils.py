@@ -61,7 +61,7 @@ def isDirty(model, fieldName):
         entryInDB = model.__class__.objects.get(id=model.id)
     except ObjectDoesNotExist:
         raise Exception("A serious error has occurred in db_utils.isDirty(). A model instance was passed that doesn't exist.")
-    return re.sub('[\r\n\ ]+', '', entryInDB.__dict__[fieldName]) != re.sub('[\r\n\ ]+', '', model.__dict__[fieldName])    
+    return re.sub('[\r\n\ ]+', '', entryInDB.__dict__.get(fieldName, 'none')) != re.sub('[\r\n\ ]+', '', model.__dict__.get(fieldName, 'none'))    
 
 
 
