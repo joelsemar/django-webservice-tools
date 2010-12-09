@@ -4,6 +4,7 @@ from django.core import serializers
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.http import HttpResponse
 from django.db import models
+from django.contrib.auth.models import User
 from webservice_tools.logging import logging
 import utils
 from xml.dom import minidom
@@ -29,7 +30,7 @@ class ResponseObject():
         self.doc = None
         
         if self._request:
-            message_sent.connect(self.message_callback, sender=request.user)
+            message_sent.connect(self.message_callback, sender=User, weak=False)
     
     
     def addErrors(self, errors, status=500):
@@ -54,13 +55,12 @@ class ResponseObject():
     
     def message_callback(self, sender, **kwargs):
         message = kwargs.get('message', '')
-        self.addMessages(message)
+        if self._request.user == sender:
+            self.addMessages(message)
         
     
     def addMessages(self, messages):
         self.success = False
-        
-            
         if isinstance(messages, basestring):
             #just a single message
             self._messages.append(messages)
@@ -72,6 +72,7 @@ class ResponseObject():
                 self._message.append(message)
             return
         raise TypeError("Argument 'messages' must be of type 'string' or 'list'")
+
     
     def set(self, **kwargs):
         self._data.update(kwargs)
