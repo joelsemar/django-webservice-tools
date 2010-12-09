@@ -29,7 +29,7 @@ class ResponseObject():
         self.doc = None
         
         if self._request:
-            message_sent.conect(self.message_callback, sender=request.user)
+            message_sent.connect(self.message_callback, sender=request.user)
     
     
     def addErrors(self, errors, status=500):
