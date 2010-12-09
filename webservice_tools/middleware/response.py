@@ -23,8 +23,8 @@ class ProvideResponse(object):
                 doc = getattr(view.handler, view.callmap[request.method]).func_doc
             else:
                 doc = view.func_doc
-            if data_format == 'json':
-                doc = doc.replace('\n', '<br/>')
+            if data_format == 'json' and doc:
+               pass# doc = doc.replace('\n', '<br/>')
             kwargs['response'].doc=doc
         
         return None

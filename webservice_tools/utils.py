@@ -226,26 +226,26 @@ def toXML(obj, objname, nodePrefix='', isCdata=False):
         From http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/440595
         """
         if obj == None:
-            return u''
+            return ""
         if adapt.has_key(obj.__class__):
-            return adapt[obj.__class__](obj, objname)
+            return adapt[obj.__class__](objname,obj)
         else:
             objXML = None
-            if hasattr(obj, 'toXML'):
-                objXML = obj.toXML(nodePrefix)
-                if not objXML: return u''
+        if hasattr(obj, 'toXML'):
+            objXML = obj.toXML(nodePrefix)
             if not objXML:
-                objXML = unicode(obj)
-            if objXML and len(objXML) > 0:
-                if isCdata:
-                    return u"%s<%s><![CDATA[%s]]></%s>" % (nodePrefix, objname, objXML, objname)
-                else:
-                    return u"%s<%s>%s</%s>" % (nodePrefix, objname, objXML, objname)
+                return ''
+        if not objXML:
+            objXML = str(obj)
+        if objXML and len(objXML)>0:
+            if isCdata:
+                return "%s&lt;%s&gt;&lt;![CDATA[%s]]&gt;&lt;/%s&gt;\n"%(nodePrefix,objname,objXML,objname)
             else:
-                return u"%s<%s/>" % (nodePrefix, objname)
+                return "%s&lt;%s&gt;%s&lt;/%s&gt;\n"%(nodePrefix,objname,objXML,objname)
+        else: return "%s&lt;%s/&gt;\n"%(nodePrefix,objname) 
     
     return  getXML(obj, objname, nodePrefix, isCdata)
-    #return minidom.parseString(header % xml).toprettyxml()
+
 
 
 def flatten(seq):

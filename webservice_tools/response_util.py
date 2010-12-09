@@ -1,4 +1,5 @@
 import simplejson
+from django import dispatch
 from django.core import serializers
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.http import HttpResponse
@@ -11,19 +12,25 @@ JSON_INDENT = 4
 XMLSerializer = serializers.get_serializer("xml")
 JSONSerializer = serializers.get_serializer('json')
 
+message_sent = dispatch.Signal(providing_args=['message'])
 
 class ResponseObject():
     """
     A generic response object for generating and returning api responses
     """
-    def __init__(self, dataFormat='json'):
+    def __init__(self, dataFormat='json', request=None):
         self._errors = []
+        self._request = request
         self._messages = []
         self.success = True
         self._data = {}
         self._status = 200
         self._dataFormat = dataFormat
         self.doc = None
+        
+        if self._request:
+            message_sent.conect(self.message_callback, sender=request.user)
+    
     
     def addErrors(self, errors, status=500):
         
@@ -45,12 +52,17 @@ class ResponseObject():
         raise TypeError("Argument 'errors' must be of type 'string' or 'list'")
     
     
+    def message_callback(self, sender, **kwargs):
+        message = kwargs.get('message', '')
+        self.addMessages(message)
+        
+    
     def addMessages(self, messages):
         self.success = False
         
             
         if isinstance(messages, basestring):
-            #just a single error
+            #just a single message
             self._messages.append(messages)
             return
         
@@ -64,6 +76,8 @@ class ResponseObject():
     def set(self, **kwargs):
         self._data.update(kwargs)
     
+    def __setitem__(self, key, value):
+        self._data[key] = value
     
     def __getitem__(self, key):
         return self._data[key]
@@ -112,8 +126,7 @@ class ResponseObject():
         
     def _sendXML(self, responseDict):
         responseDict = self._prepareData(responseDict)
-        content =  utils.toXML(responseDict, 'response')
-        content =  utils.prettyxml(minidom.parseString(content))
+        content = utils.toXML(responseDict, 'response')
         return HttpResponse(content, mimetype='text/xml', status=self._status)
     
     
