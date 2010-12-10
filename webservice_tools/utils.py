@@ -226,23 +226,23 @@ def toXML(obj, objname, nodePrefix='', isCdata=False):
         From http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/440595
         """
         if obj == None:
-            return ""
+            return u""
         if adapt.has_key(obj.__class__):
-            return adapt[obj.__class__](objname,obj)
+            return adapt[obj.__class__](obj, objname)
         else:
             objXML = None
         if hasattr(obj, 'toXML'):
             objXML = obj.toXML(nodePrefix)
             if not objXML:
-                return ''
+                return u''
         if not objXML:
-            objXML = str(obj)
-        if objXML and len(objXML)>0:
+            objXML = unicode(obj)
+        if objXML and len(objXML) > 0:
             if isCdata:
-                return "%s&lt;%s&gt;&lt;![CDATA[%s]]&gt;&lt;/%s&gt;\n"%(nodePrefix,objname,objXML,objname)
+                return "%s&lt;%s&gt;&lt;![CDATA[%s]]&gt;&lt;/%s&gt;\n" % (nodePrefix, objname, objXML, objname)
             else:
-                return "%s&lt;%s&gt;%s&lt;/%s&gt;\n"%(nodePrefix,objname,objXML,objname)
-        else: return "%s&lt;%s/&gt;\n"%(nodePrefix,objname) 
+                return "%s&lt;%s&gt;%s&lt;/%s&gt;\n" % (nodePrefix, objname, objXML, objname)
+        else: return "%s&lt;%s/&gt;\n" % (nodePrefix, objname) 
     
     return  getXML(obj, objname, nodePrefix, isCdata)
 
