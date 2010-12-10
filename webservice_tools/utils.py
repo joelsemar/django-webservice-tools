@@ -198,14 +198,14 @@ def toXML(obj, objname, nodePrefix='', isCdata=False):
         h = u"<%s>" % objname
         for k, v in indict.items():
             h += toXML(v, k)
-        h += u"</%s>" % objname
+        h += u"</%s>\n" % objname
         return h
 
     def getXML_list(inlist, objname=None):
         if len(inlist) == 0:
             #return a set of tags to denote an empty list
             #or should we return a single tag like <bla/>?
-            return u"<%s></%s>" % (objname, objname)
+            return u"<%s></%s>\n" % (objname, objname)
         
         h = u""
         for i in inlist:
