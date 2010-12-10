@@ -24,7 +24,7 @@ class ProvideResponse(object):
             else:
                 doc = view.func_doc
             if data_format == 'json' and doc:
-               pass# doc = doc.replace('\n', '<br/>')
+                doc = doc.replace('\n', '<br/>')
             kwargs['response'].doc=doc
         
         return None
