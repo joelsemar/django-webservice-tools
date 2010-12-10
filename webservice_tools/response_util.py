@@ -30,7 +30,8 @@ class ResponseObject():
         self.doc = None
         
         if self._request:
-            message_sent.connect(self.message_callback, sender=User, weak=False)
+            message_sent.connect(self.message_callback, sender=None, weak=False, dispatch_uid='response_receiver')
+
     
     
     def addErrors(self, errors, status=500):
@@ -53,9 +54,9 @@ class ResponseObject():
         raise TypeError("Argument 'errors' must be of type 'string' or 'list'")
     
     
-    def message_callback(self, sender, **kwargs):
+    def message_callback(self, signal, sender, **kwargs):
         message = kwargs.get('message', '')
-        if self._request.user == sender:
+        if self._request.user.id == sender.id:
             self.addMessages(message)
         
     
@@ -69,9 +70,9 @@ class ResponseObject():
         elif isinstance(messages, (list, tuple)):
             # a list of errors
             for message in messages:
-                self._message.append(message)
+                self._messages.append(message)
             return
-        raise TypeError("Argument 'messages' must be of type 'string' or 'list'")
+        self._messages.append(messages)
 
     
     def set(self, **kwargs):
