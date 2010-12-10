@@ -30,7 +30,7 @@ class ResponseObject():
         self.doc = None
         
         if self._request:
-            message_sent.connect(self.message_callback, sender=None, weak=False, dispatch_uid='response_receiver')
+            message_sent.connect(self.message_callback, sender=None, dispatch_uid='response_receiver')
 
     
     
