@@ -4,7 +4,21 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 from webservice_tools.response_util import ResponseObject
+from webservice_tools.utils import GeoCode
+from django.http import HttpResponse
 
+def geo(request, response):
+    address = request.GET.get('address')
+    if settings.GOOGLE_API_KEY:
+        geo_code = GeoCode(address, apiKey=settings.GOOGLE_API_KEY)
+    else:
+        #just use the api key in the utils module
+        geo_code = GeoCode(address)
+    
+    response.set(result=geo_code.getCoords())
+    return response.send()
+
+handler404_view = lambda request: HttpResponse("404 Not Found", status=404)
 
 def newResetPass(request, response):
     """

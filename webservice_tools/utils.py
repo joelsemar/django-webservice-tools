@@ -277,7 +277,7 @@ class GeoCodeError(Exception):
 
 class GeoCode():
     
-    def __init__(self, address, apiKey):
+    def __init__(self, address, apiKey=GOOGLE_API_KEY):
         self.maxRetries = 3
         self.timeout = 10
         self.apiKey = apiKey
