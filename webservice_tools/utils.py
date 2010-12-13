@@ -468,3 +468,10 @@ def prettyxml(node, encoding='utf-8'):
 
 def escape_xml(xml):
     return re.sub('&', '&amp;', xml)
+
+
+first_cap_re = re.compile('(.)([A-Z][a-z]+)')
+all_cap_re = re.compile('([a-z0-9])([A-Z])')
+def camel_to_under(name):
+    s1 = first_cap_re.sub(r'\1_\2', name)
+    return all_cap_re.sub(r'\1_\2', s1).lower()
