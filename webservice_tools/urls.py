@@ -1,4 +1,4 @@
 from django.conf.urls.defaults import *
 
-basepatterns = patterns('webservice_tools.views', 
-    ('/geo$'),'geo')
+urlpatterns = patterns('webservice_tools.views', 
+    ('/geo$','geo'))
