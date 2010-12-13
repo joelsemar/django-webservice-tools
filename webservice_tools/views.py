@@ -9,7 +9,7 @@ from django.http import HttpResponse
 
 def geo(request, response):
     address = request.GET.get('address')
-    if settings.GOOGLE_API_KEY:
+    if settings.get('GOOGLE_API_KEY'):
         geo_code = GeoCode(address, apiKey=settings.GOOGLE_API_KEY)
     else:
         #just use the api key in the utils module
