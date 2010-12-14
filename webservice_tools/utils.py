@@ -101,10 +101,10 @@ def fromXML(src):
     """
     
     
-    if isinstance(src, unicode):
-        #try to take it down to a string if necessary. It may generate an error, but it would throw an error
-        # anyhow if we tried to run with a unicode string
-        src = str(src)
+    #if isinstance(src, unicode):
+    #    # try to take it down to a string if necessary. It may generate an error, but it would throw an error
+    #    # anyhow if we tried to run with a unicode string
+    #    src = str(src)
 
     non_id_char = re.compile('[^_0-9a-zA-Z]')
     def _name_mangle(name):
