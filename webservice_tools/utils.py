@@ -181,10 +181,11 @@ def fromXML(src):
             self.text_parts.append(content)
 
     builder = TreeBuilder()
+    from lxml import etree
     if isinstance(src, basestring):
-        xml.sax.parseString(src, builder)
+        etree.parseString(src, builder)
     else:
-        xml.sax.parse(src, builder)
+        etree.parse(src, builder)
     return builder.root._attrs.values()[0]
 
 
