@@ -1,4 +1,4 @@
-
+from webservice_tools.logging import logging
 from webservice_tools.response_util import ResponseObject
 import sys
 class WebServiceException():
@@ -16,6 +16,7 @@ class WebServiceException():
         lastframe = self.get_traceback_frames(tb)[-1]
         location = "%s in %s, line: %s" %(lastframe['filename'], lastframe['function'], lastframe['lineno'])
         response.addErrors([exception.message, location])
+        logging.critical(','.join([exception.message, location]))
         return response.send()
     
     
