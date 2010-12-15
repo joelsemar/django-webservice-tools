@@ -94,11 +94,12 @@ class ResponseObject():
     
     def send(self, messages=None, errors=None, status=None):
         
-        if status:
-            self.setStatus(status)
-            
+        
         if errors:
             self.addErrors(errors)
+        
+        if status:
+            self.setStatus(status)
         
         if messages:
             self.addMessages(messages)
