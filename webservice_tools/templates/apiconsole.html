@@ -17,7 +17,7 @@
         <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.1/ext-all.js">
         </script>
         <script type='text/javascript'>
-            var paramTemplate = new Ext.Template("Name: <input type='text' class='paramName spaced' id='paramName_{paramID}'></input>", " Value:<input type='text' class='paramVal spaced' size='75' id='paramVal_{paramID}'></input><br/>")
+            var paramTemplate = new Ext.Template("Name: <input type='text' class='paramName spaced' id='paramName_{paramID}'></input>", " Value:<input type='text' class='paramVal spaced' size='75' id='paramVal_{paramID}'></input><br/>");
             
             
             function sendCall(){
@@ -35,9 +35,9 @@
                 }
                 var headers = {
                     'Accept': Ext.get('dataFormat').getValue()
-                }
+                };
                 if (Ext.getDom('showdoc').checked) {
-                    headers['Show-Doc'] = true
+                    headers['Show-Doc'] = true;
                 }
                 Ext.Ajax.request({
                     method: requestMethod,
@@ -75,7 +75,7 @@
                 });
             });
             function formatXML(string){
-                return string.replace(/>/g, "&gt;").replace(/</g, "&lt;")
+                return string.replace(/>/g, "&gt;").replace(/</g, "&lt;");
                 
             }
         </script>
