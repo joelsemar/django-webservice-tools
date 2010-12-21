@@ -8,7 +8,7 @@
             
             #result {
                 background-color: #ddd;
-                width: 75%;
+                width: 100%;
                 height: auto;
             }
         </style>
@@ -62,20 +62,16 @@
                 });
             }
             
-            function addFileUploadField(){
-                var paramName = prompt('Param name for this filed');
-                fileUploadTemplate.append('params', {
-                    paramName: paramName
-                });
-                
-            }
-            
             Ext.onReady(function(){
                 paramTemplate.append('params', {
                     paramID: '1'
                 });
                 paramTemplate.append('params', {
                     paramID: '2'
+                });
+                var map = new Ext.KeyMap(document.body, {
+                    key: Ext.EventObject.ENTER,
+                    fn: sendCall
                 });
             });
             function formatXML(string){
@@ -106,12 +102,13 @@
         <option value='DELETE'>DELETE</option>
         <option value='PUT'>PUT</option>
     </select>
-	<h3 style='margin:4px;'>Headers</h3>
+    <h3 style='margin:4px;'>Headers</h3>
     Accept:
     <select id='dataFormat'>
         <option value='application/json'>application/json</option>
         <option value='text/xml'>text/xml</option>
-    </select><br/>
+    </select>
+    <br/>
     Show Doc: <input type='checkbox' name='showdoc' id='showdoc'/>
     <br/>
     <button type='button' onclick='sendCall()'>
