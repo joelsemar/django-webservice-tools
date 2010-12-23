@@ -12,6 +12,9 @@ class ProvideResponse(object):
         if kwargs.get('dataFormat') or '/admin/' in request.path:
             return None
         
+        if 'html' in request.META.get('HTTP_ACCEPT', 'json'):
+            return None
+        
         if 'xml' in request.META.get('HTTP_ACCEPT', 'json'):
             data_format = 'xml'
         else:
