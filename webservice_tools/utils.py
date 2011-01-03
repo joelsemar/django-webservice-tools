@@ -359,7 +359,7 @@ def formatPhoneNumber(number):
     
 
 def makeAPICall(domain, apiHandler, postData=None, rawPostData=None, queryData=None, userName=None,
-                 password=None, secure=False, timeout=5, deserializeAs='json'):
+                 password=None, secure=False, timeout=5, deserializeAs='json', headers={}):
     """
     @see: L{makeAPICall} 
     """
@@ -373,6 +373,10 @@ def makeAPICall(domain, apiHandler, postData=None, rawPostData=None, queryData=N
         url += "?" + queryString
     
     req = urllib2.Request(url)
+    
+    if headers:
+        for k,v in headers.items():
+            req.add_header(k,v)
     
     if userName is not None and password is not None:
         base64String = base64.encodestring('%s:%s' % (userName, password)).rstrip('\n')

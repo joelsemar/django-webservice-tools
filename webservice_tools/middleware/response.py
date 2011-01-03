@@ -9,7 +9,7 @@ class ProvideResponse(object):
         Optionally provides the docstring to the view in debug mode
         """
         
-        if kwargs.get('dataFormat') or '/admin/' in request.path:
+        if kwargs.get('dataFormat') or '/admin/' in request.path or '/static/' in request.path:
             return None
         
         if 'html' in request.META.get('HTTP_ACCEPT', 'json'):

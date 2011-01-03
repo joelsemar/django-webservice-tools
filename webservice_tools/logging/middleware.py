@@ -3,6 +3,9 @@ from webservice_tools.utils import toDict
 class LoggingMiddleware(object):
     
     def process_response(self, request, response):
+        if '/static/' in request.path:
+            return response
+        
         if 'html' in response['Content-Type'] or 'javascript' in response['Content-Type']:
             return response
         
