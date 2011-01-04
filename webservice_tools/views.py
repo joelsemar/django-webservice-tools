@@ -17,10 +17,18 @@ def geo(request, response=None):
     else:
         #just use the api key in the utils module
         geo_code = GeoCode(address)
+    
     if get_coords:
-        response.set(result=geo_code.getCoords())
+        try:
+            response.set(result=geo_code.getCoords())
+        except:
+            return response.send(errors='Invalid Address')
     else:
-        response.set(result=geo_code.getResponse())
+        result = geo_code.getResponse()
+        if int(result['Status']['code']) == 200:
+            response.set(result=geo_code.getResponse())
+        else:
+            return response.send(errors="Invalid Address")
     return response.send()
 
 handler404_view = lambda request: HttpResponse("404 Not Found", status=404)
