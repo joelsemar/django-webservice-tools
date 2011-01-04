@@ -9,7 +9,7 @@ from django.http import HttpResponse
 
 def geo(request, response=None):
     if not response:
-        response = ResponseObject
+        response = ResponseObject()
     address = request.GET.get('address')
     get_coords = strToBool(request.GET.get('get_coords', 'True'))
     if hasattr(settings, 'GOOGLE_API_KEY'):
