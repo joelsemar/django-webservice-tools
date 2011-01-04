@@ -7,7 +7,9 @@ from webservice_tools.response_util import ResponseObject
 from webservice_tools.utils import GeoCode, strToBool
 from django.http import HttpResponse
 
-def geo(request, response):
+def geo(request, response=None):
+    if not response:
+        response = ResponseObject
     address = request.GET.get('address')
     get_coords = strToBool(request.GET.get('get_coords', 'True'))
     if hasattr(settings, 'GOOGLE_API_KEY'):
