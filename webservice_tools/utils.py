@@ -279,7 +279,7 @@ class GeoCode():
     
     def __init__(self, address, apiKey=GOOGLE_API_KEY):
         self.maxRetries = 3
-        self.timeout = 10
+        self.timeout = 20
         self.apiKey = apiKey
         self.query = urllib.urlencode({'q': address})
         
