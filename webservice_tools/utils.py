@@ -285,9 +285,22 @@ class GeoCode():
         
         socket.setdefaulttimeout(self.timeout)
     
+    def _make_call(self):
+        return simplejson.loads(urllib2.urlopen(GOOGLE_API_URL % self.apiKey + '&' + self.query).read())
+    
+    def getResponse(self):
+        try:
+            response = self._make_call()
+            return response
+        except:
+            if self.maxRetries:
+                self.maxRetries -= 1
+                return self.getResponse()
+            raise GeoCodeError("Invalid address")
+    
     def getCoords(self):
         try:
-            response = simplejson.loads(urllib2.urlopen(GOOGLE_API_URL % self.apiKey + '&' + self.query).read())
+            response = self._make_call()
             coordinates = response['Placemark'][0]['Point']['coordinates'][0:2]
             return tuple([float(n) for n in coordinates])
         except:
