@@ -16,6 +16,7 @@ from django.utils import encoding
 from xml.dom.ext import PrettyPrint
 from StringIO import StringIO
 
+from webservice_tools.decorators import retry
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
@@ -278,57 +279,36 @@ class GeoCodeError(Exception):
 class GeoCode():
     
     def __init__(self, address, apiKey=GOOGLE_API_KEY):
-        self.maxRetries = 3
-        self.timeout = 20
         self.apiKey = apiKey
         self.query = urllib.urlencode({'q': address})
-        
-        socket.setdefaulttimeout(self.timeout)
     
     def _make_call(self):
         return simplejson.loads(urllib2.urlopen(GOOGLE_API_URL % self.apiKey + '&' + self.query).read())
     
+    @retry(exception_raise=GeoCodeError("Invalid Address"))
     def getResponse(self):
-        try:
-            response = self._make_call()
-            return response
-        except:
-            if self.maxRetries:
-                self.maxRetries -= 1
-                return self.getResponse()
-            raise GeoCodeError("Invalid address")
+        return  self._make_call()
     
+    @retry(exception_raise=GeoCodeError("Invalid Address"))
     def getCoords(self):
-        try:
-            response = self._make_call()
-            coordinates = response['Placemark'][0]['Point']['coordinates'][0:2]
-            return tuple([float(n) for n in coordinates])
-        except:
-            if self.maxRetries:
-                self.maxRetries -= 1
-                return self.getCoords()
-            raise GeoCodeError("Invalid address")
+        response = self._make_call()
+        coordinates = response['Placemark'][0]['Point']['coordinates'][0:2]
+        return tuple([float(n) for n in coordinates])
             
         
 class ReverseGeoCode():      
 
-    def __init__(self, latlng, apiKey):
-        self.maxRetries = 3
-        self.timeout = 10
+    def __init__(self, latlng, apiKey=GOOGLE_API_KEY):
         self.apiKey = apiKey
         self.query = urllib.urlencode({'latlng': latlng})
-        
-        socket.setdefaulttimeout(self.timeout)
     
+    @retry(exception_raise=GeoCodeError("Invalid Coordinates"))
     def getAddress(self):
-        try:
-            response = simplejson.loads(urllib2.urlopen(GOOGLE_REVERSE_URL % self.apiKey + '&' + self.query).read())
-            return response['results']
-        except Exception, e:
-            if self.maxRetries:
-                self.maxRetries -= 1
-                return self.getAddress()
-            raise GeoCodeError
+        response = simplejson.loads(urllib2.urlopen(GOOGLE_REVERSE_URL % self.apiKey + '&' + self.query).read())
+        ret = response['results']
+        if not ret:
+            raise GeoCodeError('Invalid coordinates')
+        return ret
             
             
 def generateNewPassword():
@@ -388,8 +368,8 @@ def makeAPICall(domain, apiHandler, postData=None, rawPostData=None, queryData=N
     req = urllib2.Request(url)
     
     if headers:
-        for k,v in headers.items():
-            req.add_header(k,v)
+        for k, v in headers.items():
+            req.add_header(k, v)
     
     if userName is not None and password is not None:
         base64String = base64.encodestring('%s:%s' % (userName, password)).rstrip('\n')
