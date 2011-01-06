@@ -349,7 +349,7 @@ def formatPhoneNumber(number):
     m = re.search("\+?1?(\d{3})(\d{3})(\d{4})", number)
     if m:
         return u"(%s) %s-%s" % m.groups()
-    
+    return m
 
 def makeAPICall(domain, apiHandler, postData=None, rawPostData=None, queryData=None, userName=None,
                  password=None, secure=False, timeout=5, deserializeAs='json', headers={}):
