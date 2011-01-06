@@ -3,8 +3,9 @@ import passwordpieces
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db.models import Q
 from webservice_tools.response_util import ResponseObject
-from webservice_tools.utils import GeoCode, strToBool
+from webservice_tools.utils import GeoCode, strToBool, is_valid_email
 from django.http import HttpResponse
 
 def geo(request, response=None):
@@ -49,8 +50,11 @@ def newResetPass(request, response):
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
-        response.addErrors(errors='That user does not appear to exist', status=404)
-        return response.send()
+        if is_valid_email(username):
+            try:
+                user = User.objects.get(email=username)
+            except User.DoesNotExist:
+                return response.send(errors='That user does not appear to exist', status=404)
     
     if not user.email:
         return response.send(errors="That user has not provided an email address")
@@ -59,7 +63,7 @@ def newResetPass(request, response):
     user.set_password(newPassword)
     user.save()
     send_mail('Password Reset',
-              'Your password has been successfully reset, your new password is "%s", please change as soon as possible' % newPassword,
+              'The password for the username "%s" has been successfully reset, your new password is "%s",  please change as soon as possible' % (user.username, newPassword),
               '%s' % sent_from, [user.email, ])
     
     request.session['RESET_PASS'] = True
