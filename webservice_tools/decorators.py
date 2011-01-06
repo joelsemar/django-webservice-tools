@@ -1,10 +1,11 @@
 from functools import wraps
-from response_util import ResponseObject
+
 import time
 
 def login_required(fn):
     @wraps(fn)
     def inner(*args, **kwargs):
+        from webservice_tools.response_util import ResponseObject
         response = ResponseObject(dataFormat=kwargs.get('dataFormat', 'json'))
         try:
             request = [a for a in args if hasattr(a, 'user')][0]
