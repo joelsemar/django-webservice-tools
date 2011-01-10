@@ -1,6 +1,7 @@
 """
 General utils
 """
+import datetime
 import math
 import types
 import random
@@ -465,6 +466,11 @@ def prettyxml(node, encoding='utf-8'):
 
 def escape_xml(xml):
     return re.sub('&', '&amp;', xml)
+
+
+def iso_8601_parse(time_string):
+    from xml.utils.iso8601 import parse
+    return datetime.datetime.fromtimestamp(parse(time_string))
 
 
 first_cap_re = re.compile('(.)([A-Z][a-z]+)')
