@@ -120,6 +120,14 @@ class ResponseObject():
             responseDict['doc'] = self.doc
         
         
+        return responseDict
+        
+        """
+        After this is a bunch of dead code, for now we will default back to using piston's emmiter
+        
+        """
+        
+        
         if self._dataFormat == 'json':
             return self._sendJSON(responseDict)
         
