@@ -37,7 +37,7 @@ class ResponseObject():
     
     def set_headers(self, headers):
         for k, v in headers.items():
-            headers[k] = v
+            self.headers[k] = v
     
     
     def addErrors(self, errors, status=500):
