@@ -1,6 +1,6 @@
+from django.core import serializers
 import simplejson
 from django import dispatch
-from django.core import serializers
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.http import HttpResponse
 from django.db import models
@@ -111,21 +111,13 @@ class ResponseObject():
             self.addMessages(messages)
         
         responseDict = {}
-        responseDict['data'] = self._data
+        responseDict['data'] = {}
         responseDict['errors'] = self._errors
         responseDict['success'] = self.success
         if self._messages:
             responseDict['messages'] = self._messages
         if self.doc:
             responseDict['doc'] = self.doc
-        
-        
-        return responseDict
-        
-        """
-        After this is a bunch of dead code, for now we will default back to using piston's emmiter
-        
-        """
         
         
         if self._dataFormat == 'json':
@@ -136,7 +128,7 @@ class ResponseObject():
         
         
     def _sendJSON(self, responseDict):
-        responseDict = self._prepareData(responseDict, JSONSerializer())
+        responseDict = self._prepareData(responseDict)
         content = simplejson.dumps(responseDict, cls=DateTimeAwareJSONEncoder,
                                    ensure_ascii=True, indent=JSON_INDENT)
         http_response = HttpResponse(content, mimetype='application/json', status=self._status)
@@ -146,10 +138,10 @@ class ResponseObject():
         return http_response
         
     def _sendXML(self, responseDict):
-        responseDict = self._prepareData(responseDict, XMLSerializer())
-        content = utils.toXML(responseDict, 'response')
+        responseDict = self._prepareData(responseDict)
+        content =  utils.toXML(responseDict, 'response')
         content = utils.escape_xml(content)
-        content = utils.prettyxml(minidom.parseString(content))
+        content =  utils.prettyxml(minidom.parseString(content))
         http_response = HttpResponse(content, mimetype='text/xml', status=self._status)
         
         if self.headers:
@@ -158,11 +150,9 @@ class ResponseObject():
         return http_response
         
     
-    def _prepareData(self, responseDict, serializer):
+    def _prepareData(self, responseDict):
         for key, value in self._data.iteritems():
-            if isinstance(value, models.query.QuerySet):
-                responseDict['data'][key] = serializer.serialize(value)
-            elif isinstance(value, (list, tuple)):
+            if isinstance(value, (list, tuple, models.query.QuerySet)):
                 responseDict['data'][key] = [utils.toDict(o) for o in value]
             else:
                 responseDict['data'][key] = utils.toDict(value)

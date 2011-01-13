@@ -11,6 +11,7 @@ import socket
 import urllib
 import urllib2
 import simplejson
+from django.core import serializers
 import passwordpieces
 import base64
 from django.utils import encoding
