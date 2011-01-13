@@ -133,7 +133,7 @@ class ResponseObject():
                                    ensure_ascii=True, indent=JSON_INDENT)
         http_response = HttpResponse(content, mimetype='application/json', status=self._status)
         if self.headers:
-            for k, v in self.headers:
+            for k, v in self.headers.items():
                 http_response[k] = v 
         return http_response
         
