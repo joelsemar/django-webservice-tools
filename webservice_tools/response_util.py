@@ -111,7 +111,7 @@ class ResponseObject():
             self.addMessages(messages)
         
         responseDict = {}
-        responseDict['data'] = {}
+        responseDict['data'] = self._data
         responseDict['errors'] = self._errors
         responseDict['success'] = self.success
         if self._messages:
