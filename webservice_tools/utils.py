@@ -16,6 +16,7 @@ import base64
 from django.utils import encoding
 from xml.dom.ext import PrettyPrint
 from StringIO import StringIO
+import logging
 
 from webservice_tools.decorators import retry
 JSON_INDENT = 4
@@ -471,6 +472,27 @@ def escape_xml(xml):
 def iso_8601_parse(time_string):
     from xml.utils.iso8601 import parse
     return datetime.datetime.fromtimestamp(parse(time_string))
+
+def simpleReadConfigFile(filename):
+    """Reads in config file 
+    
+    @return: A dict containing the entries of the file read in. If the file could not be found or otherwise
+    parsed, an empty dict is returned.
+    """
+    import ConfigParser
+    loadedConfig = {}
+    cp = ConfigParser.SafeConfigParser()
+    filesParsed = cp.read(filename)
+    if len(filesParsed) == 0:
+        #could not parse out the file
+        return {}
+    
+    for sec in cp.sections():
+        name = str.lower(sec)
+        for opt in cp.options(sec):
+            loadedConfig[name + "." + opt.lower()] = cp.get(sec, opt).strip()
+    
+    return loadedConfig
 
 
 first_cap_re = re.compile('(.)([A-Z][a-z]+)')

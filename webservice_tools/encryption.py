@@ -1,7 +1,6 @@
 import base64
 import os
 from Crypto.Cipher import AES
-from django.core.cache import cache
 ENCRYPTION_PADDING = ' '
 ENCRYPTION_OBJECT_KEY = 'dbencryptionkey'
 
@@ -49,12 +48,9 @@ def _getEncryptionObject():
     Gets the Encryption Object which is used to encrypt/decrypt data
     The encryption key is cached.
     """
-    key = cache.get(ENCRYPTION_OBJECT_KEY)
-    if key is None:
-        try:
-            key = open('%s/dbkey' % os.getcwd()).read()
-        except IOError:
-            key = 'H3YY!H0pp3d0u70f7h47h0u$3w!7hmY>'
-        cache.set(ENCRYPTION_OBJECT_KEY, key)
+    try:
+        key = open('%s/dbkey' % os.getcwd()).read()
+    except IOError:
+        key = 'H3YY!H0pp3d0u70f7h47h0u$3w!7hmY>'
     return AES.new(key, AES.MODE_ECB)
 

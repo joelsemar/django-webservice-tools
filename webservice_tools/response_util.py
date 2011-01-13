@@ -28,10 +28,16 @@ class ResponseObject():
         self._status = 200
         self._dataFormat = dataFormat
         self.doc = None
+        self.headers = {}
         
         if self._request:
             message_sent.connect(self.message_callback, sender=None, dispatch_uid='response_receiver')
-
+    
+    
+    
+    def set_headers(self, headers):
+        for k, v in headers.items:
+            headers[k] = v
     
     
     def addErrors(self, errors, status=500):
@@ -125,15 +131,24 @@ class ResponseObject():
         responseDict = self._prepareData(responseDict)
         content = simplejson.dumps(responseDict, cls=DateTimeAwareJSONEncoder,
                                    ensure_ascii=True, indent=JSON_INDENT)
-        return HttpResponse(content, mimetype='application/json', status=self._status)
+        http_response = HttpResponse(content, mimetype='application/json', status=self._status)
+        if self.headers:
+            for k, v in self.headers:
+                http_response[k] = v 
+        return http_response
         
     def _sendXML(self, responseDict):
         responseDict = self._prepareData(responseDict)
         content =  utils.toXML(responseDict, 'response')
         content = utils.escape_xml(content)
         content =  utils.prettyxml(minidom.parseString(content))
-        return HttpResponse(content, mimetype='text/xml', status=self._status)
-    
+        http_response = HttpResponse(content, mimetype='text/xml', status=self._status)
+        
+        if self.headers:
+            for k, v in self.headers:
+                http_response[k] = v 
+        return http_response
+        
     
     def _prepareData(self, responseDict):
         for key, value in self._data.iteritems():
