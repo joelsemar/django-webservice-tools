@@ -36,7 +36,7 @@ class ResponseObject():
     
     
     def set_headers(self, headers):
-        for k, v in headers.items:
+        for k, v in headers.items():
             headers[k] = v
     
     
