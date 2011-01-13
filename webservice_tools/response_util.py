@@ -128,7 +128,7 @@ class ResponseObject():
         
         
     def _sendJSON(self, responseDict):
-        responseDict = self._prepareData(responseDict)
+        responseDict = self._prepareData(responseDict, JSONSerializer)
         content = simplejson.dumps(responseDict, cls=DateTimeAwareJSONEncoder,
                                    ensure_ascii=True, indent=JSON_INDENT)
         http_response = HttpResponse(content, mimetype='application/json', status=self._status)
@@ -138,7 +138,7 @@ class ResponseObject():
         return http_response
         
     def _sendXML(self, responseDict):
-        responseDict = self._prepareData(responseDict)
+        responseDict = self._prepareData(responseDict, XMLSerializer)
         content =  utils.toXML(responseDict, 'response')
         content = utils.escape_xml(content)
         content =  utils.prettyxml(minidom.parseString(content))
@@ -150,9 +150,11 @@ class ResponseObject():
         return http_response
         
     
-    def _prepareData(self, responseDict):
+    def _prepareData(self, responseDict, serializer):
         for key, value in self._data.iteritems():
-            if isinstance(value, (list, tuple, models.query.QuerySet)):
+            if isinstance(value, models.query.QuerySet):
+                responseDict['data'][key] = simplejson.loads(serializer.serialize(value))
+            elif isinstance(value, (list, tuple, models.query.QuerySet)):
                 responseDict['data'][key] = [utils.toDict(o) for o in value]
             else:
                 responseDict['data'][key] = utils.toDict(value)
