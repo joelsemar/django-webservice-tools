@@ -17,67 +17,77 @@
         <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.1/ext-all.js">
         </script>
         <script type='text/javascript'>
-            var paramTemplate = new Ext.Template("Name: <input type='text' class='paramName spaced' id='paramName_{paramID}'></input>", " Value:<input type='text' class='paramVal spaced' size='75' id='paramVal_{paramID}'></input><br/>");
-            
-            
-            function sendCall(){
-                var url = Ext.get('baseURL').getValue() + Ext.get('url').getValue();
-                var paramObject = {};
-                var paramNames = Ext.select('.paramName');
-                var requestMethod = Ext.get('method').getValue();
-                for (var i = 0; i < paramNames.getCount(); i++) {
-                    var p = paramNames.elements[i];
-                    var id = p.id.split('_')[1];
-                    var v = Ext.get('paramVal_' + id);
-                    if (p.value) {
-                        paramObject[p.value] = v.getValue();
-                    }
-                }
-                var headers = {
-                    'Accept': Ext.get('dataFormat').getValue()
-                };
-                if (Ext.getDom('showdoc').checked) {
-                    headers['Show-Doc'] = true;
-                }
-                Ext.Ajax.request({
-                    method: requestMethod,
-                    url: url,
-                    params: paramObject,
-                    headers: headers,
-                    callback: function(o, s, responseObject){
-                        if (responseObject.getResponseHeader('content-type').indexOf('xml') != -1) {
-                            data = formatXML(responseObject.responseText)
+                        var paramTemplate = new Ext.Template("Name: <input type='text' class='paramName spaced' id='paramName_{paramID}'></input>", " Value:<input type='text' class='paramVal spaced' size='75' id='paramVal_{paramID}'></input><br/>");
+                        
+                        
+                        function sendCall(){
+                            var url = Ext.get('baseURL').getValue() + Ext.get('url').getValue();
+                            var paramObject = {};
+            				var paramString = '';
+                            var paramNames = Ext.select('.paramName');
+                            var requestMethod = Ext.get('method').getValue();
+                            for (var i = 0; i < paramNames.getCount(); i++) {
+                                var p = paramNames.elements[i];
+                                var id = p.id.split('_')[1];
+                                var v = Ext.get('paramVal_' + id);
+            					if (p.value()){
+            					   if (requestMethod === 'GET') {
+                                   paramString += p.value + '=' + v.getValue() + '&'; 
+                                }
+                                else if (reqiestMethod === 'POST') {
+                                    paramObject[p.value] = v.getValue();
+                                }	
+            						
+            						
+            					}
+            					
+                            }
+                            var headers = {
+                                'Accept': Ext.get('dataFormat').getValue()
+                            };
+                            if (Ext.getDom('showdoc').checked) {
+                                headers['Show-Doc'] = true;
+                            }
+                            Ext.Ajax.request({
+                                method: requestMethod,
+                                url: url,
+                                params: paramstring || paramObject,
+                                headers: headers,
+                                callback: function(o, s, responseObject){
+                                    if (responseObject.getResponseHeader('content-type').indexOf('xml') != -1) {
+                                        data = formatXML(responseObject.responseText)
+                                    }
+                                    else {
+                                        data = responseObject.responseText;
+                                    }
+                                    Ext.get('result').update(data);
+                                    var paramDiv = Ext.get('recentParams');
+                                    var urlDiv = Ext.get('recentURLs');
+                                    if (paramObject !== '{}') {
+                                        paramDiv.update(paramDiv.dom.innerHTML + '<br/>' + Ext.util.JSON.encode(paramObject));
+                                    }
+                                    urlDiv.update(urlDiv.dom.innerHTML + '<br/>' + url);
+                                }
+                            });
                         }
-                        else {
-                            data = responseObject.responseText;
+                        
+                        Ext.onReady(function(){
+                            paramTemplate.append('params', {
+                                paramID: '1'
+                            });
+                            paramTemplate.append('params', {
+                                paramID: '2'
+                            });
+                            var map = new Ext.KeyMap(document.body, {
+                                key: 13, // Ext.EventObject.ENTER,
+                                fn: sendCall
+                            });
+                        });
+                        function formatXML(string){
+                            return string.replace(/>/g, "&gt;").replace(/</g, "&lt;");
+                            
                         }
-                        Ext.get('result').update(data);
-                        var paramDiv = Ext.get('recentParams');
-                        var urlDiv = Ext.get('recentURLs');
-                        if (paramObject !== '{}') {
-                            paramDiv.update(paramDiv.dom.innerHTML + '<br/>' + Ext.util.JSON.encode(paramObject));
-                        }
-                        urlDiv.update(urlDiv.dom.innerHTML + '<br/>' + url);
-                    }
-                });
-            }
-            
-            Ext.onReady(function(){
-                paramTemplate.append('params', {
-                    paramID: '1'
-                });
-                paramTemplate.append('params', {
-                    paramID: '2'
-                });
-                var map = new Ext.KeyMap(document.body, {
-                    key: 13, // Ext.EventObject.ENTER,
-                    fn: sendCall
-                });
-            });
-            function formatXML(string){
-                return string.replace(/>/g, "&gt;").replace(/</g, "&lt;");
-                
-            }
+                    
         </script>
     </head>
 </html>
