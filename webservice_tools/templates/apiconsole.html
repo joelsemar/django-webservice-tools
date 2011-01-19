@@ -23,7 +23,6 @@
             function sendCall(){
                 var url = Ext.get('baseURL').getValue() + Ext.get('url').getValue();
                 var paramObject = {};
-                var paramString = '';
                 var paramNames = Ext.select('.paramName');
                 var requestMethod = Ext.get('method').getValue();
                 for (var i = 0; i < paramNames.getCount(); i++) {
@@ -31,20 +30,11 @@
                     var id = p.id.split('_')[1];
                     var v = Ext.get('paramVal_' + id);
                     if (p.value) {
-                        if (requestMethod === 'GET') {
-                            paramString += p.value + '=' + v.getValue() + '&';
-                        }
-                        else 
-                            if (requestMethod === 'POST') {
-                                paramObject[p.value] = v.getValue();
-                            }
-                        
-                        
+                        paramObject[p.value] = v.getValue();
                     }
-                    
                 }
-				
-				params = paramString || paramObject;
+                
+                
                 var headers = {
                     'Accept': Ext.get('dataFormat').getValue()
                 };
@@ -54,7 +44,7 @@
                 Ext.Ajax.request({
                     method: requestMethod,
                     url: url,
-                    params: params,
+                    params: paramObject,
                     headers: headers,
                     callback: function(o, s, responseObject){
                         if (responseObject.getResponseHeader('content-type').indexOf('xml') != -1) {

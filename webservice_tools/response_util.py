@@ -67,7 +67,6 @@ class ResponseObject():
         
     
     def addMessages(self, messages):
-        self.success = False
         if isinstance(messages, basestring):
             #just a single message
             self._messages.append(messages)
