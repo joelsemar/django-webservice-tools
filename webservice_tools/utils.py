@@ -471,8 +471,23 @@ def escape_xml(xml):
 
 
 def iso_8601_parse(time_string):
+    """
+    Y-m-dTH:M:S 
+    """
     from xml.utils.iso8601 import parse
     return datetime.datetime.fromtimestamp(parse(time_string))
+
+
+def default_time_parse(time_string):
+    """
+    Expects times in the format "2011-12-25 18:22"
+    Returns None on error
+    """
+    try:
+        return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M")
+    except ValueError:
+        return None
+
 
 def simpleReadConfigFile(filename):
     """Reads in config file 
