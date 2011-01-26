@@ -483,6 +483,8 @@ def default_time_parse(time_string):
     Expects times in the format "2011-12-25 18:22"
     Returns None on error
     """
+    if not time_string and isinstance(time_string, basestring):
+        return None
     try:
         return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M")
     except ValueError:

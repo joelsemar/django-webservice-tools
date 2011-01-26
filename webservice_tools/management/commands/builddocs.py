@@ -23,7 +23,7 @@ class Command(BaseCommand):
         pydoc.writedocs(moduleDir)
         # attempt to add the new docs to git
         os.chdir(moduleDir)
-        os.system('find . -name *.html |xargs git add')
+        os.system('find . -name *.html | xargs git add')
         os.chdir(origDir)
         
         
