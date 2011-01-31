@@ -68,17 +68,21 @@ def isDirty(model, fieldName):
 class ThumbFieldFile(ImageFieldFile):
     
     def save(self, *args, **kwargs):
+        rotation =  kwargs.get('rotation')
+        del kwargs['rotation']
+
         super(ImageFieldFile, self).save(*args, **kwargs)
         filename = self.path
         imageFile = Image.open(filename)
         imageFile = imageFile.resize(settings.DEFAULT_THUMB_SIZE, Image.ANTIALIAS)
-        rotation =  kwargs.get('image_rotation')
-        try:
-            rotation = int(rotation)
-            if rotation  in [90, 180, 270]:
-                imageFile = imageFile.rotate(rotation)
-        except ValueError:
-            pass
+        
+        if rotation:
+            try:
+                rotation = int(rotation)
+                if rotation  in [90, 180, 270]:
+                    imageFile = imageFile.rotate(rotation)
+            except ValueError:
+                pass
         imageFile.save(filename)
         
 class ThumbField(ImageField):
