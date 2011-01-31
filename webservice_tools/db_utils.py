@@ -69,7 +69,8 @@ class ThumbFieldFile(ImageFieldFile):
     
     def save(self, *args, **kwargs):
         rotation =  kwargs.get('rotation')
-        del kwargs['rotation']
+        if rotation:
+            del kwargs['rotation']
 
         super(ImageFieldFile, self).save(*args, **kwargs)
         filename = self.path
