@@ -27,6 +27,8 @@ GOOGLE_REVERSE_URL = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=fa
 
 EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$"
 
+ZIP_CODE_REGEX = '^[\d]{5}$|^[\d]{5}\-[\d]{4}$'
+
 def toDict(obj, r=4):
     """ 
     Returns a Dict representation of the given object, replacing object relations with ids

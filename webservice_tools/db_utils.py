@@ -72,6 +72,13 @@ class ThumbFieldFile(ImageFieldFile):
         filename = self.path
         imageFile = Image.open(filename)
         imageFile = imageFile.resize(settings.DEFAULT_THUMB_SIZE, Image.ANTIALIAS)
+        rotation =  kwargs.get('image_rotation')
+        try:
+            rotation = int(rotation)
+            if rotation  in [90, 180, 270]:
+                imageFile = imageFile.rotate(rotation)
+        except ValueError:
+            pass
         imageFile.save(filename)
         
 class ThumbField(ImageField):
