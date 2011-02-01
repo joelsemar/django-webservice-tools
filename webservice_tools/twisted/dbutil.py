@@ -736,7 +736,7 @@ _alreadyInBacklog=False, many=False):
 
     #make sure argList ends up being a tuple
     if not isinstance(argList, tuple):
-        argList = (argList,)
+        argList = tuple(argList)
     
     log.msg(u"Executing query: \"%s\"; Args: %s" % (queryString, argList,),
             lvl=printQuery and 'a' or 'd2', ss='ss_db')
@@ -833,7 +833,6 @@ def _directProcessExecute(txn, queryString, argList, fetch, connID, useCache, ca
 
 def _directProcessExecute_onError(failure, queryString, argList, fetch, connID, useCache,
 cacheExpireTime, cacheHashKey, printQuery, _alreadyInBacklog):
-    import pydevd;pydevd.settrace('127.0.0.1')
     if failure.check(MySQLdb.ProgrammingError) or failure.check(TypeError):
         log.msg(u"Database query failure. Error: %s. Failed query was: %s; Args: (%s)"
             % (failure.getErrorMessage(), queryString, ', '.join([x for x in argList]),), lvl='e', ss='ss_db')
