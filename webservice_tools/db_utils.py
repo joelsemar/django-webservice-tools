@@ -91,6 +91,6 @@ class ThumbField(ImageField):
     attr_class = ThumbFieldFile
 
 
-#so souch doesn't choke on our custom field
+#so south doesn't choke on our custom field
 from south.modelsinspector import add_introspection_rules
 add_introspection_rules([], ['webservice_tools.db_utils.ThumbField'])

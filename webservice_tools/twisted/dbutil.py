@@ -697,7 +697,7 @@ cacheExpireTime, cacheHashKey, printQuery, _alreadyInBacklog):
 
 def execute(queryString, argList=tuple(), fetch='N', connID='dbMetastore', useCache=False,
 cacheExpireTime=consts.MEMCACHED_DEFAULT_EXPIRE_PERIOD, printQuery=False,
-_alreadyInBacklog=False):
+_alreadyInBacklog=False, many=False):
     """
     Executes a SQL statement on the database
     
@@ -752,7 +752,7 @@ _alreadyInBacklog=False):
         cacheHashKey = _produceCacheHashKey(queryString, argList, fetch)
         d = memcache.retrieve(cacheHashKey)
         d.addCallback(_cbExecute, queryString, argList, fetch, connID, useCache, cacheExpireTime, printQuery,
-                      cacheHashKey, _alreadyInBacklog)
+                      cacheHashKey, _alreadyInBacklog, many)
     else:
         cacheHashKey = ""
         d = defer.succeed(None)
@@ -762,7 +762,7 @@ _alreadyInBacklog=False):
 
 
 def _cbExecute(cacheValue, queryString, argList, fetch, connID, useCache, cacheExpireTime, printQuery, cacheHashKey,
-_alreadyInBacklog):
+_alreadyInBacklog, many):
     if cacheHashKey and cacheValue:
         #useCache set to true and we found something in the cache
         #serialize it out from JSON
@@ -776,7 +776,7 @@ _alreadyInBacklog):
     #otherwise we're not caching or did not find anything in the memcache...make the query
     if singleton.get(connID + 'Type') == 'direct':
         d = singleton.get(connID).runInteraction(_directProcessExecute, queryString, argList, fetch, connID, useCache,
-            cacheExpireTime, cacheHashKey, printQuery)
+            cacheExpireTime, cacheHashKey, printQuery, many)
         d.addErrback(_directProcessExecute_onError, queryString, argList, fetch, connID, useCache,
             cacheExpireTime, cacheHashKey, printQuery, _alreadyInBacklog)
         return d
@@ -785,10 +785,12 @@ _alreadyInBacklog):
             cacheExpireTime, cacheHashKey)
 
 
-def _directProcessExecute(txn, queryString, argList, fetch, connID, useCache, cacheExpireTime, cacheHashKey, printQuery):
+def _directProcessExecute(txn, queryString, argList, fetch, connID, useCache, cacheExpireTime, cacheHashKey, printQuery, many=False):
     assert isinstance(argList, tuple)
-
-    txn.execute(queryString, argList)
+    if many:
+        txn.executemany(queryString, argList)
+    else:
+        txn.execute(queryString, argList)
     #^ may raise an exception if the error can't be handled. don't handle that here (propagate it up)
     if fetch == 'o':
         results = txn.fetchone()
