@@ -785,7 +785,7 @@ _alreadyInBacklog, many):
             cacheExpireTime, cacheHashKey)
 
 
-def _directProcessExecute(txn, queryString, argList, fetch, connID, useCache, cacheExpireTime, cacheHashKey, printQuery, many=False):
+def _directProcessExecute(txn, queryString, argList, fetch, connID, useCache, cacheExpireTime, cacheHashKey, printQuery, many):
     assert isinstance(argList, tuple)
     if many:
         txn.executemany(queryString, argList)
@@ -833,6 +833,7 @@ def _directProcessExecute(txn, queryString, argList, fetch, connID, useCache, ca
 
 def _directProcessExecute_onError(failure, queryString, argList, fetch, connID, useCache,
 cacheExpireTime, cacheHashKey, printQuery, _alreadyInBacklog):
+    import pydevd;pydevd.settrace('127.0.0.1')
     if failure.check(MySQLdb.ProgrammingError) or failure.check(TypeError):
         log.msg(u"Database query failure. Error: %s. Failed query was: %s; Args: (%s)"
             % (failure.getErrorMessage(), queryString, ', '.join([x for x in argList]),), lvl='e', ss='ss_db')
