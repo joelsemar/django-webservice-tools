@@ -757,7 +757,7 @@ _alreadyInBacklog=False, many=False):
         cacheHashKey = ""
         d = defer.succeed(None)
         d.addCallback(_cbExecute, queryString, argList, fetch, connID, useCache, cacheExpireTime, printQuery,
-                      cacheHashKey, _alreadyInBacklog)
+                      cacheHashKey, _alreadyInBacklog, many)
     return d
 
 
