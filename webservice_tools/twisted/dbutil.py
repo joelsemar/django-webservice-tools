@@ -717,6 +717,7 @@ _alreadyInBacklog=False, many=False):
     successfully processed)
 
     """
+    import pydevd;pydevd.settrace('127.0.0.1')
     assert queryString and len(queryString) >= 6
     assert fetch in ('N', 'o', 'om', 'a', 'am', 'lid')
     assert singleton.get(connID + 'Type') in ('direct', 'dbproxy')
