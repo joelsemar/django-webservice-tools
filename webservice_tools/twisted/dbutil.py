@@ -659,7 +659,7 @@ printQuery):
 
 def _directProcessCallProc_onError(failure, procName, inArgList, fetch, connID, useCache,
 cacheExpireTime, cacheHashKey, printQuery, _alreadyInBacklog):
-    import pydevd;pydevd.settrace('127.0.0.1')
+    
     if failure.check(MySQLdb.ProgrammingError) or failure.check(TypeError):
         log.msg(u"Database query failure. Error: %s. Failed proc was: %s; Args: (%s)"
             % (failure.getErrorMessage(), procName, ', '.join([x for x in inArgList]),), lvl='e', ss='ss_db')
@@ -835,6 +835,7 @@ def _directProcessExecute(txn, queryString, argList, fetch, connID, useCache, ca
 def _directProcessExecute_onError(failure, queryString, argList, fetch, connID, useCache,
 cacheExpireTime, cacheHashKey, printQuery, _alreadyInBacklog):
     if failure.check(MySQLdb.ProgrammingError) or failure.check(TypeError):
+        import pydevd;pydevd.settrace('127.0.0.1')
         log.msg(u"Database query failure. Error: %s. Failed query was: %s; Args: (%s)"
             % (failure.getErrorMessage(), queryString, ', '.join([x for x in argList]),), lvl='e', ss='ss_db')
         failure.raiseException() #invalid syntax error
