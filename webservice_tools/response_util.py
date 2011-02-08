@@ -33,8 +33,6 @@ class ResponseObject():
         if self._request:
             message_sent.connect(self.message_callback, sender=None, dispatch_uid='response_receiver')
     
-    
-    
     def set_headers(self, headers):
         for k, v in headers.items():
             self.headers[k] = v
