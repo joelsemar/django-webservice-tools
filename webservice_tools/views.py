@@ -32,7 +32,7 @@ def geo(request, response=None):
             return response.send(errors="Invalid Address")
     return response.send()
 
-handler404_view = lambda request: HttpResponse("404 Not Found", status=404)
+handler404_view = lambda request: HttpResponse('{"errors": ["Not Found"], "data": {}, "success": false}', status=404)
 
 def newResetPass(request, response):
     """
