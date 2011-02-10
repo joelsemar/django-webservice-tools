@@ -500,9 +500,9 @@ dbProxySecHosts=None):
         cursorClassDict['cursorclass'] = SSCursor
     #try:
     connPool = adbapi.ConnectionPool("pyPgSQL.PgSQL",
-    #connPool = BackloggingConnectionPool("pyPgSQL.PgSQL",
-        database=database,user=username, password=password,)
-        #host=hostname, port=port, user=username, passwd=password,
+        database=database,user=username, password=password,
+        host=hostname, port=port)
+        #user=username, passwd=password,
         #db=database, cp_min=minPoolCons, cp_max=maxPoolCons)
         #use_unicode=True, charset='utf8', ssl=sslEnabled and sslDict or None,
         #cp_noisy=False,
