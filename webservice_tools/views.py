@@ -57,6 +57,8 @@ def newResetPass(request, response):
                 user = User.objects.get(email=username)
             except User.DoesNotExist:
                 return response.send(errors='That user does not appear to exist', status=404)
+        else:
+            return response.send(errors='That user does not appear to exist', status=404)
     
     if not user.email:
         return response.send(errors="That user has not provided an email address")
