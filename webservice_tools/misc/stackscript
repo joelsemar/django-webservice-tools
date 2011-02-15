@@ -8,6 +8,7 @@
 # <UDF name="repo_name" label="Repo name" default="LadiesNight"/>
 # <UDF name="django_ver" label="Current Django Version" default="1.2.5" />
 # <UDF name="migrations" label="Migrations?" oneOf="yes, no">
+
 source <ssinclude StackScriptID="1"> #StackScript Bash Library
 source <ssinclude StackScriptID="125"> #lib-postgres
 source <ssinclude StackScriptID="124"> #lib-system
@@ -70,7 +71,7 @@ git clone https://$GITHUB_LOGIN:$GITHUB_PASSWORD@github.com/appiction/$REPO_NAME
 
 #symlink to /var/www
 cd /var/www
-ln -s /var/git/$REPO_NAME/$SERVER_NAME $SERVER_NAME
+ln -s /var/git/$REPO_NAME/$SERVER_NAME $PROJECT_PATH
 
 cd ..
 chown -R www-data:www-data www/
@@ -174,14 +175,18 @@ mkdir -p "$PROJECT_PATH/apache"
 ln -s /usr/local/lib/python2.6/dist-packages/django/contrib/admin/media $PROJECT_PATH/admin-media 
 
 cat > "$PROJECT_PATH/apache/django.wsgi" << EOF
-    import os, sys
-    sys.path.insert(0, 'var/www/$SERVER_NAME')
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'settings
-    import django.core.handlers.wsgi
-    application = django.core.handlers.wsgi.WSGIHandler()    
+import os, sys
+sys.path.insert(0, '/var/www/$SERVER_NAME')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+import django.core.handlers.wsgi
+application = django.core.handlers.wsgi.WSGIHandler()    
 EOF
 
+
+sudo chown -R www-data:www-data $PROJECT_PATH
+
 echo "Created wsgi file"
+rm -rf /etc/apach2/sites-available/default
 cat > "/etc/apache2/sites-available/$HOSTNAME" << EOF
 <VirtualHost *:80>
     ServerName $HOSTNAME
@@ -189,7 +194,7 @@ cat > "/etc/apache2/sites-available/$HOSTNAME" << EOF
     LogLevel warn
     WSGIDaemonProcess www-data processes=1 threads=15 maximum-requests=10000
     WSGIProcessGroup www-data
-    WSGIScriptAlias / $PROJECT_PATH/wsgi/django.wsgi
+    WSGIScriptAlias / $PROJECT_PATH/apache/django.wsgi
     Alias /static $PROJECT_PATH/static/
 </VirtualHost>
 EOF
