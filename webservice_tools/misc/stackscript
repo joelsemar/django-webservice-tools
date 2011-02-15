@@ -1,0 +1,154 @@
+#!/bin/bash
+#<UDF name="user_name" label="User account name" default="joel"/>
+# <UDF name="user_password" label="User password" default="defaultpass12" />
+# <UDF name="server_name" label="Server name" default="lnserver"/>
+# <UDF name="hostname" label="Hostname" default="lnserver.com"/>
+# <UDF name="github_login" label="Github login" default="joelsemar"/>
+# <UDF name="github_password" label="Github password" />
+# <UDF name="repo_name" label="Repo name" default="LadiesNight"/>
+# <UDF name="django_ver" label="Current Django Version" default="1.2.5" />
+# <UDF name="migrations" label="Migrations?" oneOf="yes, no">
+source <ssinclude StackScriptID="1"> #StackScript Bash Library
+source <ssinclude StackScriptID="125"> #lib-postgres
+source <ssinclude StackScriptID="124"> #lib-system
+source <ssinclude StackScriptID="123"> #lib-system-ubuntu
+source <ssinclude StackScriptID="127"> #lib-django
+
+
+#utils, apache, postgres, add user
+system_update
+goodstuff
+system_install_git
+apt-get -y  install wget less vim
+apache_install
+apache_tune
+system_sshd_permitrootlogin 'No'
+system_add_user $USER_NAME $USER_PASSWORD sudo
+apt-get -y install python-setuptools
+apg-get -y install gcc
+PROJECT_PATH="/var/www/$SERVER_NAME"
+#deps
+
+
+exec &> /root/stackscript.log
+cd /var/opt
+yes | git clone https://$GITHUB_LOGIN:$GITHUB_PASSWORD@github.com/joelsemar/django-webservice-tools.git
+cd django-webservice-tools
+python setup.py install
+cd webservice_tools/misc
+tar -xvf Imaging-1.1.7.tar.gz
+#tar -xvf geos-3.2.2.tar.bz2
+tar -xvf PyXML.tgz
+
+
+cd Imaging-1.1.7
+apt-get -y  install libjpeg62 libjpeg62-dev
+python setup.py install 
+
+cd ../PyXML-0.8.4
+python setup.py install
+
+
+#cd ../geos-3.2.2  && ./configure && make && make install
+
+cd ../../piston
+python setup.py install
+
+#install Django
+cd /opt
+yes | wget http://www.djangoproject.com/download/$DJANGO_VER/tarball/ -O Django-$DJANGO_VER.tar.gz
+tar -xvf Django-$DJANGO_VER.tar.gz
+cd Django-$DJANGO_VER
+python setup.py install
+
+
+#application code
+mkdir /var/git && cd /var/git
+git clone https://$GITHUB_LOGIN:$GITHUB_PASSWORD@github.com/appiction/$REPO_NAME.git /var/git/$REPO_NAME
+
+#symlink to /var/www
+cd /var/www
+ln -s /var/git/$REPO_NAME/$SERVER_NAME $SERVER_NAME
+
+cd ..
+chown -R www-data:www-data www/
+chown -R www-data:www-data git/
+
+
+#the database!
+#run this before doing anything else, (set default to utf-8)
+sudo apt-get install python-software-properties
+add-apt-repository ppa:pitti/postgresql
+add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+apt-get update
+apt-get install -y postgresql-9.0 postgresql-server-dev-9.0 postgresql-contrib-9.0 proj libgeos-3.2.2 
+apt-get install -y libgeos-c1 libgeos-dev libgdal1-1.7.0 libgdal1-dev build-essential libxml2 libxml2-dev checkinstall
+apt-get -y  install python-psycopg2 python-pgsql
+
+
+cd /opt
+
+wget http://postgis.refractions.net/download/postgis-1.5.2.tar.gz
+tar zxvf postgis-1.5.2.tar.gz && cd postgis-1.5.2/
+./configure &&  make && sudo checkinstall --pkgname postgis-1.5.2 --pkgversion 1.5.2-src --default
+
+sudo -u postgres pg_dropcluster --stop 9.0 main
+sudo -u postgres pg_createcluster --start -e UTF-8 9.0 main
+
+#need the template_postgis
+POSTGIS_SQL_PATH=`pg_config --sharedir`/contrib
+sudo -u postgres createdb -E utf8 -O postgres -U postgres template_postgis
+createlang -d template_postgis plpgsql # Adding PLPGSQL language support.
+psql -d postgres -c "UPDATE pg_database SET datistemplate='true' WHERE datname='template_postgis';"
+psql -d template_postgis -f $POSTGIS_SQL_PATH/hstore.sql
+psql -d template_postgis -f $POSTGIS_SQL_PATH/postgis.sql
+psql -d template_postgis -f $POSTGIS_SQL_PATH/spatial_ref_sys.sql
+# Enabling users to alter spatial tables.
+psql -d template_postgis -c "GRANT ALL ON geometry_columns TO PUBLIC;"
+psql -d template_postgis -c "GRANT ALL ON geography_columns TO PUBLIC;"
+psql -d template_postgis -c "GRANT ALL ON spatial_ref_sys TO PUBLIC;"
+
+
+#your new database
+sudo -u postgres createdb -E utf8 -T template_postgis -O $SERVER_NAME $SERVER_NAME
+
+echo "CREATE USER  $SERVER_NAME WITH PASSWORD '$SERVER_NAME' --createdb" | sudo -u postgres psql
+echo "GRANT ALL PRIVILEGES ON DATABASE $SERVER_NAME to $SERVER_NAME" | sudo -u postgres psql
+#set up for 'password' auth instead of ident (you know, so it actually works)
+echo "local   $SERVER_NAME $SERVER_NAME           password" >> /etc/postgresql/9.0/main/pg_hba.conf
+
+
+cd $PROJECT_PATH
+./manage.py syncdb
+if [$MIGRATIONS = "yes"]; then
+   ./manage.py migrate
+fi
+
+
+#Hook it up
+mkdir -p "$PROJECT_PATH/apache"
+ln -s /usr/local/lib/python2.6/dist-packages/django/contrib/admin/media $PROJECT_PATH/admin-media 
+
+
+cat > "$PROJECT_PATH/apache/django.wsgi" << EOF
+    import os, sys
+    sys.path.insert(0, 'var/www/$SERVER_NAME')
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'settings
+    import django.core.handlers.wsgi
+    application = django.core.handlers.wsgi.WSGIHandler()    
+EOF
+
+touch "/etc/apache2/sites_available/$HOSTNAME"
+cat < "/etc/apache2/sites_available/$HOSTNAME" << EOF
+<VirtualHost *:80>
+    ServerName $HOSTNAME
+    DocumentRoot $PROJECT_PATH
+    LogLevel warn
+    WSGIDaemonProcess www-data processes=1 threads=15 maximum-requests=10000
+    WSGIProcessGroup www-data
+    WSGIScriptAlias $PROJECT_PATH/wsgi/django.wsgi
+    Alias /static $PROJECT_PATH/static/
+</VirtualHost>
+EOF
+a2ensite "$HOSTNAME"
+/etc/init.d/apache2 restart

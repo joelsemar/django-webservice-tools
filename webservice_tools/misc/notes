@@ -4,3 +4,7 @@ sudo apt-get install python-software-properties
 sudo add-apt-repository ppa:pitti/postgresql
 sudo apt-get update
 sudo apt-get install postgresql-9.0 libpq-dev
+
+#run this before doing anything else, (set default to utf-8)
+sudo -u postgres pg_dropcluster --stop 9.0 main
+sudo -u postgres pg_createcluster --start -e UTF-8 9.0 main
