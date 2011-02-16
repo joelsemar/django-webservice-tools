@@ -488,10 +488,12 @@ def default_time_parse(time_string):
     if not time_string or not isinstance(time_string, basestring):
         return None
     try:
-        return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M")
+        return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M:%S")
     except ValueError:
-        return None
-
+        try:
+            return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M")
+        except ValueError:
+            return None
 
 def simpleReadConfigFile(filename):
     """Reads in config file 
