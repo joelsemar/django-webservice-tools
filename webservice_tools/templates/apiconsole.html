@@ -87,7 +87,12 @@
     BaseURL:<input type='text' id='baseURL' value='{{baseURL}}'>
     </input>
     <br/>
-    Api Call:<input type='text' id='url'>
+    Api Call:<input type='text' id='url'> <select id='method'>
+        <option value='GET'>GET</option>
+        <option value='POST'>POST</option>
+        <option value='PUT'>PUT</option>
+        <option value='DELETE'>DELETE</option>
+    </select>
     </input>
     <br/>
     Params 
@@ -98,12 +103,7 @@
     <div id='params'>
     </div>
     <br/>
-    <select id='method'>
-        <option value='POST'>POST</option>
-        <option value='GET'>GET</option>
-        <option value='DELETE'>DELETE</option>
-        <option value='PUT'>PUT</option>
-    </select>
+    
     <h3 style='margin:4px;'>Headers</h3>
     Accept:
     <select id='dataFormat'>
