@@ -13,17 +13,11 @@
 #      default="lnserver">
 
 
-
-
-
-
-
-
-source /root/ssinclude-1 #StackScript Bash Library
-source /root/ssinclude-125 #lib-postgres
-source /root/ssinclude-124 #lib-system
-source /root/ssinclude-123 #lib-system-ubuntu
-source /root/ssinclude-127 #lib-django
+source ssinclude-1 #StackScript Bash Library
+source ssinclude-125 #lib-postgres
+source ssinclude-124 #lib-system
+source ssinclude-123 #lib-system-ubuntu
+source ssinclude-127 #lib-django
 
 exec &> /root/stackscript.log
 
@@ -195,7 +189,7 @@ EOF
 sudo chown -R www-data:www-data $PROJECT_PATH
 
 echo "Created wsgi file"
-rm -rf /etc/apach2/sites-available/default
+rm -rf /etc/apache2/sites-available/default
 cat > "/etc/apache2/sites-available/$HOSTNAME" << EOF
 <VirtualHost *:80>
     ServerName $HOSTNAME
