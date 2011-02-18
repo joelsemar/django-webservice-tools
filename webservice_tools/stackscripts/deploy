@@ -1,17 +1,11 @@
 #!/bin/bash
 #We can use this on aws when the environ is already set up
-echo -e "Server Name:"
-read $SERVER_NAME
-echo -e "Github Login:"
-read $GITHUB_LOGIN
-echo -s "Github Password:"
-read $GITHUB_PASSWORD
-echo -e "Repo name:"
-read $REPO_NAME
-echo -e "Server git path:"
-read $SERVER_GIT_PATH
-echo -e "Hostname:"
-read $HOSTNAME
+read -e -p "Server Name:" SERVER_NAME
+read -e -p "Github Login:"  GITHUB_LOGIN
+read -s -p "Github Password:" GITHUB_PASSWORD
+read -e -p "Repo name:" REPO_NAME
+read -e -p "Server git path:" SERVER_GIT_PATH
+read -e -p "Hostname:" HOSTNAME
 PROJECT_PATH = '/var/www/$SERVER_NAME'
 
 #application code
