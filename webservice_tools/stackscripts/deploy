@@ -1,0 +1,115 @@
+#!/bin/bash
+#We can use this on aws when the environ is already set up
+echo -e "Server Name:"
+read $SERVER_NAME
+echo -e "Github Login:"
+read $GITHUB_LOGIN
+echo -s "Github Password:"
+read $GITHUB_PASSWORD
+echo -e "Repo name:"
+read $REPO_NAME
+echo -e "Server git path:"
+read $SERVER_GIT_PATH
+echo -e "Hostname:"
+read $HOSTNAME
+PROJECT_PATH = '/var/www/$SERVER_NAME'
+
+#application code
+mkdir /var/git && cd /var/git
+git clone https://$GITHUB_LOGIN:$GITHUB_PASSWORD@github.com/appiction/$REPO_NAME.git /var/git/$REPO_NAME
+
+#symlink to /var/www
+cd /var/www
+ln -s /var/git/$REPO_NAME/$SERVER_GIT_PATH $PROJECT_PATH
+
+cd ..
+chown -R www-data:www-data www/
+chown -R www-data:www-data git/
+
+
+
+#your new database
+echo "CREATE USER  $SERVER_NAME WITH PASSWORD '$SERVER_NAME' --createdb" | sudo -u postgres psql
+sudo -u postgres createdb -E utf8 -T template_postgis -O $SERVER_NAME $SERVER_NAME
+
+echo "GRANT ALL PRIVILEGES ON DATABASE $SERVER_NAME to $SERVER_NAME" | sudo -u postgres psql
+
+
+#set up for 'password' auth instead of ident (you know, so it actually works)
+#In the future we could do this better, but eeeh..
+cat > "/etc/postgresql/9.0/main/pg_hba.conf" << EOF
+
+
+# This file is read on server startup and when the postmaster receives
+# a SIGHUP signal.  If you edit the file on a running system, you have
+# to SIGHUP the postmaster for the changes to take effect.  You can
+# use "pg_ctl reload" to do that.
+
+# Put your actual configuration here
+# ----------------------------------
+#
+# If you want to allow non-local connections, you need to add more
+# "host" records.  In that case you will also need to make PostgreSQL
+# listen on a non-local interface via the listen_addresses
+# configuration parameter, or via the -i or -h command line switches.
+
+
+
+
+# DO NOT DISABLE!
+# If you change this first entry you will need to make sure that the
+# database
+# super user can access the database using some other method.
+# Noninteractive
+# access to all databases is required during automatic maintenance
+# (custom daily cronjobs, replication, and similar tasks).
+#
+# Database administrative login by UNIX sockets
+local   all         postgres                                    trust
+
+# TYPE  DATABASE        USER            CIDR-ADDRESS            METHOD
+
+# "local" is for Unix domain socket connections only
+local   all             all                                     trust
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            md5
+# IPv6 local connections:
+host    all             all             ::1/128                 password
+host    $SERVER_NAME        $SERVER_NAME        0.0.0.0/0       md5
+EOF
+
+/etc/init.d/postgresql restart
+
+cd $PROJECT_PATH
+./manage.py syncdb --noinput && echo "Syncing app db.."
+./manage.py migrate && echo "Migrating if i can.."
+
+#Hook it up
+mkdir -p "$PROJECT_PATH/apache"
+ln -s /usr/local/lib/python2.6/dist-packages/django/contrib/admin/media $PROJECT_PATH/admin-media 
+
+cat > "$PROJECT_PATH/apache/django.wsgi" << EOF
+import os, sys
+sys.path.insert(0, '/var/www/$SERVER_NAME')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+import django.core.handlers.wsgi
+application = django.core.handlers.wsgi.WSGIHandler()    
+EOF
+
+sudo chown -R www-data:www-data $PROJECT_PATH
+
+echo "Created wsgi file"
+rm -rf /etc/apache2/sites-available/default
+cat > "/etc/apache2/sites-available/$HOSTNAME" << EOF
+<VirtualHost *:80>
+    ServerName $HOSTNAME
+    DocumentRoot /var/www
+    LogLevel warn
+    WSGIDaemonProcess www-data processes=5 threads=15 maximum-requests=10000
+    WSGIProcessGroup www-data
+    WSGIScriptAlias / $PROJECT_PATH/apache/django.wsgi
+    Alias /static $PROJECT_PATH/static/
+</VirtualHost>
+EOF
+a2ensite "$HOSTNAME"
+/etc/init.d/apache2 reload
