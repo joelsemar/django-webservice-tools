@@ -8,6 +8,9 @@
 # <UDF name="repo_name" label="Repo name" default="LadiesNight"/>
 # <UDF name="django_ver" label="Current Django Version" default="1.2.5" />
 # <UDF name="migrations" label="Migrations?" oneOf="yes, no">
+# <UDF name="server_git_path" label="Where is the server?" example="This is the path to the server in the git repo
+#       eg: 'cbserver' in SportsClubFanatics/cbserver or 'BotannicalEdition/wdykbserver' on WhatDoYouKnow/BotannicalEdition/wdykbsever" 
+#      default="lnserver">
 
 source <ssinclude StackScriptID="1"> #StackScript Bash Library
 source <ssinclude StackScriptID="125"> #lib-postgres
@@ -71,7 +74,7 @@ git clone https://$GITHUB_LOGIN:$GITHUB_PASSWORD@github.com/appiction/$REPO_NAME
 
 #symlink to /var/www
 cd /var/www
-ln -s /var/git/$REPO_NAME/$SERVER_NAME $PROJECT_PATH
+ln -s /var/git/$REPO_NAME/$SERVER_GIT_PATH $PROJECT_PATH
 
 cd ..
 chown -R www-data:www-data www/
@@ -181,7 +184,6 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 import django.core.handlers.wsgi
 application = django.core.handlers.wsgi.WSGIHandler()    
 EOF
-
 
 sudo chown -R www-data:www-data $PROJECT_PATH
 
