@@ -7,7 +7,7 @@ echo ""
 read -e -p "Repo name:" REPO_NAME
 read -e -p "Server git path:" SERVER_GIT_PATH
 read -e -p "Hostname:" HOSTNAME
-PROJECT_PATH='/var/www/$SERVER_NAME'
+PROJECT_PATH="/var/www/$SERVER_NAME"
 
 #application code
 mkdir /var/git && cd /var/git
