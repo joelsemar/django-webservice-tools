@@ -37,7 +37,6 @@ def retry(tries=5, exceptions=None, delay=0.3, exception_raise=None):
                 try:
                     return fn(*args, **kwargs)
                 except exceptions_, e:
-                    print "Retry, exception:" + str(e)
                     time.sleep(delay)
             #if no success after tries raise last exception
             if exception_raise:
