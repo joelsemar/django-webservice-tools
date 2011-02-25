@@ -62,7 +62,7 @@ def strToBool(str):
     if not isinstance(str, basestring):
         raise TypeError
     
-    return str.lower() in ['1', 'true', 't', 'y']
+    return str.lower() in ['1', 'true', 't', 'y', 'yes']
         
     
 def fromXML(src):
