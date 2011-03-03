@@ -12,9 +12,7 @@ class ProvideResponse(object):
         if kwargs.get('dataFormat') or '/admin/' in request.path or '/static/' in request.path:
             return None
         
-        accept_header = request.META.get('HTTP_ACCEPT', 'json')
-        
-        if 'html' in accept_header or  accept_header == '*/*':
+        if 'html' in request.META.get('HTTP_ACCEPT', 'json'):
             return None
         
         if 'xml' in request.META.get('HTTP_ACCEPT', 'json'):
