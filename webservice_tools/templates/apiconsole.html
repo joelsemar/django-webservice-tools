@@ -64,6 +64,40 @@
                 });
             }
             
+			function sendCallTest(){
+                var url = Ext.get('baseURL').getValue() + Ext.get('url').getValue();
+                var paramObject = {};
+                var paramNames = Ext.select('.paramName');
+                var requestMethod = Ext.get('method').getValue();
+                for (var i = 0; i < paramNames.getCount(); i++) {
+                    var p = paramNames.elements[i];
+                    var id = p.id.split('_')[1];
+                    var v = Ext.get('paramVal_' + id);
+                    if (p.value) {
+                        paramObject[p.value] = v.getValue();
+                    }
+                }
+                
+                
+                var headers = {
+                    'Accept': Ext.get('dataFormat').getValue()
+                };
+                if (Ext.getDom('showdoc').checked) {
+                    headers['Show-Doc'] = true;
+                }
+                Ext.Ajax.request({
+                    method: requestMethod,
+                    url: url,
+                    params: paramObject,
+                    headers: headers,
+                    callback: function(o, s, responseObject){
+                        console.log(responseObject.status)
+                    }
+                });
+            }
+            
+			
+			
             Ext.onReady(function(){
                 paramTemplate.append('params', {
                     paramID: '1'
