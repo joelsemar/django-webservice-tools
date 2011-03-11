@@ -50,12 +50,9 @@ def retry(tries=5, exceptions=None, delay=0.3, exception_raise=None):
 import hotshot
 import os
 import time
-import settings
 
-try:
-    PROFILE_LOG_BASE = settings.PROFILE_LOG_BASE
-except:
-    PROFILE_LOG_BASE = "/tmp"
+
+PROFILE_LOG_BASE = "/tmp"
 
 
 def profile(log_file):

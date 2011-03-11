@@ -5,31 +5,39 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
 from webservice_tools.response_util import ResponseObject
-from webservice_tools.utils import GeoCode, strToBool, is_valid_email
+from webservice_tools.utils import GeoCode, strToBool, is_valid_email, ReverseGeoCode
 from django.http import HttpResponse
 
 def geo(request, response=None):
     if not response:
         response = ResponseObject()
     address = request.GET.get('address')
-    get_coords = strToBool(request.GET.get('get_coords', 'True'))
-    if hasattr(settings, 'GOOGLE_API_KEY'):
-        geo_code = GeoCode(address, apiKey=settings.GOOGLE_API_KEY)
-    else:
-        #just use the api key in the utils module
-        geo_code = GeoCode(address)
-    
-    if get_coords:
-        try:
-            response.set(result=geo_code.getCoords())
-        except:
-            return response.send(errors='Invalid Address')
-    else:
-        result = geo_code.getResponse()
-        if int(result['Status']['code']) == 200:
-            response.set(result=geo_code.getResponse())
+    lat = request.GET.get('lat')
+    lng = request.GET.get('lng')
+    if address:
+        get_coords = strToBool(request.GET.get('get_coords', 'True'))
+        if hasattr(settings, 'GOOGLE_API_KEY'):
+            geo_code = GeoCode(address, apiKey=settings.GOOGLE_API_KEY)
         else:
-            return response.send(errors="Invalid Address")
+            #just use the api key in the utils module
+            geo_code = GeoCode(address)
+        
+        if get_coords:
+            try:
+                response.set(result=geo_code.getCoords())
+            except:
+                return response.send(errors='Invalid Address')
+        else:
+            result = geo_code.getResponse()
+            if int(result['Status']['code']) == 200:
+                response.set(result=geo_code.getResponse())
+            else:
+                return response.send(errors="Invalid Address")
+    elif (lat and lng):
+        address = ReverseGeoCode(latlng='%s,%s' %(lat,lng)).getAddress()
+        response.set(address=address)
+    else:
+        return response.send(errors="Pleae provide a lat/lng pair or address")
     return response.send()
 
 handler404_view = lambda request: HttpResponse('{"errors": ["Not Found"], "data": {}, "success": false}', status=404)
