@@ -94,10 +94,12 @@ def resetPass(request, dataFormat='json'):
     return newResetPass(request, ResponseObject(dataFormat=dataFormat))
 
 
-def amialive(request, response):
+def amialive(request, response=None):
     """
     Health check url for ec2 instances
+    
     """
+    response = response or ResponseObject()
     response.set(datetime=datetime.datetime.utcnow())
     return response.send()
 
