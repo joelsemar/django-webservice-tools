@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns('webservice_tools.views', 
-    ('geo$','geo'))
+    ('geo$','geo'),
+    ('amialive', 'amialive'))

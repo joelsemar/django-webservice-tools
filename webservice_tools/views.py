@@ -1,4 +1,5 @@
 import random
+import datetime
 import passwordpieces
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -41,6 +42,7 @@ def geo(request, response=None):
     return response.send()
 
 handler404_view = lambda request: HttpResponse('{"errors": ["Not Found"], "data": {}, "success": false}', status=404)
+
 
 def newResetPass(request, response):
     """
@@ -91,6 +93,13 @@ def resetPass(request, dataFormat='json'):
     """
     return newResetPass(request, ResponseObject(dataFormat=dataFormat))
 
+
+def amialive(request, response):
+    """
+    Health check url for ec2 instances
+    """
+    response.set(datetime=datetime.datetime.utcnow())
+    return response.send()
 
 def changePass(request):
     
