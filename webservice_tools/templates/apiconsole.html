@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
+        <meta name="generator" content="HTML Tidy, see www.w3.org">
         <style type='text/css'>
             .spaced {
                 margin-top: 5px;
@@ -12,19 +13,23 @@
                 height: auto;
             }
         </style>
-        <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.1/adapter/ext/ext-base.js">
+        <script type="text/javascript" src= "http://extjs.cachefly.net/ext-3.1.1/adapter/ext/ext-base.js">
         </script>
-        <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.1/ext-all.js">
+        <script type="text/javascript" src= "http://extjs.cachefly.net/ext-3.1.1/ext-all.js">
+        </script>
+        <script type="text/javascript" src= "http://maps.google.com/maps/api/js?sensor=false">
         </script>
         <script type='text/javascript'>
-            var paramTemplate = new Ext.Template("Name: <input type='text' class='paramName spaced' id='paramName_{paramID}'></input>", " Value:<input type='text' class='paramVal spaced' size='75' id='paramVal_{paramID}'></input><br/>");
+            var paramTemplate = new Ext.Template("Name: <input type='text' class='paramName spaced' id='paramName_{paramID}'><\/input>", " Value:<input type='text' class='paramVal spaced' size='75' id='paramVal_{paramID}'><\/input><br/>");
             
             
-            function sendCall(){
+            function sendCall(update){
                 var url = Ext.get('baseURL').getValue() + Ext.get('url').getValue();
                 var paramObject = {};
                 var paramNames = Ext.select('.paramName');
                 var requestMethod = Ext.get('method').getValue();
+                var updateMap = Ext.getDom('mapresults').checked;
+                var mapCenter = Ext.get('mapCenter').getValue();
                 for (var i = 0; i < paramNames.getCount(); i++) {
                     var p = paramNames.elements[i];
                     var id = p.id.split('_')[1];
@@ -41,63 +46,52 @@
                 if (Ext.getDom('showdoc').checked) {
                     headers['Show-Doc'] = true;
                 }
+                
+                
                 Ext.Ajax.request({
                     method: requestMethod,
                     url: url,
                     params: paramObject,
                     headers: headers,
                     callback: function(o, s, responseObject){
-                        if (responseObject.getResponseHeader('content-type').indexOf('xml') != -1) {
-                            data = formatXML(responseObject.responseText)
+                        if (updateMap) {
+                            Ext.get('mapCanvas').setHeight('800px');
+                            var coords = mapCenter.split(',');
+                            
+                            var latlng = new google.maps.LatLng(coords[0], coords[1]);
+                            var myOptions = {
+                                zoom: 14,
+                                center: latlng,
+                                mapTypeId: google.maps.MapTypeId.ROADMAP
+                            };
+                            var map = new google.maps.Map(document.getElementById("mapCanvas"), myOptions);
+                            var pairs = getCoordsFromResults(Ext.util.JSON.decode(responseObject.responseText));
+                            return;
+                        }
+                        if (update) {
+                            if (responseObject.getResponseHeader('content-type').indexOf('xml') != -1) {
+                                data = formatXML(responseObject.responseText)
+                            }
+                            else {
+                                data = responseObject.responseText;
+                            }
+                            Ext.get('result').update(data);
+                            var paramDiv = Ext.get('recentParams');
+                            var urlDiv = Ext.get('recentURLs');
+                            if (paramObject !== '{}') {
+                                paramDiv.update(paramDiv.dom.innerHTML + '<br/>' + Ext.util.JSON.encode(paramObject).data);
+                            }
+                            urlDiv.update(urlDiv.dom.innerHTML + '<br/>' + url);
+                            
                         }
                         else {
-                            data = responseObject.responseText;
+                            console.log(responseObject.status)
                         }
-                        Ext.get('result').update(data);
-                        var paramDiv = Ext.get('recentParams');
-                        var urlDiv = Ext.get('recentURLs');
-                        if (paramObject !== '{}') {
-                            paramDiv.update(paramDiv.dom.innerHTML + '<br/>' + Ext.util.JSON.encode(paramObject));
-                        }
-                        urlDiv.update(urlDiv.dom.innerHTML + '<br/>' + url);
                     }
                 });
             }
             
-			function sendCallTest(){
-                var url = Ext.get('baseURL').getValue() + Ext.get('url').getValue();
-                var paramObject = {};
-                var paramNames = Ext.select('.paramName');
-                var requestMethod = Ext.get('method').getValue();
-                for (var i = 0; i < paramNames.getCount(); i++) {
-                    var p = paramNames.elements[i];
-                    var id = p.id.split('_')[1];
-                    var v = Ext.get('paramVal_' + id);
-                    if (p.value) {
-                        paramObject[p.value] = v.getValue();
-                    }
-                }
-                
-                
-                var headers = {
-                    'Accept': Ext.get('dataFormat').getValue()
-                };
-                if (Ext.getDom('showdoc').checked) {
-                    headers['Show-Doc'] = true;
-                }
-                Ext.Ajax.request({
-                    method: requestMethod,
-                    url: url,
-                    params: paramObject,
-                    headers: headers,
-                    callback: function(o, s, responseObject){
-                        console.log(responseObject.status)
-                    }
-                });
-            }
             
-			
-			
             Ext.onReady(function(){
                 paramTemplate.append('params', {
                     paramID: '1'
@@ -105,7 +99,7 @@
                 paramTemplate.append('params', {
                     paramID: '2'
                 });
-                var map = new Ext.KeyMap(document.body, {
+                var key_map = new Ext.KeyMap(document.body, {
                     key: 13, // Ext.EventObject.ENTER,
                     fn: sendCall
                 });
@@ -114,50 +108,103 @@
                 return string.replace(/>/g, "&gt;").replace(/</g, "&lt;");
                 
             }
+            
+            function toggleCenterInput(checkbox){
+                if (checkbox.checked) {
+                    Ext.get('centerInput').show()
+                }
+                else {
+                    Ext.get('centerInput').hide()
+                }
+                
+            }
+            
+            function process(obj, seq){
+				var lat, lng;
+                if (obj.hasOwnPropery('geolocation')) {
+                    var c = obj.geolcation.split(',');
+					lat = c[1];
+					lng = c[0];
+                }
+                else 
+				    lat = obj.lat || obj.latitude;
+					lng = obj.lng || obj.lng || obj.longitude;
+               if (lat & lng){
+			   	seq.push([lat,lng]);
+			   }                
+            }
+            
+            function traverse(o, func){
+                for (i in o) {
+                    func.apply(this, [o[i]]);
+                    if (typeof(o[i]) == "object") {
+                        //going on step down in the object tree!!
+                        traverse(o[i], func);
+                    }
+                }
+            }
+            
+            function getCoordsFromResults(results){
+                var coords = [];
+                coords = traverse(results, function(obj){
+                    process(obj, coords)
+                });
+                console.log(coords);
+                
+                
+                
+            }
         </script>
+        <title></title>
     </head>
+    <body>
+        BaseURL:<input type='text' id='baseURL' value= '{{baseURL}}'>
+        <br>
+        Api Call:<input type='text' id='url'>
+        <select id='method'>
+            <option value='GET'>GET</option>
+            <option value='POST'>POST</option>
+            <option value='PUT'>PUT</option>
+            <option value='DELETE'>DELETE</option>
+        </select>
+        <br>
+        Params 
+        <button type='button' onclick="paramTemplate.append('params', {paramID: Ext.select('.paramName').getCount()+1})">
+            add param
+        </button>
+        <br>
+        <div id='params'>
+        </div>
+        <br>
+        <h3 style='margin:4px;'>Headers</h3>
+        Accept: 
+        <select id='dataFormat'>
+            <option value='application/json'>application/json</option>
+            <option value='text/xml'>text/xml</option>
+        </select>
+        <br>
+        Show Doc: <input type='checkbox' name='showdoc' id= 'showdoc'>
+        <br>
+        Map Results: <input type='checkbox' name='mapresults' id= 'mapresults' onclick='toggleCenterInput(this)'>
+        <br>
+        <div id='centerInput' style='display:none'>
+            Map Center: <input type='text' id='mapCenter'>('30.407503,-97.715391' for Appiction)
+        </div>
+        <button type='button' onclick='sendCall(true)'>
+            Send
+        </button>
+        <div id='mapCanvas' style='width:80%;height:0px;'>
+        </div>
+        <pre id='result'>
+   
+</pre>
+        <h3>Recent Params</h3>
+        <a href='#' onclick="Ext.fly('recentParams').update('');">clear</a>
+        <div id='recentParams'>
+        </div>
+        <h3>Recent URLS</h3>
+        <a href='#' onclick="Ext.fly('recentURLs').update('')">clear</a>
+        <div id='recentURLs'>
+        </div>
+    </body>
 </html>
-<body>
-    BaseURL:<input type='text' id='baseURL' value='{{baseURL}}'>
-    </input>
-    <br/>
-    Api Call:<input type='text' id='url'> <select id='method'>
-        <option value='GET'>GET</option>
-        <option value='POST'>POST</option>
-        <option value='PUT'>PUT</option>
-        <option value='DELETE'>DELETE</option>
-    </select>
-    </input>
-    <br/>
-    Params 
-    <button type='button' onclick="paramTemplate.append('params', {paramID: Ext.select('.paramName').getCount()+1})">
-        add param
-    </button>
-    <br/>
-    <div id='params'>
-    </div>
-    <br/>
-    
-    <h3 style='margin:4px;'>Headers</h3>
-    Accept:
-    <select id='dataFormat'>
-        <option value='application/json'>application/json</option>
-        <option value='text/xml'>text/xml</option>
-    </select>
-    <br/>
-    Show Doc: <input type='checkbox' name='showdoc' id='showdoc'/>
-    <br/>
-    <button type='button' onclick='sendCall()'>
-        Send
-    </button>
-    <pre id='result'>
-	</pre>
-    <h3>Recent Params</h3>
-    <a href='#' onclick="Ext.fly('recentParams').update('');">clear</a>
-    <div id='recentParams'>
-    </div>
-    <h3>Recent URLS</h3>
-    <a href='#' onclick="Ext.fly('recentURLs').update('')">clear</a>
-    <div id='recentURLs'>
-    </div>
-</body>
