@@ -89,7 +89,7 @@ add-apt-repository ppa:pitti/postgresql
 add-apt-repository ppa:ubuntugis/ubuntugis-unstable
 apt-get update
 apt-get install -y postgresql-9.0 postgresql-server-dev-9.0 postgresql-contrib-9.0 proj libgeos-3.2.2 
-apt-get install -y libgeos-c1 libgeos-dev libgdal1-1.7.0 libgdal1-dev build-essential libxml2 libxml2-dev checkinstall
+apt-get install -y libgeos-c1 libgeos-dev  libgdal1-dev build-essential libxml2 libxml2-dev checkinstall
 apt-get -y  install python-psycopg2 python-pgsql
 
 
