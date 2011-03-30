@@ -12,7 +12,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': '{{servername}}',                      # Or path to database file if using sqlite3.
         'USER': '{{servername}}',                      # Not used with sqlite3.
         'PASSWORD': '{{servername}}',                  # Not used with sqlite3.
@@ -46,7 +46,7 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = os.path.join(sys.path[0], '/{{servername}}/static')
+MEDIA_ROOT = os.path.join(sys.path[0], 'static')
 MEDIA_URL = '/{{servername}}/static/'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
@@ -97,6 +97,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
+    'django.contrib.gis'
     'mainapp',
     'south',
     'webservice_tools',

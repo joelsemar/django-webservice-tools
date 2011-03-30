@@ -8,7 +8,9 @@ from django.contrib.auth.models import User
 from webservice_tools.logging import logging
 import utils
 from xml.dom import minidom
-JSON_INDENT = 4
+from django.conf import settings
+
+JSON_INDENT = 4 if settings.DEBUG else 0
 
 XMLSerializer = serializers.get_serializer("xml")
 JSONSerializer = serializers.get_serializer('json')
