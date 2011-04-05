@@ -52,6 +52,9 @@ def newResetPass(request, response):
     """
     username = request.POST.get('username')
     if not username:
+        username = request.POST.get('email')
+        
+    if not username:
         return response.send(errors='Username or email required', status=404)
     #email address of the first entry in the ADMINS tuple (you should set it to something meaningful)
     try:
