@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" >
+<interface name="Ripplr" path="http://staging.appiction.com/ripserver/" version="1">
+	<resource name="Location">
+	   <field name="geolocation" key="geolocation" type="point" access="rw" />
+	   <field name="size" key="size" type="xsd:integer" access="ro" />
+	   <field name="relevance" key="relevance" type="xsd:integer" access="ro" />
+	   <field name="profiles" key="profiles" type="[User]" access="ro" />
+	   <field name="id" key="id" type="xsd:integer" access="ro" />
+	   <field name="name" key="name" type="xsd:string" access="rw" />
+	   <!--Get an existing location-->
+	   <method id="read" method="GET" path="/location/{id}.json" >
+	   	<param name="id" key="id" type="xsd:integer" required="1" field="id" style="template"/>
+		<return path = "data.location" /></method><!--Create a new location-->
+	   <method id="create" method="POST" path="/location.json" ><param name="geolocation" key="geolocation" type="point" required="1"
+			 field="geolocation"/><param name="name" key="name" type="xsd:string" required="1"
+			 field="name"/><return path = "success" /></method></resource><resource name="Locations"><field name="locations" key="locations" type="[Location]" access="ro" /><!--Get existing locations by querying with geo_location/radius--><method id="read" method="GET" path="/locations.json" ><param name="target" key="target" type="point" required="1"
+			 /><param name="radius" key="radius" type="xsd:integer" required="0"
+			 /><return path = "data.locations" /></method></resource><resource name="OAuthOne"></resource><resource name="OauthTwo"></resource><resource name="SocialNetwork"></resource><resource name="User"><field name="id" key="id" type="xsd:integer" access="key" /><field name="imageURL" key="imageURL" type="xsd:anyURI" access="ro" /><field name="locationName" key="location_name" type="xsd:string" access="ro" /><field name="username" key="username" type="xsd:string" access="rw" /><field name="password" key="password" type="xsd:string" access="rw" /><field name="screenName" key="screen_name" type="xsd:string" access="rw" /><field name="birthdate" key="birthdate" type="xsd:date" access="rw" /><field name="gender" key="gender" type="xsd:string" access="rw" /><field name="status" key="status" type="xsd:string" access="rw" /><field name="locationID" key="location_id" type="xsd:integer" access="rw" /><!--Read a user from the database--><method id="read" method="GET" path="/user/{id}.json" ><param name="id" key="id" type="xsd:integer" required="1"
+			 field="id" style="template"/><return path = "data.user" /></method><!--Create a new user--><method id="create" method="POST" path="/user.json" ><param name="username" key="username" type="xsd:string" required="1"
+			 field="username"/><param name="password" key="password" type="xsd:string" required="1"
+			 field="password"/><param name="screenName" key="screen_name" type="xsd:string" required="1"
+			 field="screen_name"/><param name="birthdate" key="birthdate" type="xsd:date" required="1"
+			 field="birthdate"/><param name="gender" key="gender" type="xsd:string" required="1"
+			 field="gender"/><return path = "success" /></method><!--Update the users profile--><method id="update" method="PUT" path="/user/{id}.json" ><param name="id" key="id" type="xsd:integer" required="1"
+			 field="id" style="template"/><param name="password" key="password" type="xsd:string" required="0"
+			 field="password"/><param name="screenName" key="screen_name" type="xsd:string" required="0"
+			 field="screen_name"/><param name="birthdate" key="birthdate" type="xsd:string" required="0"
+			 field="birthdate"/><param name="gender" key="gender" type="xsd:string" required="0"
+			 field="gender"/><param name="profileImage" key="profile_image" type="image" required="0"/><param name="status" key="status" type="xsd:string" required="0"
+			 field="status"/><param name="locationID" key="location_id" type="xsd:integer" required="0"
+			 field="location_id"/><return path = "success" /></method></resource></interface></definitions>

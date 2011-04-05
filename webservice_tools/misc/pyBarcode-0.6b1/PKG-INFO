@@ -1,0 +1,25 @@
+Metadata-Version: 1.0
+Name: pyBarcode
+Version: 0.6b1
+Summary: Create standard barcodes with Python. No external modules needed (optional PIL support included).
+Home-page: http://bitbucket.org/whitie/pybarcode/
+Author: Thorsten Weimann
+Author-email: thorsten.weimann@gmx.net
+License: MIT
+Description: pyBarcode
+        =========
+        
+        This package provides a simple way to create standard barcodes.
+        It needs no external packages to be installed, the barcodes are
+        created as SVG objects. If PIL (Python Imaging Library) is
+        installed, the barcodes can also be rendered as images (all
+        formats supported by PIL).
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Multimedia :: Graphics
