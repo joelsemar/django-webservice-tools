@@ -6,7 +6,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
 from webservice_tools.response_util import ResponseObject
-from webservice_tools.utils import GeoCode, strToBool, is_valid_email, ReverseGeoCode
+from webservice_tools.utils import GeoCode, strToBool, is_valid_email, ReverseGeoCode, YahooLocations
 from django.http import HttpResponse
 
 def geo(request, response=None):
@@ -35,10 +35,10 @@ def geo(request, response=None):
             else:
                 return response.send(errors="Invalid Address")
     elif (lat and lng):
-        address = ReverseGeoCode(latlng='%s,%s' %(lat,lng)).getAddress()
+        address = ReverseGeoCode(latlng='%s,%s' % (lat, lng)).getAddress()
         response.set(address=address)
     else:
-        return response.send(errors="Pleae provide a lat/lng pair or address")
+        return response.send(errors="Please provide a lat/lng pair or address")
     return response.send()
 
 handler404_view = lambda request: HttpResponse('{"errors": ["Not Found"], "data": {}, "success": false}', status=404)
@@ -103,6 +103,7 @@ def amialive(request, response=None):
     response.set(datetime=datetime.datetime.utcnow())
     return response.send()
 
+
 def changePass(request):
     
     response = ResponseObject()
@@ -125,3 +126,22 @@ def generateNewPassword():
            passwordpieces.PASSWORD_SPECIAL_CHARACTERS[random.randint(0, len(passwordpieces.PASSWORD_SPECIAL_CHARACTERS) - 1)] + \
            passwordpieces.PASSWORD_WORDS[random.randint(0, len(passwordpieces.PASSWORD_WORDS) - 1)] + \
            passwordpieces.PASSWORD_SPECIAL_CHARACTERS[random.randint(0, len(passwordpieces.PASSWORD_SPECIAL_CHARACTERS) - 1)]
+
+
+def yahoo_places(request, response):
+    lat = request.GET.get('lat')
+    lng = request.GET.get('lng')
+    location = request.GET.get('location')
+    radius = request.GET.get('radius', 20)
+    if not ((lat and lng) or location):
+        return response.send(errors="Please provide either a lat/lng pair or location string")
+    
+    query = request.GET.get('query', '*')
+    if hasattr(settings, 'YAHOO_APPID'):
+        locations = YahooLocations(lat=lat, lng=lng, query=query, location=location, app_id=settings.YAHOO_APPID, radius=radius, sort='distance').fetch()
+    else:
+        #just use the api key in the utils module
+        locations = YahooLocations(lat=lat, lng=lng, query=query, location=location, radius=radius, sort='distance').fetch()
+    response.set(locations=locations['ResultSet'])
+    return response.send()    
+    

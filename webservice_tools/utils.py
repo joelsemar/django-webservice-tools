@@ -29,6 +29,9 @@ EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$"
 
 ZIP_CODE_REGEX = '^[\d]{5}$|^[\d]{5}\-[\d]{4}$'
 
+YAHOO_APPID = "0NYrSEfV34E53zulq2mSDNG2tj6cR5IUlpDpguxqUx6mBs_GDVjIf5OguewjmQ--"
+YAHOO_LOCATION_URL = "http://local.yahooapis.com/LocalSearchService/V3/localSearch?"
+
 def toDict(obj, r=4):
     """ 
     Returns a Dict representation of the given object, replacing object relations with ids
@@ -315,6 +318,26 @@ class ReverseGeoCode():
             raise GeoCodeError('Invalid coordinates')
         return ret
             
+
+class YahooLocations():
+    
+    def __init__(self, lat=None, lng=None, query='*', app_id=YAHOO_APPID, **kwargs):
+        self.app_id = app_id
+        self.query = query
+        self.arg_dict = kwargs
+        self.arg_dict['query'] = query
+        self.arg_dict['output'] = 'json'
+        self.arg_dict['appid'] = app_id
+        if lat:
+            self.arg_dict['latitude'] = lat
+        if lng:
+            self.arg_dict['longitude'] = lng
+        
+        
+    def fetch(self):
+        args = friendlyURLEncode(self.arg_dict)
+        return simplejson.loads(urllib2.urlopen(YAHOO_LOCATION_URL + args).read())
+
             
 def generateNewPassword():
     # generates a new password

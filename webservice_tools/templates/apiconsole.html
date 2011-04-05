@@ -132,13 +132,14 @@
                 }
                 var lat, lng;
                 if (obj.hasOwnProperty('geolocation')) {
-                    var c = obj.geolcation.split(',');
-                    lat = c[1];
-                    lng = c[0];
-                }
-                else 
-                    lat = obj.lat || obj.latitude;
-                lng = obj.lng || obj.lng || obj.longitude;
+					var c = obj.geolocation.split(',');
+					lat = c[1];
+					lng = c[0];
+				}
+				else {
+					lat = obj.lat || obj.latitude || obj.Latitude;
+					lng = obj.long || obj.lng || obj.longitude || obj.Longitude;
+				}
                 if (lat & lng) {
                     coords.push([lat, lng, '<pre class="infoWindowContent">' + JSON.stringify(obj, null, '  ') + '</pre>']);
                 }
@@ -174,7 +175,7 @@
                 return function(){
                     infowindow.setContent(content);
                     infowindow.open(map, marker);
-					map.panTo(marker.getPosition());
+                    map.panTo(marker.getPosition());
                 }
             }
         </script>
