@@ -136,15 +136,18 @@ def yahoo_places(request, response):
     lng = request.GET.get('lng')
     location = request.GET.get('location')
     radius = request.GET.get('radius', 20)
+    start = request.GET.get('start', 1)
     if not ((lat and lng) or location):
         return response.send(errors="Please provide either a lat/lng pair or location string")
     
     query = request.GET.get('query', '*')
+    query_args = {'lat': lat, 'lng': lng, 'query': query, 'location': location,
+                  'radius': radius, 'start': start, 'sort': 'distance'}
+    
     if hasattr(settings, 'YAHOO_APPID'):
-        locations = YahooLocations(lat=lat, lng=lng, query=query, location=location, app_id=settings.YAHOO_APPID, radius=radius, sort='distance').fetch()
-    else:
-        #just use the api key in the utils module
-        locations = YahooLocations(lat=lat, lng=lng, query=query, location=location, radius=radius, sort='distance').fetch()
+        query_args['app_id'] = settings.YAHOO_APPID
+
+    locations = YahooLocations(**query_args).fetch()
     response.set(locations=locations['ResultSet'])
     return response.send()    
     

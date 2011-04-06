@@ -4,8 +4,6 @@ from django import dispatch
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.http import HttpResponse
 from django.db import models
-from django.contrib.auth.models import User
-from webservice_tools.logging import logging
 import utils
 from xml.dom import minidom
 from django.conf import settings
@@ -138,9 +136,10 @@ class ResponseObject():
         
     def _sendXML(self, responseDict):
         responseDict = self._prepareData(responseDict)
-        content =  utils.toXML(responseDict, 'response')
+        content = utils.toXML(responseDict, 'response')
         content = utils.escape_xml(content)
-        content =  utils.prettyxml(minidom.parseString(content))
+        if settings.DEBUG:
+            content = utils.prettyxml(minidom.parseString(content))
         http_response = HttpResponse(content, mimetype='text/xml', status=self._status)
         
         if self.headers:

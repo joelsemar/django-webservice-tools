@@ -1,6 +1,4 @@
 from django.conf.urls.defaults import *
-from django.conf import settings
-from  django.views.generic.simple import direct_to_template
 from piston.resource import Resource
 from webservice_tools.apps.user.handlers import FacebookHandler, GenericUserHandler, LoginHandler, TwitterHandler 
 urlpatterns = patterns('',

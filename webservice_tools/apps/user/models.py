@@ -1,11 +1,13 @@
 from django.db import models
-from webservice_tools import utils, db_utils, encryption
+from webservice_tools import db_utils, encryption
 from django.conf import settings
 from django.contrib.auth.models import User
 
 class BaseProfile(models.Model):
     user = models.ForeignKey(User)
-    
+    if 'webservice_tools.apps.friends' in settings.INSTALLED_APPS:
+        friends = models.ManyToManyField('self')
+        
     def __unicode__(self):
         return self.user.username
     
@@ -17,6 +19,11 @@ class BaseProfile(models.Model):
     
     def update_callback(self):
         pass
+    
+    def dict(self):
+        return {'username': self.user.username}
+
+
 
 class SocialNetwork(models.Model):
     id = models.AutoField(primary_key=True)
@@ -29,6 +36,7 @@ class SocialNetwork(models.Model):
     api_key = models.CharField(max_length=1028, null=True, help_text='This field is encrypted')
     app_secret = models.CharField(max_length=1028, null=True, help_text='This field is encrypted')
     app_id = models.CharField(max_length=1028, null=True, help_text='This field is encrypted', blank=True)
+    
     
     def getRequestTokenURL(self):
         return 'https://%s/%s' % (self.base_url, self.request_token_path)
