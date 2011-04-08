@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import *
-from piston.resource import Resource
+from webservice_tools.utils import Resource
 from webservice_tools.apps.user.handlers import FacebookHandler, GenericUserHandler, LoginHandler, TwitterHandler 
 urlpatterns = patterns('',
     (r'^/?$', Resource(GenericUserHandler)),

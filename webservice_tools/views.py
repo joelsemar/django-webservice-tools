@@ -142,7 +142,7 @@ def yahoo_places(request, response):
     
     query = request.GET.get('query', '*')
     query_args = {'lat': lat, 'lng': lng, 'query': query, 'location': location,
-                  'radius': radius, 'start': start, 'sort': 'distance'}
+                  'radius': radius, 'start': start, 'sort': 'distance', 'results': 20}
     
     if hasattr(settings, 'YAHOO_APPID'):
         query_args['app_id'] = settings.YAHOO_APPID

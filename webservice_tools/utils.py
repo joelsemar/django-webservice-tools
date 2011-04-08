@@ -11,15 +11,16 @@ import socket
 import urllib
 import urllib2
 import simplejson
-from django.core import serializers
 import passwordpieces
 import base64
+from xml.dom import minidom
 from django.utils import encoding
 from xml.dom.ext import PrettyPrint
 from StringIO import StringIO
-import logging
-
+from piston.resource import Resource as PistonResource
+from piston.emitters import Emitter, XMLEmitter as PistonXMLEmitter
 from webservice_tools.decorators import retry
+from django.conf import settings
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
@@ -31,6 +32,33 @@ ZIP_CODE_REGEX = '^[\d]{5}$|^[\d]{5}\-[\d]{4}$'
 
 YAHOO_APPID = "0NYrSEfV34E53zulq2mSDNG2tj6cR5IUlpDpguxqUx6mBs_GDVjIf5OguewjmQ--"
 YAHOO_LOCATION_URL = "http://local.yahooapis.com/LocalSearchService/V3/localSearch?"
+
+class Resource(PistonResource):
+    def determine_emitter(self, request, *args, **kwargs):
+        """
+        Subclass piston's resource to enable format detection from header
+        """
+        em = kwargs.pop('emitter_format', None)
+        
+        accept_header = request.META.get('HTTP_ACCEPT')
+        if 'text/xml' in accept_header:
+            em = 'xml'
+        elif 'application/json' in accept_header:
+            em = 'json'
+        
+        if not em:
+            em = request.GET.get('format', 'json')
+
+        return em
+
+
+class XMLEmitter(PistonXMLEmitter):
+    def render(self, request):
+        result = super(XMLEmitter, self).render(request)
+        if settings.DEBUG:
+            result = prettyxml(minidom.parseString(result))
+        return result
+Emitter.register('xml', XMLEmitter, 'text/xml; charset=utf-8')
 
 def toDict(obj, r=4):
     """ 

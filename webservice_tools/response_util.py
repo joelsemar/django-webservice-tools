@@ -19,14 +19,13 @@ class ResponseObject():
     """
     A generic response object for generating and returning api responses
     """
-    def __init__(self, dataFormat='json', request=None):
+    def __init__(self, request=None):
         self._errors = []
         self._request = request
         self._messages = []
         self.success = True
         self._data = {}
         self._status = 200
-        self._dataFormat = dataFormat
         self.doc = None
         self.headers = {}
         
@@ -97,7 +96,6 @@ class ResponseObject():
     
     def send(self, messages=None, errors=None, status=None):
         
-        
         if errors:
             self.addErrors(errors)
         
@@ -108,7 +106,7 @@ class ResponseObject():
             self.addMessages(messages)
         
         responseDict = {}
-        responseDict['data'] = {}
+        responseDict['data'] = self._data
         responseDict['errors'] = self._errors
         responseDict['success'] = self.success
         if self._messages:
@@ -116,44 +114,4 @@ class ResponseObject():
         if self.doc:
             responseDict['doc'] = self.doc
         
-        
-        if self._dataFormat == 'json':
-            return self._sendJSON(responseDict)
-        
-        else:
-            return self._sendXML(responseDict)
-        
-        
-    def _sendJSON(self, responseDict):
-        responseDict = self._prepareData(responseDict)
-        content = simplejson.dumps(responseDict, cls=DateTimeAwareJSONEncoder,
-                                   ensure_ascii=True, indent=JSON_INDENT)
-        http_response = HttpResponse(content, mimetype='application/json', status=self._status)
-        if self.headers:
-            for k, v in self.headers.items():
-                http_response[k] = v 
-        return http_response
-        
-    def _sendXML(self, responseDict):
-        responseDict = self._prepareData(responseDict)
-        content = utils.toXML(responseDict, 'response')
-        content = utils.escape_xml(content)
-        if settings.DEBUG:
-            content = utils.prettyxml(minidom.parseString(content))
-        http_response = HttpResponse(content, mimetype='text/xml', status=self._status)
-        
-        if self.headers:
-            for k, v in self.headers:
-                http_response[k] = v 
-        return http_response
-        
-    
-    def _prepareData(self, responseDict):
-        for key, value in self._data.iteritems():
-            if isinstance(value, (list, tuple, models.query.QuerySet)):
-                responseDict['data'][key] = [utils.toDict(o) for o in value]
-            else:
-                responseDict['data'][key] = utils.toDict(value)
         return responseDict
-    
-    

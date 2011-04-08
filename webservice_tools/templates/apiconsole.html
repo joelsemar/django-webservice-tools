@@ -52,7 +52,7 @@
                     headers['Show-Doc'] = true;
                 }
                 
-                
+                Ext.get('result').update('')
                 Ext.Ajax.request({
                     method: requestMethod,
                     url: url,
@@ -74,6 +74,9 @@
                             map = new google.maps.Map(document.getElementById("mapCanvas"), myOptions);
                             mapResults(Ext.util.JSON.decode(responseObject.responseText));
                         }
+						else{
+							Ext.get('mapCanvas').setHeight('0px');
+						}
                         if (update) {
                             if (responseObject.getResponseHeader('content-type').indexOf('xml') != -1) {
                                 data = formatXML(responseObject.responseText)
@@ -107,7 +110,9 @@
                 });
                 var key_map = new Ext.KeyMap(document.body, {
                     key: 13, // Ext.EventObject.ENTER,
-                    fn: sendCall
+                    fn: function(){
+						sendCall(true)
+					}
                 });
             });
             function formatXML(string){
@@ -217,11 +222,9 @@
         <button type='button' onclick='sendCall(true)'>
             Send
         </button>
-        <div id='mapCanvas' style='width:100%;height:0px;margin:0 auto;'>
+        <div id='mapCanvas' style='width:90%;height:0px;margin:0 auto;'>
         </div>
-        <pre id='result'>
-   
-</pre>
+        <pre id='result'></pre>
         <h3>Recent Params</h3>
         <a href='#' onclick="Ext.fly('recentParams').update('');">clear</a>
         <div id='recentParams'>

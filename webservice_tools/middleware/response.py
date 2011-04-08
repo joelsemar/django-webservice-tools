@@ -20,7 +20,7 @@ class ProvideResponse(object):
         else:
             data_format = 'json'
         
-        kwargs['response'] = ResponseObject(dataFormat=data_format)
+        kwargs['response'] = ResponseObject()
         if request.META.get("HTTP_SHOW_DOC"):
             if hasattr(view, 'callmap'):
                 doc = getattr(view.handler, view.callmap[request.method]).func_doc

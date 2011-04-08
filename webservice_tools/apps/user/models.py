@@ -11,6 +11,7 @@ class BaseProfile(models.Model):
     def __unicode__(self):
         return self.user.username
     
+    
     class Meta:
         abstract = True
     
