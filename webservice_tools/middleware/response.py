@@ -17,7 +17,7 @@ class ProvideResponse(object):
         
         data_format = data_format or request.GET.get('format')
         
-        if ('html' in request.META.get('HTTP_ACCEPT')) or ('admin' in request.path) and not data_format:
+        if ('html' in request.META.get('HTTP_ACCEPT') or ('admin' in request.path)) and not data_format:
             return None
         
         kwargs['response'] = ResponseObject()
