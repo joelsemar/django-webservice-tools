@@ -10,8 +10,6 @@ class ProvideResponse(object):
         """
         
         data_format = None
-        if 'html' in request.META.get('HTTP_ACCEPT') or 'admin' in request.path:
-            return None
         if 'xml' in request.META.get('HTTP_ACCEPT'):
             data_format = 'xml'
         elif 'json' in request.META.get('HTTP_ACCEPT'):
@@ -19,9 +17,8 @@ class ProvideResponse(object):
         
         data_format = data_format or request.GET.get('format')
         
-        if not data_format:
+        if ('html' in request.META.get('HTTP_ACCEPT') or 'admin' in request.path) and not data_format:
             return None
-        
         
         kwargs['response'] = ResponseObject()
         if request.META.get("HTTP_SHOW_DOC"):
