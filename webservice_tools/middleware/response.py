@@ -10,14 +10,15 @@ class ProvideResponse(object):
         """
         
         data_format = None
-        if 'xml' in request.META.get('HTTP_ACCEPT'):
+        accept_header = request.META.get('HTTP_ACCEPT')
+        if 'text/xml' in accept_header and 'html' not in accept_header:
             data_format = 'xml'
-        elif 'json' in request.META.get('HTTP_ACCEPT'):
+        elif 'application/json' in accept_header:
             data_format = 'json'
         
         data_format = data_format or request.GET.get('format')
         
-        if ('html' in request.META.get('HTTP_ACCEPT') or ('admin' in request.path)) and not data_format:
+        if ('html' in accept_header or ('admin' in request.path)) and not data_format:
             return None
         
         kwargs['response'] = ResponseObject()
