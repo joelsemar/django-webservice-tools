@@ -9,16 +9,19 @@ class ProvideResponse(object):
         Optionally provides the docstring to the view in debug mode
         """
         
-        if kwargs.get('dataFormat') or '/admin/' in request.path or '/static/' in request.path:
+        data_format = None
+        if 'html' in request.META.get('HTTP_ACCEPT') or 'admin' in request.path:
             return None
-        
-        if 'html' in request.META.get('HTTP_ACCEPT', 'json'):
-            return None
-        
-        if 'xml' in request.META.get('HTTP_ACCEPT', 'json'):
+        if 'xml' in request.META.get('HTTP_ACCEPT'):
             data_format = 'xml'
-        else:
+        elif 'json' in request.META.get('HTTP_ACCEPT'):
             data_format = 'json'
+        
+        data_format = data_format or request.GET.get('format')
+        
+        if not data_format:
+            return None
+        
         
         kwargs['response'] = ResponseObject()
         if request.META.get("HTTP_SHOW_DOC"):

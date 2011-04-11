@@ -34,6 +34,7 @@ class SocialNetwork(models.Model):
     request_token_path = models.CharField(max_length=512, null=True)
     access_token_path = models.CharField(max_length=512, null=True)
     auth_path = models.CharField(max_length=512, null=True)
+    scope_string = models.CharField(max_length=512, default='publish_stream, offline_access', blank=True)
     api_key = models.CharField(max_length=1028, null=True, help_text='This field is encrypted')
     app_secret = models.CharField(max_length=1028, null=True, help_text='This field is encrypted')
     app_id = models.CharField(max_length=1028, null=True, help_text='This field is encrypted', blank=True)

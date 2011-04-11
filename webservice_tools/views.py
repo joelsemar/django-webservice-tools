@@ -8,40 +8,49 @@ from django.db.models import Q
 from webservice_tools.response_util import ResponseObject
 from webservice_tools.utils import GeoCode, strToBool, is_valid_email, ReverseGeoCode, YahooLocations
 from django.http import HttpResponse
+from piston.handler import BaseHandler
 
-def geo(request, response=None):
-    if not response:
-        response = ResponseObject()
-    address = request.GET.get('address')
-    lat = request.GET.get('lat')
-    lng = request.GET.get('lng')
-    if address:
-        get_coords = strToBool(request.GET.get('get_coords', 'True'))
-        if hasattr(settings, 'GOOGLE_API_KEY'):
-            geo_code = GeoCode(address, apiKey=settings.GOOGLE_API_KEY)
-        else:
-            #just use the api key in the utils module
-            geo_code = GeoCode(address)
-        
-        if get_coords:
-            try:
-                response.set(result=geo_code.getCoords())
-            except:
-                return response.send(errors='Invalid Address')
-        else:
-            result = geo_code.getResponse()
-            if int(result['Status']['code']) == 200:
-                response.set(result=geo_code.getResponse())
+class GeoHandler(BaseHandler):
+    allowed_methods=('GET',)
+    
+    def read(self, request, response=None):
+        if not response:
+            response = ResponseObject()
+        address = request.GET.get('address')
+        lat = request.GET.get('lat')
+        lng = request.GET.get('lng')
+        if address:
+            get_coords = strToBool(request.GET.get('get_coords', 'True'))
+            if hasattr(settings, 'GOOGLE_API_KEY'):
+                geo_code = GeoCode(address, apiKey=settings.GOOGLE_API_KEY)
             else:
-                return response.send(errors="Invalid Address")
-    elif (lat and lng):
-        address = ReverseGeoCode(latlng='%s,%s' % (lat, lng)).getAddress()
-        response.set(address=address)
-    else:
-        return response.send(errors="Please provide a lat/lng pair or address")
-    return response.send()
+                #just use the api key in the utils module
+                geo_code = GeoCode(address)
+            
+            if get_coords:
+                try:
+                    response.set(result=geo_code.getCoords())
+                except:
+                    return response.send(errors='Invalid Address')
+            else:
+                result = geo_code.getResponse()
+                if int(result['Status']['code']) == 200:
+                    response.set(result=geo_code.getResponse())
+                else:
+                    return response.send(errors="Invalid Address")
+        elif (lat and lng):
+            address = ReverseGeoCode(latlng='%s,%s' % (lat, lng)).getAddress()
+            response.set(address=address)
+        else:
+            return response.send(errors="Please provide a lat/lng pair or address")
+        return response.send()
 
 handler404_view = lambda request: HttpResponse('{"errors": ["Not Found"], "data": {}, "success": false}', status=404)
+
+class ResetPassHandler(BaseHandler):
+    allowed_methods=('POST',)
+    def create(self, request, response):
+        return newResetPass(request, response)
 
 
 def newResetPass(request, response):
@@ -102,9 +111,7 @@ def amialive(request, response=None):
     Health check url for ec2 instances
     
     """
-    response = response or ResponseObject()
-    response.set(datetime=datetime.datetime.utcnow())
-    return response.send()
+    return HttpResponse(str(datetime.datetime.utcnow()))
 
 
 def changePass(request):
@@ -131,6 +138,13 @@ def generateNewPassword():
            passwordpieces.PASSWORD_SPECIAL_CHARACTERS[random.randint(0, len(passwordpieces.PASSWORD_SPECIAL_CHARACTERS) - 1)]
 
 
+class PlacesHandler(BaseHandler):
+    allowed_methods=('GET',)
+    def read(self, request, response):
+        return yahoo_places(request, response)
+    
+
+
 def yahoo_places(request, response):
     lat = request.GET.get('lat')
     lng = request.GET.get('lng')
@@ -149,5 +163,4 @@ def yahoo_places(request, response):
 
     locations = YahooLocations(**query_args).fetch()
     response.set(locations=locations['ResultSet'])
-    return response.send()    
-    
+    return response.send()

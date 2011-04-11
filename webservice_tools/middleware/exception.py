@@ -1,5 +1,7 @@
+from simplejson import dumps
 from webservice_tools.logging import logging
 from webservice_tools.response_util import ResponseObject
+from django.http import HttpResponse
 import sys
 class WebServiceException():
     """
@@ -10,14 +12,13 @@ class WebServiceException():
     def process_exception(self, request, exception):
         
         response = ResponseObject()
-        exc_info = sys.exc_info()
-        exType, exValue, tb = exc_info
+        _, _, tb = sys.exc_info()
         # we just want the last frame, (the one the exception was thrown from)
         lastframe = self.get_traceback_frames(tb)[-1]
         location = "%s in %s, line: %s" %(lastframe['filename'], lastframe['function'], lastframe['lineno'])
         response.addErrors([exception.message, location])
         logging.critical(','.join([exception.message, location]))
-        return response.send()
+        return HttpResponse(dumps(response.send()))
     
     
     def get_traceback_frames(self, tb):

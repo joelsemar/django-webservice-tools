@@ -7,7 +7,7 @@ class LoggingMiddleware(object):
         if '/static/' in request.path:
             return response
         
-        if 'html' in response['Content-Type'] or 'javascript' in response['Content-Type']:
+        if 'html' in response.get('Content-Type', '') or 'javascript' in response.get('Content-Type', ''):
             return response
         
         log = "-------------------------------------\n%(timestamp)s\n%(request)s\nHANDLER: %(method)s %(url)s\nRESPONSE\n%(response)s\n-------------------------------------\n" 

@@ -340,9 +340,7 @@ class TwitterHandler(BaseHandler):
                                               profile=request.user.get_profile(),
                                               network=network)
         
-        return_url = request.session.get('from_url')
-        del request.session['from_url']
-        return HttpResponseRedirect(return_url)
+        return response.send()
         
 
 class FacebookHandler(BaseHandler):
@@ -366,7 +364,7 @@ class FacebookHandler(BaseHandler):
         
         args = urllib.urlencode({'client_id' : network.getAppId(),
                                  'redirect_uri': network.getCallBackURL(request),
-                                 'scope': 'publish_stream, offline_access'})
+                                 'scope': network.scope_string})
     
         return HttpResponseRedirect(network.getAuthURL() + '?' + args)
 
@@ -413,6 +411,4 @@ class FacebookHandler(BaseHandler):
                                               network=network,
                                               uuid=uuid)
         
-        return_url = request.session.get('from_url', '/')
-        del request.session['from_url']
-        return HttpResponseRedirect(return_url)
+        return response.send()
