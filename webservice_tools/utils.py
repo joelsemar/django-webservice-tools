@@ -347,7 +347,7 @@ class ReverseGeoCode():
         return ret
             
 
-class YahooLocations():
+class PlacesSearch():
     
     def __init__(self, lat=None, lng=None, query='*', app_id=YAHOO_APPID, **kwargs):
         self.app_id = app_id

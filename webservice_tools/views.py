@@ -6,7 +6,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
 from webservice_tools.response_util import ResponseObject
-from webservice_tools.utils import GeoCode, strToBool, is_valid_email, ReverseGeoCode, YahooLocations
+from webservice_tools.utils import GeoCode, strToBool, is_valid_email, ReverseGeoCode, PlacesSearch
 from django.http import HttpResponse
 from piston.handler import BaseHandler
 
@@ -141,11 +141,11 @@ def generateNewPassword():
 class PlacesHandler(BaseHandler):
     allowed_methods=('GET',)
     def read(self, request, response):
-        return yahoo_places(request, response)
+        return places_search(request, response)
     
 
 
-def yahoo_places(request, response):
+def places_search(request, response):
     lat = request.GET.get('lat')
     lng = request.GET.get('lng')
     location = request.GET.get('location')
@@ -161,6 +161,6 @@ def yahoo_places(request, response):
     if hasattr(settings, 'YAHOO_APPID'):
         query_args['app_id'] = settings.YAHOO_APPID
 
-    locations = YahooLocations(**query_args).fetch()
+    locations = PlacesSearch(**query_args).fetch()
     response.set(locations=locations['ResultSet'])
     return response.send()
