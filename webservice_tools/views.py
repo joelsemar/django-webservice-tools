@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from piston.handler import BaseHandler
 
 class GeoHandler(BaseHandler):
-    allowed_methods=('GET',)
+    allowed_methods = ('GET',)
     
     def read(self, request, response=None):
         if not response:
@@ -48,7 +48,7 @@ class GeoHandler(BaseHandler):
 handler404_view = lambda request: HttpResponse('{"errors": ["Not Found"], "data": {}, "success": false}', status=404)
 
 class ResetPassHandler(BaseHandler):
-    allowed_methods=('POST',)
+    allowed_methods = ('POST',)
     def create(self, request, response):
         return newResetPass(request, response)
 
@@ -139,11 +139,10 @@ def generateNewPassword():
 
 
 class PlacesHandler(BaseHandler):
-    allowed_methods=('GET',)
+    allowed_methods = ('GET',)
     def read(self, request, response):
         return places_search(request, response)
     
-
 
 def places_search(request, response):
     lat = request.GET.get('lat')
@@ -152,7 +151,8 @@ def places_search(request, response):
     radius = request.GET.get('radius', 20)
     start = request.GET.get('start', 1)
     if not ((lat and lng) or location):
-        return response.send(errors="Please provide either a lat/lng pair or location string")
+        response.addErrors("Please provide either a lat/lng pair or location string")
+        return None, response
     
     query = request.GET.get('query', '*')
     query_args = {'lat': lat, 'lng': lng, 'query': query, 'location': location,
@@ -162,5 +162,11 @@ def places_search(request, response):
         query_args['app_id'] = settings.YAHOO_APPID
 
     locations = PlacesSearch(**query_args).fetch()
-    response.set(locations=locations['ResultSet'])
+    return locations['ResultSet']
+
+
+def places_search_view(request, response):
+    locations, response = places_search(request, response)
+    if locations:
+        response.set(locations=locations)
     return response.send()
