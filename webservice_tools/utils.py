@@ -15,6 +15,7 @@ import passwordpieces
 import base64
 from xml.dom import minidom
 from django.utils import encoding
+from PIL import Image
 from xml.dom.ext import PrettyPrint
 from StringIO import StringIO
 from piston.resource import Resource as PistonResource
@@ -33,6 +34,7 @@ ZIP_CODE_REGEX = '^[\d]{5}$|^[\d]{5}\-[\d]{4}$'
 YAHOO_APPID = "0NYrSEfV34E53zulq2mSDNG2tj6cR5IUlpDpguxqUx6mBs_GDVjIf5OguewjmQ--"
 YAHOO_LOCATION_URL = "http://local.yahooapis.com/LocalSearchService/V3/localSearch?"
 
+GOOGLE_QR_CODE_URL = "https://chart.googleapis.com/chart?cht=qr&chs=150x150&(data)s&chld=L|4"
 class Resource(PistonResource):
     def determine_emitter(self, request, *args, **kwargs):
         """
@@ -573,3 +575,12 @@ all_cap_re = re.compile('([a-z0-9])([A-Z])')
 def camel_to_under(name):
     s1 = first_cap_re.sub(r'\1_\2', name)
     return all_cap_re.sub(r'\1_\2', s1).lower()
+
+
+def generate_qr_code(data):
+    
+    fetch_url = GOOGLE_QR_CODE_URL
+    post_data = friendlyURLEncode({'chl': data})
+    request = urllib2.Request(fetch_url)
+    raw = urllib2.urlopen(request, post_data).read()
+    return StringIO(raw)

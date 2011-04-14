@@ -162,7 +162,11 @@ def places_search(request, response):
         query_args['app_id'] = settings.YAHOO_APPID
 
     locations = PlacesSearch(**query_args).fetch()
-    return locations['ResultSet'], response
+    ret = locations['ResultSet']
+    if isinstance(ret, dict):
+        ret = [ret,]
+        
+    return ret, response
 
 
 def places_search_view(request, response):
