@@ -31,7 +31,7 @@ apache_install
 apache_tune
 system_sshd_permitrootlogin 'No'
 system_add_user $USER_NAME $USER_PASSWORD sudo
-apt-get -y install python-setuptools python2.6-dev python-simplejson libapache2-mod-wsgi python-pip python-crypto
+apt-get -y install python-setuptools python2.6-dev python-simplejson libapache2-mod-wsgi python-pip python-crypto ipython
 pip install south
 apt-get -y install gcc
 
@@ -45,7 +45,6 @@ tar -xvf Imaging-1.1.7.tar.gz
 #tar -xvf geos-3.2.2.tar.bz2
 tar -xvf PyXML.tgz
 
-
 cd Imaging-1.1.7
 apt-get -y  install libjpeg62 libjpeg62-dev
 python setup.py install 
@@ -53,11 +52,11 @@ python setup.py install
 cd ../PyXML-0.8.4
 python setup.py install
 
-
 #cd ../geos-3.2.2  && ./configure && make && make install
 
-cd ../../piston
-tar -xvf piston.tgz
+#install piston
+cd /opt
+git clone https://github.com/mozilla/django-piston
 cd django-piston
 python setup.py install
 
@@ -202,129 +201,4 @@ cat > "/etc/apache2/sites-available/$HOSTNAME" << EOF
 </VirtualHost>
 EOF
 a2ensite "$HOSTNAME"
-/etc/init.d/apache2 reload
-
-chown -R www-data:www-data git/
-
-
-#the database!
-#run this before doing anything else, (set default to utf-8)
-apt-get -y install python-software-properties
-add-apt-repository ppa:pitti/postgresql
-add-apt-repository ppa:ubuntugis/ubuntugis-unstable
-apt-get update
-apt-get install -y postgresql-9.0 postgresql-server-dev-9.0 postgresql-contrib-9.0 proj libgeos-3.2.2 
-apt-get install -y libgeos-c1 libgeos-dev libgdal1-1.7.0 libgdal1-dev build-essential libxml2 libxml2-dev checkinstall
-apt-get -y  install python-psycopg2 python-pgsql
-
-
-cd /opt
-
-wget http://postgis.refractions.net/download/postgis-1.5.2.tar.gz
-tar zxvf postgis-1.5.2.tar.gz && cd postgis-1.5.2/
-./configure &&  make && sudo checkinstall --pkgname postgis-1.5.2 --pkgversion 1.5.2-src --default
-
-sudo -u postgres pg_dropcluster --stop 9.0 main
-sudo -u postgres pg_createcluster --start -e UTF-8 9.0 main
-
-#need the template_postgis
-POSTGIS_SQL_PATH=`pg_config --sharedir`/contrib/postgis-1.5
-sudo -u postgres createdb -E utf8 -O postgres -U postgres template_postgis
-sudo -u postgres createlang -d template_postgis plpgsql # Adding PLPGSQL language support.
-sudo -u postgres psql -d postgres -c "UPDATE pg_database SET datistemplate='true' WHERE datname='template_postgis';"
-sudo -u postgres psql -d template_postgis -f $POSTGIS_SQL_PATH/hstore.sql
-sudo -u postgres psql -d template_postgis -f $POSTGIS_SQL_PATH/postgis.sql
-sudo -u postgres psql -d template_postgis -f $POSTGIS_SQL_PATH/spatial_ref_sys.sql
-
-# Enabling users to alter spatial tables.
-sudo -u postgres psql -d template_postgis -c "GRANT ALL ON geometry_columns TO PUBLIC;"
-sudo -u postgres psql -d template_postgis -c "GRANT ALL ON geography_columns TO PUBLIC;"
-sudo -u postgres psql -d template_postgis -c "GRANT ALL ON spatial_ref_sys TO PUBLIC;"
-
-
-#your new database
-echo "CREATE USER  $SERVER_NAME WITH PASSWORD '$SERVER_NAME' --createdb" | sudo -u postgres psql
-sudo -u postgres createdb -E utf8 -T template_postgis -O $SERVER_NAME $SERVER_NAME
-
-echo "GRANT ALL PRIVILEGES ON DATABASE $SERVER_NAME to $SERVER_NAME" | sudo -u postgres psql
-
-
-
-#set up for 'password' auth instead of ident (you know, so it actually works)
-#In the future we could do this better, but eeeh..
-cat > "/etc/postgresql/9.0/main/pg_hba.conf" << EOF
-
-
-# This file is read on server startup and when the postmaster receives
-# a SIGHUP signal.  If you edit the file on a running system, you have
-# to SIGHUP the postmaster for the changes to take effect.  You can
-# use "pg_ctl reload" to do that.
-
-# Put your actual configuration here
-# ----------------------------------
-#
-# If you want to allow non-local connections, you need to add more
-# "host" records.  In that case you will also need to make PostgreSQL
-# listen on a non-local interface via the listen_addresses
-# configuration parameter, or via the -i or -h command line switches.
-
-
-
-
-# DO NOT DISABLE!
-# If you change this first entry you will need to make sure that the
-# database
-# super user can access the database using some other method.
-# Noninteractive
-# access to all databases is required during automatic maintenance
-# (custom daily cronjobs, replication, and similar tasks).
-#
-# Database administrative login by UNIX sockets
-local   all         postgres                                    trust
-
-# TYPE  DATABASE        USER            CIDR-ADDRESS            METHOD
-
-# "local" is for Unix domain socket connections only
-local   all             all                                     trust
-# IPv4 local connections:
-host    all             all             127.0.0.1/32            md5
-# IPv6 local connections:
-host    all             all             ::1/128                 password
-host    $SERVER_NAME        $SERVER_NAME        0.0.0.0/0       md5
-EOF
-
-/etc/init.d/postgresql restart
-
-cd $PROJECT_PATH
-./manage.py syncdb --noinput && echo "Syncing app db.."
-./manage.py migrate && echo "Migrating if i can.."
-
-#Hook it up
-mkdir -p "$PROJECT_PATH/apache"
-ln -s /usr/local/lib/python2.6/dist-packages/django/contrib/admin/media $PROJECT_PATH/admin-media 
-
-cat > "$PROJECT_PATH/apache/django.wsgi" << EOF
-import os, sys
-sys.path.insert(0, '/var/www/$SERVER_NAME')
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-import django.core.handlers.wsgi
-application = django.core.handlers.wsgi.WSGIHandler()    
-EOF
-
-sudo chown -R www-data:www-data $PROJECT_PATH
-
-echo "Created wsgi file"
-rm -rf /etc/apache2/sites-available/default
-cat > "/etc/apache2/sites-available/$HOSTNAME" << EOF
-<VirtualHost *:80>
-    ServerName $HOSTNAME
-    DocumentRoot $PROJECT_PATH
-    LogLevel warn
-    WSGIDaemonProcess www-data processes=1 threads=15 maximum-requests=10000
-    WSGIProcessGroup www-data
-    WSGIScriptAlias / $PROJECT_PATH/apache/django.wsgi
-    Alias /static $PROJECT_PATH/static/
-</VirtualHost>
-EOF
-a2ensite "$HOSTNAME"
-/etc/init.d/apache2 reload
+/etc/init.d/apache2 restart
