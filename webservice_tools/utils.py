@@ -19,6 +19,7 @@ from PIL import Image
 from xml.dom.ext import PrettyPrint
 from StringIO import StringIO
 from piston.resource import Resource as PistonResource
+from piston.handler import BaseHandler as PistonBaseHandler, HandlerMetaClass as PistonHandlerMetaClass
 from piston.emitters import Emitter, XMLEmitter as PistonXMLEmitter
 from webservice_tools.decorators import retry
 from django.conf import settings
@@ -54,12 +55,30 @@ class Resource(PistonResource):
         return em
 
 
+class HandlerMetaClass(PistonHandlerMetaClass):
+    def __new__(cls, name, bases, attrs):
+        
+        new_cls = PistonHandlerMetaClass.__new__(cls, name, bases, attrs)
+        if hasattr(new_cls, 'model'):
+            model = getattr(new_cls, 'model')
+            if not new_cls.fields:
+                new_cls.fields = tuple(model._meta.get_all_field_names())
+        
+            new_cls.fields += getattr(new_cls, 'extra_fields', ())
+        new_cls.exclude = ()
+        return new_cls
+
+class BaseHandler(PistonBaseHandler):
+    __metaclass__ = HandlerMetaClass
+
+
 class XMLEmitter(PistonXMLEmitter):
     def render(self, request):
         result = super(XMLEmitter, self).render(request)
         if settings.DEBUG:
             result = prettyxml(minidom.parseString(result))
         return result
+
 Emitter.register('xml', XMLEmitter, 'text/xml; charset=utf-8')
 
 def toDict(obj, r=4):

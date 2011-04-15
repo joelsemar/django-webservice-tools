@@ -12,6 +12,16 @@
 #       eg: 'cbserver' in SportsClubFanatics/cbserver or 'BotannicalEdition/wdykbserver' on WhatDoYouKnow/BotannicalEdition/wdykbsever" 
 #      default="lnserver">
 
+read -e -p "User Name:" USER_NAME
+read -e -s "User password:" USER_PASSWORD
+read -e -p "Server Name:" SERVER_NAME
+read -e -p "Github Login:"  GITHUB_LOGIN
+read -s -p "Github Password:" GITHUB_PASSWORD
+echo ""
+read -e -p "Repo name:" REPO_NAME
+read -e -p "Server git path:" SERVER_GIT_PATH
+read -e -p "Hostname:" HOSTNAME
+
 
 source ssinclude-1 #StackScript Bash Library
 source ssinclude-125 #lib-postgres
@@ -19,7 +29,6 @@ source ssinclude-124 #lib-system
 source ssinclude-123 #lib-system-ubuntu
 source ssinclude-127 #lib-django
 
-exec &> /root/stackscript.log
 
 PROJECT_PATH="/var/www/$SERVER_NAME"
 
@@ -32,7 +41,7 @@ apache_install
 apache_tune
 system_sshd_permitrootlogin 'No'
 system_add_user $USER_NAME $USER_PASSWORD sudo
-apt-get -y install python-setuptools python2.6-dev python-simplejson libapache2-mod-wsgi python-pip python-crypto
+apt-get -y install python-setuptools python2.6-dev python-simplejson libapache2-mod-wsgi python-pip python-crypto ipython
 pip install south
 apt-get -y install gcc
 
@@ -46,7 +55,6 @@ tar -xvf Imaging-1.1.7.tar.gz
 #tar -xvf geos-3.2.2.tar.bz2
 tar -xvf PyXML.tgz
 
-
 cd Imaging-1.1.7
 apt-get -y  install libjpeg62 libjpeg62-dev
 python setup.py install 
@@ -54,11 +62,11 @@ python setup.py install
 cd ../PyXML-0.8.4
 python setup.py install
 
-
 #cd ../geos-3.2.2  && ./configure && make && make install
 
-cd ../../piston
-tar -xvf piston.tgz
+#install piston
+cd /opt
+git clone https://github.com/mozilla/django-piston
 cd django-piston
 python setup.py install
 
@@ -90,7 +98,7 @@ add-apt-repository ppa:pitti/postgresql
 add-apt-repository ppa:ubuntugis/ubuntugis-unstable
 apt-get update
 apt-get install -y postgresql-9.0 postgresql-server-dev-9.0 postgresql-contrib-9.0 proj libgeos-3.2.2 
-apt-get install -y libgeos-c1 libgeos-dev libgdal1-1.7.0 libgdal1-dev build-essential libxml2 libxml2-dev checkinstall
+apt-get install -y libgeos-c1 libgeos-dev  libgdal1-dev build-essential libxml2 libxml2-dev checkinstall
 apt-get -y  install python-psycopg2 python-pgsql
 
 
@@ -203,4 +211,4 @@ cat > "/etc/apache2/sites-available/$HOSTNAME" << EOF
 </VirtualHost>
 EOF
 a2ensite "$HOSTNAME"
-/etc/init.d/apache2 reload
+/etc/init.d/apache2 restart
