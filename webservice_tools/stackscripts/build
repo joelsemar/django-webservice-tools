@@ -15,10 +15,12 @@
 read -e -p "User Name:" USER_NAME
 read -e -s "User password:" USER_PASSWORD
 read -e -p "Server Name:" SERVER_NAME
+read -e -p "Host name:" HOST_NAME
 read -e -p "Github Login:"  GITHUB_LOGIN
 read -s -p "Github Password:" GITHUB_PASSWORD
 echo ""
 read -e -p "Repo name:" REPO_NAME
+read -e -p "Django version:" DJANGO_VER
 read -e -p "Server git path:" SERVER_GIT_PATH
 read -e -p "Hostname:" HOSTNAME
 
