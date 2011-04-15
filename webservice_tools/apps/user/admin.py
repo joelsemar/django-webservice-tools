@@ -10,4 +10,3 @@ for model_name in dir(models):
         except admin.sites.AlreadyRegistered:
             pass
 
-admin.site.unregister(models.BaseProfile)
