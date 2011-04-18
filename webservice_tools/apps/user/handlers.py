@@ -253,7 +253,7 @@ class SocialPostHandler(BaseHandler):
 
 class TwitterHandler(BaseHandler):
     model = SocialNetwork
-    
+    allowed_methods  = ('GET', 'POST')
     @login_required
     def create(self, request, network, response=None):
         """
