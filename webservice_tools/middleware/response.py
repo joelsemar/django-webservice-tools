@@ -10,7 +10,7 @@ class ProvideResponse(object):
         """
         
         data_format = None
-        accept_header = request.META.get('HTTP_ACCEPT')
+        accept_header = request.META.get('HTTP_ACCEPT', '')
         if 'text/xml' in accept_header and 'html' not in accept_header:
             data_format = 'xml'
         elif 'application/json' in accept_header:
