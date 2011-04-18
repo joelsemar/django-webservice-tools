@@ -15,6 +15,7 @@ class FriendsHandler(BaseHandler):
     def read(self, request, response):
         """
         Return a list of the users friends
+        API Handler: GET /friends
         """
         profile = request.user.get_profile()
         friends = profile.friends.all()
@@ -25,6 +26,7 @@ class FriendsHandler(BaseHandler):
     def delete(self, request, id, response):
         """
         Remove a friend from your list of friends
+        API Handler DELETE /friends/{id}
         """
         profile = request.user.get_profile()
         
@@ -44,6 +46,7 @@ class FriendRequestHandler(BaseHandler):
     def create(self, request, id, response):
         """
         Create a new friend request
+        API Handler: POST /request/user/{id}
         Params:
           @id [id]: id of the friend being requested
           @message [string] (optional): message to send to the friend
@@ -112,6 +115,7 @@ class FriendRequestHandler(BaseHandler):
     def delete(self, request, id, response):
         """
         Delete a friend request, (can only be done by requestor, requestee must update with accept=false)
+        API Handler
         Params:
            @id [id] friend request id
         """
