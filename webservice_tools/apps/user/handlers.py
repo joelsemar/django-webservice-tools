@@ -258,7 +258,7 @@ class TwitterHandler(BaseHandler):
     def create(self, request, network, response=None):
         """
         Attempts to authorize the user with a service using Oauth v1 (Twitter, LinkedIn) 
-        API Handler: /twitter
+        API Handler: POST /twitter
         """
         if not response:
             response = ResponseObject()
@@ -300,8 +300,8 @@ class TwitterHandler(BaseHandler):
         We'll try and use the oauth_token and verifier they give use to get an access_token
         API Handler: GET /twitter
         GET PARAMS:
-          oauth_token
-          oauth_verifier 
+          @oauth_token
+          @oauth_verifier 
         """
         if not response:
             response = ResponseObject()
