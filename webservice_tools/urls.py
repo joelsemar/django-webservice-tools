@@ -5,4 +5,5 @@ urlpatterns = patterns('webservice_tools.views',
     ('geo$', Resource(GeoHandler)),
     ('resetpass/?$', Resource(ResetPassHandler)),
     ('locations/?$', Resource(PlacesHandler)),
-    ('amialive/?$', 'amialive'))
+    ('amialive/?$', 'amialive'),
+    ('docs/?$', Resource(DocHandler)))

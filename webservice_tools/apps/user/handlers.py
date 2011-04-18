@@ -31,6 +31,7 @@ class FormHandler(BaseHandler):
         
 
 class GenericUserHandler(FormHandler):
+    abstract = True
     allowed_methods = ('POST', 'GET', 'PUT')
     
     def __init__(self):
@@ -102,6 +103,10 @@ class GenericUserHandler(FormHandler):
 
     @transaction.commit_on_success
     def update(self, request, response):
+        """
+        Update the logged in user
+        API handler: PUT /user
+        """
         profile = request.user.get_profile()
         profile_form = self.profile_form(request.PUT, instance=profile)
         user_form = self.user_form(request.PUT, instance=request.user)
@@ -136,8 +141,8 @@ class LoginHandler(BaseHandler):
         Allows the user to login
         API Handler: POST '/login
         POST Params
-          username
-          password
+          @username [string] The users's unique identifier, (may be an email address in some cases)
+          @password [password] The user's password
         
         """
         #all calls to this handler via '/logout should..

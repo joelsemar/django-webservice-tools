@@ -11,6 +11,7 @@ class BadgeHandler(BaseHandler):
     def read(self, request, response):
         """
         Return a list of all badges and whether or not this user has won them
+        API Handler: GET /badges
         """
         all_badges = BadgeModel.objects.all()
         profile = request.user.get_profile()

@@ -6,14 +6,24 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
 from webservice_tools.response_util import ResponseObject
-from webservice_tools.utils import GeoCode, strToBool, is_valid_email, ReverseGeoCode, PlacesSearch
+from webservice_tools.utils import GeoCode, strToBool, is_valid_email, ReverseGeoCode, PlacesSearch, BaseHandler
 from django.http import HttpResponse
-from piston.handler import BaseHandler
+from django.views.generic.simple import direct_to_template
+from webservice_tools.doc_generator.server_declaration import ServerDeclaration
 
 class GeoHandler(BaseHandler):
     allowed_methods = ('GET',)
     
     def read(self, request, response=None):
+        """
+        Geocode  an address or reverse geocode a lat/lng pair
+        API Handler: GET /services/geo
+        GET Params:
+            @address [string] the address you'd like to geocode
+            
+            @lat [latitude] the latitude you'd like to reverse geocode, required if address is not supplied
+            @lng [longitude] the longitude you'd like to reverse geocode, , required if address is not supplied
+        """
         if not response:
             response = ResponseObject()
         address = request.GET.get('address')
@@ -139,6 +149,7 @@ def generateNewPassword():
 
 
 class PlacesHandler(BaseHandler):
+    abstract=True
     allowed_methods = ('GET',)
     def read(self, request, response):
         return places_search(request, response)
@@ -174,3 +185,13 @@ def places_search_view(request, response):
     if locations:
         response.set(locations=locations)
     return response.send()
+
+class DocHandler(BaseHandler):
+    allowed_methods = ('GET',)
+    
+    def read(self, request, response=None):
+        """
+        Return generated documentation in html format
+        API Handler: GET /services/doc"""
+        server_declaration = ServerDeclaration()
+        return direct_to_template(request, 'project.html', extra_context={'handlers': server_declaration.handler_list})

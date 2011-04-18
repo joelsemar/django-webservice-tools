@@ -40,15 +40,13 @@ class FriendsHandler(BaseHandler):
 
 class FriendRequestHandler(BaseHandler):
     allowed_methods = ('POST', 'GET', 'PUT', 'DELETE')
-    
-    
     @login_required
     def create(self, request, id, response):
         """
         Create a new friend request
         Params:
-          id [id]: id of the friend being requested
-          message [string] (optional): message to send to the friend
+          @id [id]: id of the friend being requested
+          @message [string] (optional): message to send to the friend
         """
         request_from = request.user.get_profile()
         message = request.GET.get('message', '')
@@ -115,7 +113,7 @@ class FriendRequestHandler(BaseHandler):
         """
         Delete a friend request, (can only be done by requestor, requestee must update with accept=false)
         Params:
-           id [id] friend request id
+           @id [id] friend request id
         """
         profile = request.user.get_profile()
         try:
@@ -134,6 +132,7 @@ class GroupHandler(BaseHandler):
     def read(self, request, id, response):
         """
         Get a group's details by ID
+        API Handler: GEt /group/{id}
         """
         profile = request.user.get_profile()
         try:
@@ -172,8 +171,9 @@ class GroupHandler(BaseHandler):
     def update(self, request, group_id, friend_id, response):
         """
         Add/remove a user from a friend group
+        API Handler: PUT /friends/group/{id}/friend/{id}
         PUT Params:
-          action [string] 'add' or 'remove' person from group (optional, defaults to add)
+          @action [string] 'add' or 'remove' person from group (optional, defaults to add)
         """
         profile = request.user.get_profile()
         action = request.PUT.get('action', 'add')
