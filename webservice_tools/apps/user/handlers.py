@@ -356,7 +356,7 @@ class FacebookHandler(BaseHandler):
     def create(self, request, network, response=None):
         """
         Attempts to gain permission to a user's data with networks supporting OAuth2 (Facebook, Gowalla)
-        API Handler /facebook
+        API Handler POST /facebook
         """
         if not response:
             response = ResponseObject()
