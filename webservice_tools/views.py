@@ -203,5 +203,6 @@ class DocHandler(BaseHandler):
         server_declaration = ServerDeclaration()
         context = {'handlers': server_declaration.handler_list}
         context['servername'] = getattr(settings, 'SERVER_NAME', '')
+        context['developer_email'] = getattr(settings, 'ADMINS')[1][1]
         
         return direct_to_template(request, 'project.html', extra_context=context)
