@@ -77,7 +77,8 @@ class TwitterHandler(BaseHandler):
     @login_required
     def create(self, request, network, response=None):
         """
-        Attempts to authorize the user with a service using Oauth v1 (Twitter, LinkedIn) 
+        Attempts to gain permission to a user's data with Twitter, if successful, will return a redirect
+        to Twitter's servers, there the user will be prompted to login if necessary, and allow or deny us access.
         API Handler: POST /social/twitter
         """
         if not response:
@@ -175,7 +176,8 @@ class FacebookHandler(BaseHandler):
     @login_required
     def create(self, request, network, response=None):
         """
-        Attempts to gain permission to a user's data with networks supporting OAuth2 (Facebook, Gowalla)
+        Attempts to gain permission to a user's data with Facebook, if successful, will return a redirect
+        to Facebook's servers, there the user will be prompted to login if necessary, and allow or deny us access.
         API Handler POST /social/facebook
         """
         if not response:
