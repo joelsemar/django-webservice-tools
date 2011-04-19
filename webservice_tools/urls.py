@@ -6,4 +6,6 @@ urlpatterns = patterns('webservice_tools.views',
     ('resetpass/?$', Resource(ResetPassHandler)),
     ('locations/?$', Resource(PlacesHandler)),
     ('amialive/?$', 'amialive'),
-    ('docs/?$', Resource(DocHandler)))
+    ('docs/?$', Resource(DocHandler)),
+    ('socialtest/?$', direct_to_template, {'template': 'socialtest.html'}),
+    )

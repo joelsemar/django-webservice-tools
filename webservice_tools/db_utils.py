@@ -75,7 +75,7 @@ class ThumbFieldFile(ImageFieldFile):
         super(ImageFieldFile, self).save(*args, **kwargs)
         filename = self.path
         imageFile = Image.open(filename)
-        imageFile = imageFile.resize(settings.DEFAULT_THUMB_SIZE, Image.ANTIALIAS)
+        imageFile.thumbnail(settings.DEFAULT_THUMB_SIZE, Image.ANTIALIAS)
         
         if rotation:
             try:
