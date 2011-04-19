@@ -20,6 +20,8 @@
 			.handlerdiv{
 				width:100%;
 				display: block;
+				border-top: 2px solid #ddd;
+				padding: 5px;
 			}
         </style>
     </head>
@@ -34,12 +36,12 @@
 		</ul>
 		
         {% for handler in handlers %}
-		<div class='handlerdiv {% cycle 'odd' 'even' %}'>
-		<hr/><a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
+		<div class='handlerdiv'>
+		<a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
 		
         {%for method in handler.methods %}
         <div style='margin-top:25px;'>
-            <b>{{method.request_method}}</b> /{{servername}}{{method.url}}
+            <b style='color:red;'>{{method.request_method}}</b> /{{servername}}{{method.url}}
         </div>
 		<div style='margin-left: 30px;'>{% autoescape off %}
             {{method.comment}}
