@@ -62,10 +62,12 @@ class ResetPassHandler(BaseHandler):
     def create(self, request, response):
         """
         Reset a user's password using either an email address or username
+        User needs to have an email address registered in order to receive their new password
         API Handler: POST /services/resetpass
         Params:
           
            @email [email] the email address of the user whose password you are trying to reset
+           @username [string] username for the user whose password you are trying to reset.
         """
         return newResetPass(request, response)
 
