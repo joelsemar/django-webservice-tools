@@ -5,93 +5,109 @@
             body {
                 font: 82% arial, sans-serif;
             }
-			h2{
-				font-size: large;
-				margin-top: 35px;
-			}
-			p{
-				line-height:1.25em;
-			}
-			.example {
+            
+            h2 {
+                font-size: large;
+                margin-top: 35px;
+            }
+            
+            p {
+                line-height: 1.25em;
+            }
+            
+            .example {
                 background-color: #ddd;
                 width: 100%;
                 height: auto;
             }
-			.handlerdiv{
-				width:100%;
-				display: block;
-				border-top: 2px solid #ddd;
-				padding: 5px;
-			}
+            
+            .handlerdiv {
+                width: 100%;
+                display: block;
+                border-top: 2px solid #ddd;
+                padding: 5px;
+            }
+            
+            ul {
+                list-style-type: none;
+            }
         </style>
     </head>
     <body>
-    	<a name='top'><h1>{{servername}} API Documentation</h1></a>
-		Developer: {{developer_email}}<br/>
-		
-		Try calls in the <a href='/{{servername}}/apiconsole'>API Console</a><br/>
-		
-		Appiction strives to develop webservices in a RESTful style, if you are not familiar
-		with our API's, please check out the notes on data formats and return values <a href='#dataformat'>here.</a>
-		
-		<h2>Resources</h2>
-		<ul>
-			{% for handler in handlers %}
-			  <li><a href='#{{handler.name}}'>{{handler.name}}</a></li>
-			  {% endfor %}
-		</ul>
-		
-        {% for handler in handlers %}
-		<div class='handlerdiv'>
-		<a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
-		
-        {%for method in handler.methods %}
-        <div style='margin-top:25px;'>
-            <b style='color:red;'>{{method.request_method}}</b> /{{servername}}{{method.url}}
-        </div>
-		<div style='margin-left: 30px;'>{% autoescape off %}
-            {{method.comment}}
-		{% endautoescape %}</div>
-		
-		<p style='margin-left:30px'><strong>Parameters</strong></h3>
-        <ul class='paramlist'>
-        	
-        {% if method.params %}    
-            {% for param in method.params %}
+        <a name='top'><h1>{{servername}} API Documentation</h1></a>
+        Developer: {{developer_email}}
+        <br/>
+        Try calls in the <a href='/{{servername}}/apiconsole'>API Console</a>
+        <br/>
+        Appiction strives to develop webservices in a RESTful style, if you are not familiar 
+        with our API's, please check out the notes on data formats and return values <a href='#dataformat'>here.</a>
+        <h2>Resources</h2>
+        <ul>
+            {% for handler in handlers %}
             <li>
-                <b>{{param.name}}</b>
-                -- <i>{{param.type}}</i>
-                {%ifequal param.required '0' %}(optional){%endifequal%} {{param.comment}}
+                <a href='#{{handler.name}}'>{{handler.name}}</a>
             </li>
-            
             {% endfor %}
-		{%else %}
-		 None
-		{% endif %}
         </ul>
-		
-        {% endfor %} 
-		<a href='#top' style='margin-top:20px;display:block;'>Return to top</a>
-		</div>
-        {%endfor %} 
-		
-		<a name='dataformat'><h2>Notes on data format and return values.</h2></a>
-		<p>
-			The format of return values default to JSON. In order to switch to another format, you can:
-			 <ul>
-			 	<li>Specify 'text/xml' or 'application/json' in the 'Accept' header of your request</li>
-				<li>provide a format in the url, such as GET /user?format=xml</li>
-			 </ul>
-			
-			All responses contain 3 values:
-			<ul>
-				<li><i>success</i> This is a boolean value indicating the success/failure of the request</li>
-				<li><i>data</i> Here you will find the actual data (if any) of the response</li>
-				<li><i>errors</i> A list of errors that occured during the request.</li>
-			</ul>
-			
-			For example, creating a new user, with JSON, might return:
-			<pre class='example'>
+        {% for handler in handlers %}
+        <div class='handlerdiv'>
+            <a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
+            {%for method in handler.methods %}
+            <div style='margin-top:25px;'>
+                <b style='color:red;'>{{method.request_method}}</b>
+                /{{servername}}{{method.url}}
+            </div>
+            <div style='margin-left: 30px;'>
+                {% autoescape off %}
+                {{method.comment}}
+                {% endautoescape %}
+            </div>
+            {% if method.auth_required %} <i style='margin-left:30px'>Requires Authentication</i>{% endif %}
+            <p style='margin-left:30px'>
+                <strong>Parameters</strong>
+            </p>
+            <ul class='paramlist'>
+                {% if method.params %} 
+                {% for param in method.params %}
+                <li>
+                    <b>{{param.name}}</b>
+                    -- <i>{{param.type}}</i>
+                    {%ifequal param.required '0' %}(optional){%endifequal%} {{param.comment}}
+                </li>
+                {% endfor %}
+                {%else %}
+                None
+                {% endif %}
+            </ul>
+            {% endfor %} <a href='#top' style='margin-top:20px;display:block;'>Return to top</a>
+        </div>
+        {%endfor %} <a name='dataformat'><h2>Notes on data format and return values.</h2></a>
+        <p>
+        The format of return values default to JSON. In order to switch to another format, you can:
+        <ul>
+            <li>
+                Specify 'text/xml' or 'application/json' in the 'Accept' header of your request
+            </li>
+            <li>
+                provide a format in the url, such as GET /user?format=xml
+            </li>
+        </ul>
+        All responses contain 3 values:
+        <ul>
+            <li>
+                <i>success</i>
+                This is a boolean value indicating the success/failure of the request
+            </li>
+            <li>
+                <i>data</i>
+                Here you will find the actual data (if any) of the response
+            </li>
+            <li>
+                <i>errors</i>
+                A list of errors that occured during the request.
+            </li>
+        </ul>
+        For example, creating a new user, with JSON, might return:<pre class='example'>
 {
     "success": true,
     "errors": [], 
@@ -103,8 +119,7 @@
     }, 
 }
 			</pre>
-			or, if there was an error:
-			<pre class='example'>
+        or, if there was an error:<pre class='example'>
 {
     "errors": [
         "Email already in use"
@@ -113,9 +128,7 @@
     "success": false
 }
 			</pre>
-		
-			in XML:
-			<pre class='example'>
+        in XML:<pre class='example'>
 &lt;?xml version='1.0' encoding='utf-8'?&gt;
   &lt;response&gt;
     &lt;errors/&gt;
@@ -130,8 +143,7 @@
 &lt;/pre&gt;
 			
 		</pre>
-or:
-<pre class='example'>
+        or:<pre class='example'>
 <?xml version='1.0' encoding='utf-8'?>
 &lt;response&gt;
   &lt;errors&gt;

@@ -23,4 +23,3 @@ class BaseProfile(models.Model):
     def dict(self):
         return {'username': self.user.username}
 
-

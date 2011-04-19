@@ -3,6 +3,7 @@ from functools import wraps
 import time
 
 def login_required(fn):
+    fn.authentication_required = True
     @wraps(fn)
     def inner(*args, **kwargs):
         from webservice_tools.response_util import ResponseObject

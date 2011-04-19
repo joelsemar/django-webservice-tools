@@ -2,6 +2,7 @@ import re
 import copy
 from piston.handler import HandlerMetaClass
 from piston.resource import Resource
+#from webservice_tools.utils import Resource
 from django.conf import settings
 from django.utils.importlib import import_module
 from django.template import Template, Context
@@ -33,11 +34,15 @@ class ServerDeclaration():
         ret = []
         for request_method in handler.allowed_methods:
             method_name = call_map[request_method]
-            docstring = getattr(handler, method_name).__doc__
+            method = getattr(handler, method_name)
+            docstring = method.__doc__
+            auth_required = False
+            if hasattr(method, 'authentication_required'):
+                auth_required=True
             api_handler = self._get_method_api_handler(docstring)
             ret.append({'name': method_name, 'request_method': request_method,
                         'url': api_handler.get('url'), 'comment': api_handler.get('comment'),
-                        'params': self._get_method_params(docstring)})
+                        'params': self._get_method_params(docstring), 'auth_required': auth_required})
         return ret
             
     def _get_method_api_handler(self, docstring):
@@ -78,13 +83,14 @@ class ServerDeclaration():
         ret = []
         handler_names = []
         import urls
-        
+        all = []
         def _crawl_urls(urllist):
             for entry in urllist:
                 if hasattr(entry, 'url_patterns'):
                     _crawl_urls(entry.url_patterns)
                 else:
                     callback = entry._get_callback()
+                    all.append(entry)
                     if isinstance(callback, Resource):
                         handler_name =  callback.handler.__class__.__name__
                         if handler_name not in handler_names and not getattr(callback.handler.__class__, 'abstract', False):
