@@ -139,7 +139,7 @@ class LoginHandler(BaseHandler):
     def create(self, request, response):
         """
         Allows the user to login
-        API Handler: POST '/login
+        API Handler: POST /login
         POST Params
           @username [string] The users's unique identifier, (may be an email address in some cases)
           @password [password] The user's password
@@ -169,7 +169,7 @@ class LoginHandler(BaseHandler):
     def read(self, request, response):
         """
         Logout
-        API Handler: GET '/logout'
+        API Handler: GET /logout
         """
         logout(request)
         return response.send()
@@ -178,7 +178,7 @@ class LoginHandler(BaseHandler):
     def update(self, request, response):
         """
         Logout
-        API Handler: PUT '/logout'
+        API Handler: PUT /logout
         PARAMS:
            device_token: (optional)
         """
@@ -187,7 +187,7 @@ class LoginHandler(BaseHandler):
     def delete(self, request, response):
         """
         Logout
-        API Handler: DELETE '/logout'
+        API Handler: DELETE /logout
         """
         return self.read(request, response)
      
@@ -206,7 +206,7 @@ class SocialPostHandler(BaseHandler):
         API Handler:
               POST /user/announce
         PARAMS
-             network_name: 'twitter' | 'facebook'
+             @network_name: 'twitter' | 'facebook'
         """
 
 

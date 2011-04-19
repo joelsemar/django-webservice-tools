@@ -60,6 +60,13 @@ handler404_view = lambda request: HttpResponse('{"errors": ["Not Found"], "data"
 class ResetPassHandler(BaseHandler):
     allowed_methods = ('POST',)
     def create(self, request, response):
+        """
+        Reset a user's password using either an email address or username
+        API Handler: POST /services/resetpass
+        Params:
+          
+           @email [email] the email address of the user whose password you are trying to reset
+        """
         return newResetPass(request, response)
 
 
@@ -194,4 +201,7 @@ class DocHandler(BaseHandler):
         Return generated documentation in html format
         API Handler: GET /services/doc"""
         server_declaration = ServerDeclaration()
-        return direct_to_template(request, 'project.html', extra_context={'handlers': server_declaration.handler_list})
+        context = {'handlers': server_declaration.handler_list}
+        context['servername'] = getattr(settings, 'SERVER_NAME', '')
+        
+        return direct_to_template(request, 'project.html', extra_context=context)

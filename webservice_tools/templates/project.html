@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <style type='text/css'>
+            body {
+                font: 82% arial, sans-serif;
+            }
+			h2{
+				font-size: large;
+				margin-top: 35px;
+			}
+			p{
+				line-height:1.25em;
+			}
+        </style>
+    </head>
+    <body>
+    	<h1>{{servername}} API Documentation</h1>
+        {% for handler in handlers %}<h2 class='handler_name'>{{handler.name}}</h2>
+        {%for method in handler.methods %}
+        <div>
+            HTTP Method: {{method.request_method}}
+        </div>
+        <div>
+            URL: {{method.url}}
+        </div>
+        <div>
+            {{method.comment}}
+        </div>
+        <ul class='paramlist'>
+        	{% if method.params %}
+            <p><strong>Parameters</strong></h3>
+            {% for param in method.params %}
+            <li>
+                <b>{{param.name}}</b>
+                -- <i>{{param.type}}</i>
+                {%if not param.required %}(optional){%endif%} {{param.comment}}
+            </li>
+            
+            {% endfor %}
+			{% endif %}
+        </ul>
+		<hr/>
+        {% endfor %} 
+        {%endfor %} 
+    </body>
+</html>
