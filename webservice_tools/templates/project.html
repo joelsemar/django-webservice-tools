@@ -17,10 +17,15 @@
                 width: 100%;
                 height: auto;
             }
+			.handlerdiv{
+				width:100%;
+				display: block;
+			}
         </style>
     </head>
     <body>
     	<a name='top'><h1>{{servername}} API Documentation</h1></a>
+		joel.semar@appiction.com
 		<h2>Resources</h2>
 		<ul>
 			{% for handler in handlers %}
@@ -29,6 +34,7 @@
 		</ul>
 		
         {% for handler in handlers %}
+		<div class='handlerdiv {% cycle 'odd' 'even' %}'>
 		<hr/><a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
 		
         {%for method in handler.methods %}
@@ -56,6 +62,7 @@
 		
         {% endfor %} 
 		<a href='#top' style='margin-top:20px;display:block;'>Return to top</a>
+		</div>
         {%endfor %} 
 		
 		<a name='dataformat'><h2>Notes on data format and return values.</h2></a>
@@ -75,44 +82,56 @@
 			
 			For example, creating a new user, with JSON, might return:
 			<pre class='example'>
-				{
-                  "success": true,
-				  "errors": [], 
-                  "data": {
-                     "user": {
-                        "username": "foo@bar.com", 
-                        "id": 3
-                      }
-                   }, 
-                }
+{
+    "success": true,
+    "errors": [], 
+    "data": {
+        "user": {
+            "username": "foo@bar.com", 
+            "id": 3
+        }
+    }, 
+}
 			</pre>
 			or, if there was an error:
-			<pre>
-				{
-                  "errors": [
-                        "Email already in use"
-                   ], 
-                   "data": {}, 
-                   "success": false
-                }
+			<pre class='example'>
+{
+    "errors": [
+        "Email already in use"
+    ], 
+    "data": {}, 
+    "success": false
+}
 			</pre>
-			
+		
 			in XML:
 			<pre class='example'>
-			 <?xml version='1.0' encoding='utf-8'?>
-             <response>
-                <errors/>
-                <data>
-                    <user>
-                        <username>baz@bar.com</username>
-                        <id>4</id>
-                    </user>
-                 </data>
-                <success>True</success>
-            </response>
-			</pre>
+&lt;?xml version='1.0' encoding='utf-8'?&gt;
+  &lt;response&gt;
+    &lt;errors/&gt;
+    &lt;data&gt;
+      &lt;user&gt;
+        &lt;username&gt;baz@bar.com&lt;/username&gt;
+        &lt;id&gt;4&lt;/id&gt;
+      &lt;/user&gt;
+    &lt;/data&gt;
+    &lt;success&gt;True&lt;/success&gt;
+  &lt;/response&gt;
+&lt;/pre&gt;
 			
-		</p>
-		
+		</pre>
+or:
+<pre class='example'>
+<?xml version='1.0' encoding='utf-8'?>
+&lt;response&gt;
+  &lt;errors&gt;
+    &lt;resource&gt;Email already in use&lt;/resource&gt;
+  &lt;/errors&gt;
+  &lt;data/&gt;
+  &lt;success&gt;False&lt;/success&gt;
+&lt;/response&gt;	
+	
+	
+</pre>
     </body>
 </html>
