@@ -31,7 +31,7 @@ class SocialNetwork(models.Model):
         else:
             path = '%s/social' % settings.SERVER_NAME
            
-        return 'https://%s/%s/%s' % (request.META['HTTP_HOST'], path, self.name)
+        return 'http://%s/%s/%s/' % (request.META['HTTP_HOST'], path, self.name)
     
     def getCredentials(self):
         return (self.getKey(), self.getSecret())
