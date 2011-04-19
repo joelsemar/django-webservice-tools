@@ -378,6 +378,7 @@ class FacebookHandler(BaseHandler):
         """
         This is the entrypoint for the social networks to make a request, passing our verification string
         We'll take this and exchange for an access_token
+        API Handler: GET /facebook
         """
         profile = request.user.get_profile()
 

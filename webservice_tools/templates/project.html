@@ -16,17 +16,15 @@
     </head>
     <body>
     	<h1>{{servername}} API Documentation</h1>
-        {% for handler in handlers %}<h2 class='handler_name'>{{handler.name}}</h2>
+        {% for handler in handlers %}<hr/><h2 class='handler_name'>{{handler.name}}</h2>
+		
         {%for method in handler.methods %}
-        <div>
-            HTTP Method: {{method.request_method}}
+        <div style='margin-top:25px;'>
+            <b>{{method.request_method}}</b> {{method.url}}
         </div>
-        <div>
-            URL: {{method.url}}
-        </div>
-        <div>
+		<div style='margin-left: 30px;'>{% autoescape off %}
             {{method.comment}}
-        </div>
+		{% endautoescape %}</div>
         <ul class='paramlist'>
         	{% if method.params %}
             <p><strong>Parameters</strong></h3>
@@ -40,7 +38,7 @@
             {% endfor %}
 			{% endif %}
         </ul>
-		<hr/>
+		
         {% endfor %} 
         {%endfor %} 
     </body>

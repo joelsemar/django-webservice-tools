@@ -43,9 +43,14 @@ class ServerDeclaration():
     def _get_method_api_handler(self, docstring):
         if not docstring:
             return {}
-        api_handler = re.search(r'(?P<comment>[\w.\ \n\/\'\"]+)?api handler\:? (?P<method>post|put|get|delete)[\ ](?P<url>.+)', docstring, flags=re.IGNORECASE)
+        
+        api_handler = re.search(r'api handler\:? (?P<method>post|put|get|delete)[\ ](?P<url>.+)', docstring, flags=re.IGNORECASE)
         if api_handler:
-            return api_handler.groupdict()
+            ret =  api_handler.groupdict()
+            comment = re.search(r'^(?P<comment>.*)api handler', docstring, flags= re.IGNORECASE|re.DOTALL)
+            if comment:
+                ret['comment'] = comment.groupdict()['comment'].replace('\n', '<br/>')
+            return ret
         return {}
     
     def _get_method_params(self, docstring):
