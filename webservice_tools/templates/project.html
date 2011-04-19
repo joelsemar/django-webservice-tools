@@ -15,19 +15,29 @@
         </style>
     </head>
     <body>
-    	<h1>{{servername}} API Documentation</h1>
-        {% for handler in handlers %}<hr/><h2 class='handler_name'>{{handler.name}}</h2>
+    	<a name='top'><h1>{{servername}} API Documentation</h1></a>
+		<h2>Resources</h2>
+		<ul>
+			{% for handler in handlers %}
+			  <li><a href='#{{handler.name}}'>{{handler.name}}</a></li>
+			  {% endfor %}
+		</ul>
+		
+        {% for handler in handlers %}
+		<hr/><a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
 		
         {%for method in handler.methods %}
         <div style='margin-top:25px;'>
-            <b>{{method.request_method}}</b> {{method.url}}
+            <b>{{method.request_method}}</b> /{{servername}}{{method.url}}
         </div>
 		<div style='margin-left: 30px;'>{% autoescape off %}
             {{method.comment}}
 		{% endautoescape %}</div>
+		{% if method.params %}
+		<p style='margin-left:30px'><strong>Parameters</strong></h3>
         <ul class='paramlist'>
-        	{% if method.params %}
-            <p><strong>Parameters</strong></h3>
+        	
+            
             {% for param in method.params %}
             <li>
                 <b>{{param.name}}</b>
@@ -40,6 +50,66 @@
         </ul>
 		
         {% endfor %} 
+		<a href='#top' style='margin-top:20px;display:block;'>Return to top</a>
         {%endfor %} 
+		
+		<a name='dataformat'><h2>Notes on data format and return values.</h2></a>
+		<p>
+			The format of return values default to JSON. In order to switch to another format, you can:
+			 <ul>
+			 	<li>Specify 'text/xml' or 'application/json' in the 'Accept' header of your request</li>
+				<li>provide a format in the url, such as GET /user?format=xml</li>
+			 </ul>
+			
+			All responses contain 3 values:
+			<ul>
+				<li><i>success</i> This is a boolean value indicating the success/failure of the request</li>
+				<li><i>data</i> Here you will find the actual data (if any) of the response</li>
+				<li><i>errors</i> A list of errors that occured during the request.</li>
+			</ul>
+			
+			For example, creating a new user, with JSON, might return:
+			<pre>
+				{
+                  "success": true,
+				  "errors": [], 
+                  "data": {
+                     "user": {
+                        "username": "foo@bar.com", 
+                        "id": 3
+                      }
+                   }, 
+                }
+			</pre>
+			or, if there was an error:
+			<pre>
+				{
+                  "errors": [
+                        "Email already in use"
+                   ], 
+                   "data": {}, 
+                   "success": false
+                }
+			</pre>
+			
+			in XML:
+			<pre>
+			 <?xml version='1.0' encoding='utf-8'?>
+             <response>
+                <errors/>
+                <data>
+                    <user>
+                        <username>baz@bar.com</username>
+                        <id>4</id>
+                    </user>
+                 </data>
+  <success>True</success>
+</response>	
+				
+			</pre>
+			
+			
+		</p>
+		
     </body>
 </html>
