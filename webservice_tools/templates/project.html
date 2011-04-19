@@ -12,6 +12,11 @@
 			p{
 				line-height:1.25em;
 			}
+			.example {
+                background-color: #ddd;
+                width: 100%;
+                height: auto;
+            }
         </style>
     </head>
     <body>
@@ -69,7 +74,7 @@
 			</ul>
 			
 			For example, creating a new user, with JSON, might return:
-			<pre>
+			<pre class='example'>
 				{
                   "success": true,
 				  "errors": [], 
@@ -93,7 +98,7 @@
 			</pre>
 			
 			in XML:
-			<pre>
+			<pre class='example'>
 			 <?xml version='1.0' encoding='utf-8'?>
              <response>
                 <errors/>
@@ -103,11 +108,9 @@
                         <id>4</id>
                     </user>
                  </data>
-  <success>True</success>
-</response>	
-				
+                <success>True</success>
+            </response>
 			</pre>
-			
 			
 		</p>
 		
