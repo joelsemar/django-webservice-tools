@@ -27,8 +27,13 @@
     </head>
     <body>
     	<a name='top'><h1>{{servername}} API Documentation</h1></a>
-		{{developer_email}}
-		<a href='/{{servername}}/apiconsole'>Console</a>
+		Developer: {{developer_email}}<br/>
+		
+		Try calls in the <a href='/{{servername}}/apiconsole'>API Console</a><br/>
+		
+		Appiction strives to develop webservices in a RESTful style, if you are not familiar
+		with our API's, please check out the notes on data formats and return values <a href='#dataformat'>here.</a>
+		
 		<h2>Resources</h2>
 		<ul>
 			{% for handler in handlers %}
@@ -47,20 +52,22 @@
 		<div style='margin-left: 30px;'>{% autoescape off %}
             {{method.comment}}
 		{% endautoescape %}</div>
-		{% if method.params %}
+		
 		<p style='margin-left:30px'><strong>Parameters</strong></h3>
         <ul class='paramlist'>
         	
-            
+        {% if method.params %}    
             {% for param in method.params %}
             <li>
                 <b>{{param.name}}</b>
                 -- <i>{{param.type}}</i>
-                {%if not param.required %}(optional){%endif%} {{param.comment}}
+                {%ifequal param.required 0 %}(optional){%endifequal%} {{param.comment}}
             </li>
             
             {% endfor %}
-			{% endif %}
+		{%else %}
+		 None
+		{% endif %}
         </ul>
 		
         {% endfor %} 

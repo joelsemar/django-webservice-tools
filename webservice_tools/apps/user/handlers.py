@@ -376,7 +376,7 @@ class FacebookHandler(BaseHandler):
 
     def read(self, request, network, response=None):
         """
-        This is the entrypoint for the social networks to make a request, passing our verification string
+        This entry point is used by the social networks only, passing our verification string
         We'll take this and exchange for an access_token
         API Handler: GET /facebook
         """

@@ -90,8 +90,6 @@ class ServerDeclaration():
                         if handler_name not in handler_names and not getattr(callback.handler.__class__, 'abstract', False):
                             handler_names.append(handler_name)
                             ret.append(callback.handler)
-                            
-                        
         
         _crawl_urls(urls.urlpatterns)
         return ret

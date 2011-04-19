@@ -6,7 +6,7 @@
             function socialTest(){
                 var input = document.getElementById('url');
                 var form = document.getElementById('socialForm');
-                form.action = {{baseURL}} +  input.value;
+                form.action = input.value;
                 form.submit();
                 return false;
             }
