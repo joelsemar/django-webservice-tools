@@ -3,6 +3,7 @@ from webservice_tools.utils import toDict
 import datetime
 
 logger = logging.getLogger('webservice')
+
 class LoggingMiddleware(object):
     
     def process_response(self, request, response):
