@@ -20,7 +20,7 @@ class ExtModelForm(ModelForm):
         if self.editing:
             instance = self.temp_instance
             for k, v in self.cleaned_data.items():
-                if v is not None:
+                if v is not None and self.data.get(k):
                     setattr(instance, k, v)
             instance.save()
         else:
