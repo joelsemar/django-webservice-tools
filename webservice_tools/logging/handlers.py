@@ -57,3 +57,4 @@ class EmailHandler(logging.Handler):
             auth_user=self.auth_user,
             auth_password=self.auth_password,
         )
+       
