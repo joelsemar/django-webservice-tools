@@ -1,5 +1,5 @@
 from simplejson import dumps
-from webservice_tools.logging import logging
+import logging
 from webservice_tools.response_util import ResponseObject
 from django.http import HttpResponse
 import sys
@@ -17,7 +17,8 @@ class WebServiceException():
         lastframe = self.get_traceback_frames(tb)[-1]
         location = "%s in %s, line: %s" %(lastframe['filename'], lastframe['function'], lastframe['lineno'])
         response.addErrors([exception.message, location])
-        logging.critical(','.join([exception.message, location]))
+        logger = logging.getLogger('webservice')
+        logger.critical(','.join([exception.message, location]))
         return HttpResponse(dumps(response.send()))
     
     

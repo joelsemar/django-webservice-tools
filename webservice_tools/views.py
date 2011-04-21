@@ -22,7 +22,7 @@ class GeoHandler(BaseHandler):
             @address [string] the address you'd like to geocode
             
             @lat [latitude] the latitude you'd like to reverse geocode, required if address is not supplied
-            @lng [longitude] the longitude you'd like to reverse geocode, , required if address is not supplied
+            @lng [longitude] the longitude you'd like to reverse geocode, required if address is not supplied
         """
         if not response:
             response = ResponseObject()
@@ -71,6 +71,28 @@ class ResetPassHandler(BaseHandler):
         """
         return newResetPass(request, response)
 
+
+class DocHandler(BaseHandler):
+    allowed_methods = ('GET',)
+    
+    def read(self, request, response=None):
+        """
+        Return generated documentation in html format
+        API Handler: GET /services/docs"""
+        server_declaration = ServerDeclaration()
+        context = {'handlers': server_declaration.handler_list}
+        context['servername'] = getattr(settings, 'SERVER_NAME', '')
+        context['developer_email'] = getattr(settings, 'ADMINS')[1][1]
+        
+        return direct_to_template(request, 'project.html', extra_context=context)
+
+
+class PlacesHandler(BaseHandler):
+    abstract=True
+    allowed_methods = ('GET',)
+    def read(self, request, response):
+        return places_search(request, response)
+    
 
 def newResetPass(request, response):
     """
@@ -157,12 +179,6 @@ def generateNewPassword():
            passwordpieces.PASSWORD_SPECIAL_CHARACTERS[random.randint(0, len(passwordpieces.PASSWORD_SPECIAL_CHARACTERS) - 1)]
 
 
-class PlacesHandler(BaseHandler):
-    abstract=True
-    allowed_methods = ('GET',)
-    def read(self, request, response):
-        return places_search(request, response)
-    
 
 def places_search(request, response):
     lat = request.GET.get('lat')
@@ -195,16 +211,3 @@ def places_search_view(request, response):
         response.set(locations=locations)
     return response.send()
 
-class DocHandler(BaseHandler):
-    allowed_methods = ('GET',)
-    
-    def read(self, request, response=None):
-        """
-        Return generated documentation in html format
-        API Handler: GET /services/doc"""
-        server_declaration = ServerDeclaration()
-        context = {'handlers': server_declaration.handler_list}
-        context['servername'] = getattr(settings, 'SERVER_NAME', '')
-        context['developer_email'] = getattr(settings, 'ADMINS')[1][1]
-        
-        return direct_to_template(request, 'project.html', extra_context=context)

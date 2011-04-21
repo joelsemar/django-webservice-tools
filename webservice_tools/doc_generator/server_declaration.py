@@ -1,12 +1,5 @@
 import re
-import copy
-from piston.handler import HandlerMetaClass
-from piston.resource import Resource
-#from webservice_tools.utils import Resource
-from django.conf import settings
-from django.utils.importlib import import_module
-from django.template import Template, Context
-from django.core.urlresolvers import reverse
+from webservice_tools.utils import Resource
 ex = [{'name': 'Friend', 
        'methods': [{
                     'name': 'read',
