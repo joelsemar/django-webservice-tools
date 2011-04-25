@@ -17,9 +17,9 @@ class LoggingMiddleware(object):
         msg = ""
         try:
             if request.GET:
-                msg += "REQUEST GET: %s" % toDict(request.GET)
+                msg += "REQUEST GET: %s" % toDict(request.GET).encode('utf_8')
             if request.POST:
-                msg += "REQUEST POST: %s" % toDict(request.POST)
+                msg += "REQUEST POST: %s" % toDict(request.POST).encode('utf_8')
             if request.FILES:
                 msg += 'FILES: %s' % ','.join([f.name for f in request.FILES.itervalues()])
         except:

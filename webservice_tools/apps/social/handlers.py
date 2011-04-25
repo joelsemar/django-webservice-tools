@@ -60,7 +60,7 @@ class SocialPostHandler(BaseHandler):
         
         network = credentials.network
         oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, network.getCredentials(),
-                                                    token=oauth.OAuthToken.from_string(credentials.token), method='POST', params={'status': message})
+                                                    token=credentials.token, method='POST', params={'status': message})
         oauth.fetchResponse(oauthRequest, network.base_url)
         
     def post_to_facebook(self, user_profile, credentials, message):
@@ -240,3 +240,25 @@ class FacebookHandler(BaseHandler):
                                               uuid=uuid)
         
         return response.send()
+    
+class GetFriendsHandler(BaseHandler):
+    allowed_methods = ('GET',)
+    
+    @login_required
+    def read(self, request, response=None):
+        """
+        Get the list of friends that are in the app given a social network
+        API Handler: GET /social/friends
+        Params:
+            @network: [string] A network that the logged in user has authorized
+        """
+        
+        network = request.GET.get('network')
+        
+        if not network:
+            return response.send(errors="The network is required", status=499)
+        
+        profile = request.user.get_profile()
+        
+        if not response:
+            response = ResponseObject()
