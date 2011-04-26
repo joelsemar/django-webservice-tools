@@ -1,5 +1,4 @@
 from functools import wraps
-from webservice_tools.response_util import ResponseObject
 from django.http import QueryDict
 import urlparse
 import time
@@ -8,7 +7,7 @@ def login_required(fn):
     fn.authentication_required = True
     @wraps(fn)
     def inner(*args, **kwargs):
-        
+        from webservice_tools.response_util import ResponseObject
         response = ResponseObject()
         try:
             request = [a for a in args if hasattr(a, 'user')][0]
@@ -27,7 +26,7 @@ def data_delete(fn):
     """
     @wraps(fn)
     def inner(*args, **kwargs):
-        
+        from webservice_tools.response_util import ResponseObject
         response = ResponseObject()
         try:
             request = [a for a in args if hasattr(a, 'user')][0]
