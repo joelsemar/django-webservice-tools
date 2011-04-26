@@ -262,3 +262,5 @@ class GetFriendsHandler(BaseHandler):
         
         if not response:
             response = ResponseObject()
+            
+        
