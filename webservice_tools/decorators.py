@@ -1,12 +1,14 @@
 from functools import wraps
-
+from webservice_tools.response_util import ResponseObject
+from django.http import QueryDict
+import urlparse
 import time
 
 def login_required(fn):
     fn.authentication_required = True
     @wraps(fn)
     def inner(*args, **kwargs):
-        from webservice_tools.response_util import ResponseObject
+        
         response = ResponseObject()
         try:
             request = [a for a in args if hasattr(a, 'user')][0]
@@ -18,6 +20,28 @@ def login_required(fn):
         return response.send(errors='401 -- Unauthorized', status=401)
     
     return inner
+
+def data_delete(fn):
+    """
+    Allows you to supply data for delete, provides a request.DELETE dict for use in the view
+    """
+    @wraps(fn)
+    def inner(*args, **kwargs):
+        
+        response = ResponseObject()
+        try:
+            request = [a for a in args if hasattr(a, 'user')][0]
+        except IndexError:
+            return response.send(errors="Login required method called without request object", status=500)
+        
+        
+        if request.raw_post_data and request.method == 'DELETE':
+            request.DELETE = QueryDict(request.raw_post_data)
+            t_args = [a for a in args]
+            t_args[t_args.index(request)] = request
+        return fn(*t_args, **kwargs)
+    return inner
+
 
 
 
@@ -90,3 +114,25 @@ def profile(log_file):
 
         return _inner
     return _outer
+
+
+
+def make_b(fn):
+    def inner(*args, **kwargs):
+        b  = [i for i in args if i==1][0]
+        temp_args = [a for a in args]
+        temp_args[temp_args.index(b)] = 2
+        return fn(*temp_args, **kwargs)
+    return inner
+
+
+def foo(fn):
+    def inner(*args, **kwargs):
+        return fn(*args, **kwargs)
+    return inner
+
+def bar(fn):
+    def inner(*args, **kwargs):
+        return fn(*args, **kwargs)
+    return inner
+

@@ -16,6 +16,42 @@ NETWORK_HTTP_ERROR = "There was a problem reaching %s, please try again."
 class SocialNetworkError(Exception):
     pass
 
+
+class SocialNetworkFriendsHandler(BaseHandler):
+    allowed_methods = ('GET',)
+    
+    
+    @login_required
+    def read(self, request, network_name, response):
+        """
+        Params:
+          @include (optional) Only valid for twitter requests, comma delimited list of people you want to include 'followers', 'followees', or 'followers,folowees'
+        """
+        
+        profile = request.user.get_profile()
+        try:
+            credentials = UserNetworkCredentials.objects.get(profile=profile, network__name=network_name)
+        except UserNetworkCredentials.DoesNotExist:
+            return response.send(errors='Either %s does not exist or we do not have credentials for that user.' % network_name)
+        
+        social_friends = getattr(self, network_name)(request, profile, credentials.network, credentials)
+    
+    def facebook(self, request, profile, network, credentials):
+        return utils.makeAPICall(network.base_url,
+                                 '%s/friends' % credentials.uuid,
+                                 queryData={'access_token': credentials.token},
+                                 secure=True, deserializeAs='skip')
+        
+    def twitter(self, request, profile, network, credentials):
+        
+        network = credentials.network
+        oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, network.getCredentials(),
+                                                    token=oauth.OAuthToken.from_string(credentials.token))
+        oauth.fetchResponse(oauthRequest, network.base_url)
+        
+        
+
+
 class SocialPostHandler(BaseHandler):
     allowed_methods = ('POST',)
     
@@ -73,7 +109,7 @@ class SocialPostHandler(BaseHandler):
 
 class TwitterHandler(BaseHandler):
     model = SocialNetwork
-    allowed_methods  = ('GET', 'POST')
+    allowed_methods = ('GET', 'POST')
     @login_required
     def create(self, request, network, response=None):
         """

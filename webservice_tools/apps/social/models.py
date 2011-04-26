@@ -14,7 +14,8 @@ class SocialNetwork(models.Model):
     api_key = models.CharField(max_length=1028, null=True, help_text='This field is encrypted')
     app_secret = models.CharField(max_length=1028, null=True, help_text='This field is encrypted')
     app_id = models.CharField(max_length=1028, null=True, help_text='This field is encrypted', blank=True)
-    
+    post_url = models.CharField(max_length=1028)
+    friends_url = models.CharField(max_length=1028)
     
     def getRequestTokenURL(self):
         return 'https://%s/%s' % (self.base_url, self.request_token_path)
@@ -80,10 +81,9 @@ class SocialNetwork(models.Model):
 class UserNetworkCredentials(models.Model):
     id = models.AutoField(primary_key=True)
     uuid = models.CharField(max_length=512, db_index=True)
-    access_token = models.CharField(max_length=1028)
+    access_token = models.CharField(max_length=1028, help_text="This field is encrypted")
     profile = models.ForeignKey(settings.AUTH_PROFILE_MODULE)
     network = models.ForeignKey(SocialNetwork)
-    post_url = models.CharField(max_length=1028)
     
     class Meta:
         db_table = 'usernetworkcredentials'

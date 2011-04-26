@@ -1,17 +1,9 @@
 import re
 from webservice_tools.utils import Resource
-ex = [{'name': 'Friend', 
-       'methods': [{
-                    'name': 'read',
-                    'request_method': 'GET',
-                    'url': '/friends',
-                    'params': [{'name': 'age', 'type': 'integer', 'comment': 'The age of your friend'}]
-                   }]
-     }]
+call_map = {'GET': 'read', 'POST': 'create', 
+            'PUT': 'update', 'DELETE': 'delete'}
+VAR_REGEX = r'\@[\w]+\ \[[\w\[\]]+\]\ .+ \n@?' # @parameter [type] some comment
 
-
-call_map = {'GET': 'read', 'POST': 'create', 'PUT': 'update', 'DELETE': 'delete'}
-VAR_REGEX = r'\@[\w]+\ \[[\w\[\]]+\]\ .+' # @parameter [type] some comment
 class ServerDeclaration():
     
     def __init__(self):
@@ -57,13 +49,13 @@ class ServerDeclaration():
         if not docstring:
             return ret
 
-        variable_declarations = re.findall(VAR_REGEX, docstring)
+        variable_declarations = re.findall(VAR_REGEX, docstring, flags=re.DOTALL)
         for declaration in variable_declarations:
             ret.append(self._get_dict_from_var_declaration(declaration))
         return ret
     
     def _get_dict_from_var_declaration(self, declaration):
-        param = re.search(r'^\@(?P<name>[\w]+)[\ ]+\[(?P<type>[\w\[\]]+)\][\ ]*(?P<comment>.*)', declaration).groupdict()
+        param = re.search(r'^\@(?P<name>[\w]+)[\ ]+\[(?P<type>[\w\[\]]+)\][\ ]*(?P<comment>.*)', declaration, flags=re.DOTALL).groupdict()
         if re.search('(optional)', declaration):
             param['comment'] = re.sub('\(optional\)', '', param['comment'])
             param['required'] = '0'
