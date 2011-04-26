@@ -28,9 +28,9 @@ class LoggingMiddleware(object):
         headers = ''
         for k, v in request.META.iteritems():
             headers += '%s: %s\n' % (k,v )
-        logger.debug(log % {'request': msg,
+        """logger.debug(log % {'request': msg,
                              'method': request.method,
                              'response': str(response)[:5000],
                              'url': request.path,
-                             'timestamp': datetime.datetime.utcnow()})
+                             'timestamp': datetime.datetime.utcnow()})"""
         return response
