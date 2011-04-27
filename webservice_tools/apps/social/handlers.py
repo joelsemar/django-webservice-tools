@@ -132,22 +132,21 @@ class SocialPostHandler(BaseHandler):
 
 
 class SocialRegisterHandler(BaseHandler):
-    allowed_methods = ('GET', 'POST')
+    allowed_methods = ('POST',)
     
     model = SocialNetwork
     
     @login_required
-    def create(self, request, response):
+    def create(self, request, network, response):
         """
         Attempts to gain permission to a user's data with a social network, if successful, will 
         return a redirect to the network's servers, there the user will be prompted to login if 
-        necessary, and allow or deny us access.        
-        API handler: POST /social/register
+        necessary, and allow or deny us access. facebook, twitter, and linkedin
+        API handler: POST /social/register/{network}
         Params:
-            @network [string] {facebook|twitter|linkedin}
+            None
         """
         profile = request.user.get_profile()
-        network = request.POST.get('network')
         
         try:
             network = SocialNetwork.objects.get(name=network)
@@ -226,7 +225,7 @@ class SocialCallbackHandler(BaseHandler):
             return response.send(errors='Invalid network', status=404)
         
         #Use the name of the network to call the helper function
-        return getattr(self, network_name)(request, network, profile, response)
+        return getattr(self, network)(request, network, profile, response)
         
         
     def twitter(self, request, network, profile, response):
@@ -307,3 +306,9 @@ class SocialCallbackHandler(BaseHandler):
                                               name_in_network='',
                                               result=result)
         return response.send()
+    
+    def linkedin(self, request, network, profile, response):
+        """
+        Helper function to handle the callbacks for linkedin
+        """
+        raise NotImplementedError
