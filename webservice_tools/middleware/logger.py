@@ -30,7 +30,7 @@ class LoggingMiddleware(object):
             headers += '%s: %s\n' % (k,v )
         logger.debug(log % {'request': msg,
                              'method': request.method,
-                             'response': unicode(response).encode('utf_8')[:5000],
+                             'response': str(response).decode('utf-8')[:5000],
                              'url': request.path,
                              'timestamp': datetime.datetime.utcnow()})
         return response

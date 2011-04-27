@@ -84,6 +84,8 @@ class UserNetworkCredentials(models.Model):
     access_token = models.CharField(max_length=1028, help_text="This field is encrypted")
     profile = models.ForeignKey(settings.AUTH_PROFILE_MODULE)
     network = models.ForeignKey(SocialNetwork)
+    name_in_network = models.CharField(max_length=512, default='', blank=True)
+    result = models.CharField(max_length=2048, default='', blank=True)
     
     class Meta:
         db_table = 'usernetworkcredentials'

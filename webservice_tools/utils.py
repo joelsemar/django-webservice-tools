@@ -611,9 +611,16 @@ def camel_to_under(name):
 
 
 def generate_qr_code(data):
-    
     fetch_url = GOOGLE_QR_CODE_URL
     post_data = friendlyURLEncode({'chl': data})
     request = urllib2.Request(fetch_url)
     raw = urllib2.urlopen(request, post_data).read()
     return StringIO(raw)
+
+def is_num(x):
+    try:
+        if str(float(x)) == 'nan':
+            raise ValueError
+        return True
+    except ValueError:
+        return False
