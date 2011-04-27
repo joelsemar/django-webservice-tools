@@ -116,19 +116,19 @@ class SocialPostHandler(BaseHandler):
         
         return response.send()
     
-    def twitter(self, user_profile, credentials, network, message):
+    def twitter(self, profile, credentials, network, message):
         
         oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, network.getCredentials(),
                                                     token=oauth.OAuthToken.from_string(credentials.token), method='POST', params={'status': message})
         oauth.fetchResponse(oauthRequest, network.base_url)
         
-    def facebook(self, user_profile, credentials, network, message):
+    def facebook(self, profile, credentials, network, message):
         utils.makeAPICall(credentials.network.base_url,
                           '%s/feed' % credentials.uuid,
                            postData={'access_token': credentials.token, 'message': message},
                            secure=True, deserializeAs='skip')   
     
-    def linkedin(self, user_profile, credentials, network, message):
+    def linkedin(self, profile, credentials, network, message):
         raise NotImplementedError
 
 
