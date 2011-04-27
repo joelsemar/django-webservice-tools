@@ -34,6 +34,7 @@ class SocialFriendHandler(BaseHandler):
           @network [string] {twitter|facebook|linkedin}
         """
         network = request.GET.get('network')
+        extra = request.GET.get('extra')
         profile = request.user.get_profile()
         
         try:
@@ -44,10 +45,10 @@ class SocialFriendHandler(BaseHandler):
         try:
             credentials = UserNetworkCredentials.objects.get(profile=profile, network=network)
         except UserNetworkCredentials.DoesNotExist:
-            return response.send(errors='Either %s does not exist or we do not have credentials for that user.' % network_name)
+            return response.send(errors='Either %s does not exist or we do not have credentials for that user.' % network.name)
         
         #Use the name of the network to call the helper function  
-        friend_social_ids = getattr(self, network_name)(request, profile, credentials.network, credentials)
+        friend_social_ids = getattr(self, network.name)(request, profile, network, credentials)
         
         social_friends_credentials = UserNetworkCredentials.objects.filter(network=network, 
                                                                         uuid__in=friend_social_ids)
@@ -115,13 +116,11 @@ class SocialPostHandler(BaseHandler):
     
     def twitter(self, user_profile, credentials, network, message):
         
-        network = credentials.network
         oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, network.getCredentials(),
                                                     token=credentials.token, method='POST', params={'status': message})
         oauth.fetchResponse(oauthRequest, network.base_url)
         
     def facebook(self, user_profile, credentials, network, message):
-        network = credentials.network
         utils.makeAPICall(credentials.network.base_url,
                           '%s/feed' % credentials.uuid,
                            postData={'access_token': credentials.token, 'message': message},
@@ -228,7 +227,7 @@ class SocialCallbackHandler(BaseHandler):
             return response.send(errors='Invalid network', status=404)
         
         #Use the name of the network to call the helper function
-        return getattr(self, network)(request, network, profile, response)
+        return getattr(self, network.name)(request, network, profile, response)
         
         
     def twitter(self, request, network, profile, response):

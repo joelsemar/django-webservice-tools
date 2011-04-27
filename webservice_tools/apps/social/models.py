@@ -30,7 +30,7 @@ class SocialNetwork(models.Model):
         if hasattr(settings, 'SOCIAL_PATH'):
             path = settings.SOCIAL_PATH
         else:
-            path = '%s/social' % settings.SERVER_NAME
+            path = '%s/social/callback' % settings.SERVER_NAME
            
         return 'http://%s/%s/%s/' % (request.META['HTTP_HOST'], path, self.name)
     
