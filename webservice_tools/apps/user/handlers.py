@@ -1,4 +1,3 @@
-from piston.handler import BaseHandler
 from django.db import transaction
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -7,24 +6,8 @@ from django.contrib.auth import authenticate, login, logout
 from webservice_tools.decorators import login_required
 
 NETWORK_HTTP_ERROR = "There was a problem reaching %s, please try again."
-class FormHandler(BaseHandler):
-    
-    def format_errors(self, form):
-        return [v[0].replace('This field', k.title()) for k, v in form.errors.items()]
-    
-    def create(self, request, response):
-        form = self.form(request.POST)
-        if form.is_valid():
-            form.save()
-            return response.send()
-        else:
-            return response.send(errors=self.format_errors(form))
-    
-    def update(self, request, id, response):
-        pass
-        
 
-class GenericUserHandler(FormHandler):
+class GenericUserHandler(utils.BaseHandler):
     allowed_methods = ('POST', 'GET', 'PUT')
     
     def __init__(self):

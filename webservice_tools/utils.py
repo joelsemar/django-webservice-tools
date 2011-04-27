@@ -70,7 +70,21 @@ class HandlerMetaClass(PistonHandlerMetaClass):
 
 class BaseHandler(PistonBaseHandler):
     __metaclass__ = HandlerMetaClass
-
+    
+    def format_errors(self, form):
+        return [v[0].replace('This field', k.title()) for k, v in form.errors.items()]
+    
+    def create(self, request, response):
+        form = self.form(request.POST)
+        if form.is_valid():
+            form.save()
+            return response.send()
+        else:
+            return response.send(errors=self.format_errors(form))
+    
+    def update(self, request, id, response):
+        pass
+    
 
 class XMLEmitter(PistonXMLEmitter):
     def render(self, request):

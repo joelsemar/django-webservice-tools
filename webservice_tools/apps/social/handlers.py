@@ -20,7 +20,6 @@ class SocialNetworkError(Exception):
 class SocialNetworkFriendsHandler(BaseHandler):
     allowed_methods = ('GET',)
     
-    
     @login_required
     def read(self, request, network_name, response):
         """
