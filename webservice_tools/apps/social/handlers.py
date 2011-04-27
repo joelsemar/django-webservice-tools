@@ -113,23 +113,23 @@ class SocialPostHandler(BaseHandler):
             return response.send(errors="This user has not registered us with the network specified")
         
         #Call the name of the network as a helper method to implement the different posts
-        getattr(self, network.name)(user_profile, credentials, network, message)
+        getattr(self, network.name)(credentials, network, message)
         
         return response.send()
     
-    def twitter(self, user_profile, credentials, network, message):
+    def twitter(self, credentials, network, message):
         
         oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, network.getCredentials(),
                                                     token=oauth.OAuthToken.from_string(credentials.token), method='POST', params={'status': message})
         oauth.fetchResponse(oauthRequest, network.base_url)
         
-    def facebook(self, user_profile, credentials, network, message):
+    def facebook(self, credentials, network, message):
         utils.makeAPICall(credentials.network.base_url,
                           '%s/feed' % credentials.uuid,
                            postData={'access_token': credentials.token, 'message': message},
                            secure=True, deserializeAs='skip')   
     
-    def linkedin(self, user_profile, credentials, network, message):
+    def linkedin(self, credentials, network, message):
         raise NotImplementedError
 
 
@@ -205,7 +205,7 @@ class SocialRegisterHandler(BaseHandler):
         """
         Helper function to handle the linkedin redirect
         """
-        raise NotImplementedError
+        return self.twitter(request, network, response)
     
     
 class SocialCallbackHandler(BaseHandler):
@@ -315,4 +315,4 @@ class SocialCallbackHandler(BaseHandler):
         """
         Helper function to handle the callbacks for linkedin
         """
-        raise NotImplementedError
+        return self.twitter(request, network, profile, response)
