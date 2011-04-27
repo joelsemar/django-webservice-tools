@@ -112,7 +112,7 @@ class SocialPostHandler(BaseHandler):
             return response.send(errors="This user has not registered us with the network specified")
         
         #Call the name of the network as a helper method to implement the different posts
-        getattr(self, network.name)(user_profile, credentials, network, message)
+        getattr(self, network.name)(profile, credentials, network, message)
         
         return response.send()
     
