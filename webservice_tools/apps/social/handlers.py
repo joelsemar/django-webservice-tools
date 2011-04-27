@@ -94,7 +94,7 @@ class SocialPostHandler(BaseHandler):
              @network [string] Name of the network to post to
              @message [string] message to be posted
         """
-        user_profile = request.user.get_profile()
+        profile = request.user.get_profile()
         message = request.POST.get('message')
         network = request.POST.get('network')
         
