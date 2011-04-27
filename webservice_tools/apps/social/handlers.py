@@ -70,8 +70,6 @@ class SocialFriendHandler(BaseHandler):
         return [b['id'] for b in friends['data']] 
         
     def twitter(self, request, profile, network, credentials):
-        
-        network = credentials.network
         oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, network.getCredentials(),
                                                     token=oauth.OAuthToken.from_string(credentials.token))
         oauth.fetchResponse(oauthRequest, network.base_url)
@@ -264,7 +262,7 @@ class SocialCallbackHandler(BaseHandler):
         #store the token in the session and in the db, in the future we will look in the session first, and then
         #the db if that fails
         request.session['%s_access_token' % network.name] = accessToken
-        params = cgi.parse_qs(access_token)
+        params = cgi.parse_qs(accessToken)
         
         UserNetworkCredentials.objects.filter(profile=profile, network=network).delete()
         UserNetworkCredentials.objects.create(access_token=accessToken, 
