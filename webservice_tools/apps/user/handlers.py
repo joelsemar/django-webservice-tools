@@ -47,7 +47,7 @@ class GenericUserHandler(FormHandler):
         user_profile = utils.toDict(request.user.get_profile())
         user_profile['username'] = request.user.username
         
-        response.set(user=utils.toDict(user_profile))
+        response.set(user=user_profile)
         return response.send()
     
     
