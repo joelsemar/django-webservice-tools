@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 class BaseProfile(models.Model):
-    user = models.ForeignKey(User)
+    user = models.OneToOneField(User)
     if 'webservice_tools.apps.friends' in settings.INSTALLED_APPS:
         friends = models.ManyToManyField('self')
         

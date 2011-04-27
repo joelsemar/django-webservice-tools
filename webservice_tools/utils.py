@@ -56,14 +56,31 @@ class Resource(PistonResource):
 
 
 class HandlerMetaClass(PistonHandlerMetaClass):
+    """
+    Little enhancement to the piston base class
+    """
+    
+    
     def __new__(cls, name, bases, attrs):
         
         new_cls = PistonHandlerMetaClass.__new__(cls, name, bases, attrs)
         if hasattr(new_cls, 'model'):
             model = getattr(new_cls, 'model')
             if not new_cls.fields:
-                new_cls.fields = tuple([f for f in model._meta.get_all_field_names()])
+                new_cls.fields = tuple(model._meta.get_all_field_names())
             new_cls.fields += getattr(new_cls, 'extra_fields', ())
+            if new_cls.exclude:
+                fields = set(new_cls.fields)
+                for exclude in new_cls.exclude:
+                    if isinstance(exclude, basestring):
+                        fields.discard(exclude)
+
+                    elif isinstance(exclude, re._pattern_type):
+                        for field in fields.copy():
+                            if exclude.match(field):
+                                fields.discard(field)
+                new_cls.fields = fields
+                
         new_cls.exclude = ()
         return new_cls
 

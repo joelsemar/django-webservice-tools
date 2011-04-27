@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 NETWORK_HTTP_ERROR = "There was a problem reaching %s, please try again."
 
 
-class UserHandler(utils.BaseHandler):
+class UnusedUserHandler(utils.PistonBaseHandler):
     model = User
     fields = ('id', 'username', 'first_name', 'last_name', 'last_login', 'email', 'is_staff')
 
