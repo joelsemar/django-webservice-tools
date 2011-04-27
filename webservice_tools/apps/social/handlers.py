@@ -137,7 +137,7 @@ class SocialRegisterHandler(BaseHandler):
     model = SocialNetwork
     
     @login_required
-    def create(self, request, network, response):
+    def create(self, request, network, response=None):
         """
         Attempts to gain permission to a user's data with a social network, if successful, will 
         return a redirect to the network's servers, there the user will be prompted to login if 
@@ -147,6 +147,9 @@ class SocialRegisterHandler(BaseHandler):
             None
         """
         profile = request.user.get_profile()
+
+        if not response:
+            response = ResponseObject()
         
         try:
             network = SocialNetwork.objects.get(name=network)
