@@ -4,8 +4,14 @@ from django.utils.importlib import import_module
 from webservice_tools import utils
 from django.contrib.auth import authenticate, login, logout
 from webservice_tools.decorators import login_required
+from django.contrib.auth.models import User
 
 NETWORK_HTTP_ERROR = "There was a problem reaching %s, please try again."
+
+
+class UserHandler(utils.BaseHandler):
+    model = User
+    fields = ('id', 'username', 'first_name', 'last_name', 'last_login', 'email', 'is_staff')
 
 class GenericUserHandler(utils.BaseHandler):
     allowed_methods = ('POST', 'GET', 'PUT')
@@ -28,11 +34,13 @@ class GenericUserHandler(utils.BaseHandler):
         API Handler: GET /user
         """
         profile = request.user.get_profile()
+        response.set(profile=profile)
+        return response.send()
         profile_dict = utils.toDict(profile)
         profile_dict['username'] = request.user.username
         profile_dict['first_name'] = request.user.first_name
         profile_dict['last_name'] = request.user.last_name
-        response.set(user=profile_dict)
+        response.set(profile=profile_dict)
         return response.send()
     
     
@@ -111,7 +119,7 @@ class GenericUserHandler(utils.BaseHandler):
         return response.send()
 
 
-class LoginHandler(BaseHandler):
+class LoginHandler(utils.BaseHandler):
     allowed_methods = ('POST', 'DELETE', 'GET', 'PUT')
     
     def create(self, request, response):
