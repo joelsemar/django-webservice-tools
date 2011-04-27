@@ -44,10 +44,7 @@ class GenericUserHandler(FormHandler):
         Return the details of the User's profile and preferences
         API Handler: GET /user
         """
-        user_profile = utils.toDict(request.user.get_profile())
-        user_profile['username'] = request.user.username
-        
-        response.set(user=user_profile)
+        response.set(user=request.user.get_profile())
         return response.send()
     
     
