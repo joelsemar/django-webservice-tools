@@ -47,11 +47,11 @@ class SocialFriendHandler(BaseHandler):
         except UserNetworkCredentials.DoesNotExist:
             return response.send(errors='Either %s does not exist or we do not have credentials for that user.' % network.name)
         
-        #Use the name of the network to call the helper function  
+        #Use the name of the network to call the helper function
         friend_social_ids = getattr(self, network.name)(request, profile, network, credentials)
         
-        social_friends_credentials = UserNetworkCredentials.objects.filter(network=network, 
-                                                                        uuid__in=friend_social_ids)
+        social_friends_credentials = UserNetworkCredentials.objects.filter(network=network,
+                                                                           uuid__in=friend_social_ids)
         
         results = [{'id':cred.profile.id, 
                     'name_in_network':cred.name_in_network,
@@ -62,10 +62,12 @@ class SocialFriendHandler(BaseHandler):
         return response.send()
         
     def facebook(self, request, profile, network, credentials):
-        return utils.makeAPICall(network.base_url,
-                                 '%s/friends' % credentials.uuid,
+        friends = utils.makeAPICall(network.base_url,
+                                 'me/friends',
                                  queryData={'access_token': credentials.token},
-                                 secure=True, deserializeAs='skip')
+                                 secure=True)
+        
+        return [b['id'] for b in friends['data']] 
         
     def twitter(self, request, profile, network, credentials):
         
@@ -140,7 +142,7 @@ class SocialRegisterHandler(BaseHandler):
         """
         Attempts to gain permission to a user's data with a social network, if successful, will 
         return a redirect to the network's servers, there the user will be prompted to login if 
-        necessary, and allow or deny us access. facebook, twitter, and linkedin
+        necessary, and allow or deny us access. network = {facebook|twitter|linkedin}
         API handler: POST /social/register/{network}
         Params:
             None
@@ -300,12 +302,13 @@ class SocialCallbackHandler(BaseHandler):
                                 apiHandler='me?access_token=%s' % access_token,
                                 secure=True)
         
+        
         UserNetworkCredentials.objects.filter(profile=profile, network=network).delete()
         UserNetworkCredentials.objects.create(access_token=access_token,
                                               profile=profile,
                                               network=network,
                                               uuid=ret['id'],
-                                              name_in_network='',
+                                              name_in_network=ret['name'],
                                               result=result)
         return response.send()
     
