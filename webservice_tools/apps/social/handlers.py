@@ -1,7 +1,7 @@
 import datetime
 import urlparse
 import urllib
-import cgi
+import simplejson
 from piston.handler import BaseHandler
 from django.db import transaction, models
 from django.conf import settings
@@ -34,6 +34,7 @@ class SocialFriendHandler(BaseHandler):
           @network [string] {twitter|facebook|linkedin}
         """
         network = request.GET.get('network')
+        extra = request.GET.get('extra')
         profile = request.user.get_profile()
         
         try:
@@ -44,13 +45,13 @@ class SocialFriendHandler(BaseHandler):
         try:
             credentials = UserNetworkCredentials.objects.get(profile=profile, network=network)
         except UserNetworkCredentials.DoesNotExist:
-            return response.send(errors='Either %s does not exist or we do not have credentials for that user.' % network_name)
+            return response.send(errors='Either %s does not exist or we do not have credentials for that user.' % network.name)
         
-        #Use the name of the network to call the helper function  
-        friend_social_ids = getattr(self, network_name)(request, profile, credentials.network, credentials)
+        #Use the name of the network to call the helper function
+        friend_social_ids = getattr(self, network.name)(profile, network, credentials)
         
-        social_friends_credentials = UserNetworkCredentials.objects.filter(network=network, 
-                                                                        uuid__in=friend_social_ids)
+        social_friends_credentials = UserNetworkCredentials.objects.filter(network=network,
+                                                                           uuid__in=friend_social_ids)
         
         results = [{'id':cred.profile.id, 
                     'name_in_network':cred.name_in_network,
@@ -60,18 +61,20 @@ class SocialFriendHandler(BaseHandler):
         
         return response.send()
         
-    def facebook(self, request, profile, network, credentials):
-        return utils.makeAPICall(network.base_url,
-                                 '%s/friends' % credentials.uuid,
+    def facebook(self, profile, network, credentials):
+        friends = utils.makeAPICall(network.base_url,
+                                 'me/friends',
                                  queryData={'access_token': credentials.token},
-                                 secure=True, deserializeAs='skip')
+                                 secure=True)
         
-    def twitter(self, request, profile, network, credentials):
+        return [x['id'] for x in friends['data']] 
         
-        network = credentials.network
-        oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, network.getCredentials(),
+    def twitter(self, profile, network, credentials):
+        oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/friends.json' % network.base_url, network.getCredentials(),
                                                     token=oauth.OAuthToken.from_string(credentials.token))
-        oauth.fetchResponse(oauthRequest, network.base_url)
+        ret = oauth.fetchResponse(oauthRequest, network.base_url).read()
+        friends = simplejson.loads(ret)
+        return [x['id'] for x in friends]
     
     def linkedin(self, request, profile, network, credentials):
         raise NotImplementedError
@@ -91,7 +94,7 @@ class SocialPostHandler(BaseHandler):
              @network [string] Name of the network to post to
              @message [string] message to be posted
         """
-        user_profile = request.user.get_profile()
+        profile = request.user.get_profile()
         message = request.POST.get('message')
         network = request.POST.get('network')
         
@@ -115,13 +118,11 @@ class SocialPostHandler(BaseHandler):
     
     def twitter(self, user_profile, credentials, network, message):
         
-        network = credentials.network
         oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, network.getCredentials(),
-                                                    token=credentials.token, method='POST', params={'status': message})
+                                                    token=oauth.OAuthToken.from_string(credentials.token), method='POST', params={'status': message})
         oauth.fetchResponse(oauthRequest, network.base_url)
         
     def facebook(self, user_profile, credentials, network, message):
-        network = credentials.network
         utils.makeAPICall(credentials.network.base_url,
                           '%s/feed' % credentials.uuid,
                            postData={'access_token': credentials.token, 'message': message},
@@ -132,22 +133,24 @@ class SocialPostHandler(BaseHandler):
 
 
 class SocialRegisterHandler(BaseHandler):
-    allowed_methods = ('GET', 'POST')
+    allowed_methods = ('POST',)
     
     model = SocialNetwork
     
     @login_required
-    def create(self, request, response):
+    def create(self, request, network, response=None):
         """
         Attempts to gain permission to a user's data with a social network, if successful, will 
         return a redirect to the network's servers, there the user will be prompted to login if 
-        necessary, and allow or deny us access.        
-        API handler: POST /social/register
+        necessary, and allow or deny us access. network = {facebook|twitter|linkedin}
+        API handler: POST /social/register/{network}
         Params:
-            @network [string] {facebook|twitter|linkedin}
+            None
         """
         profile = request.user.get_profile()
-        network = request.POST.get('network')
+
+        if not response:
+            response = ResponseObject()
         
         try:
             network = SocialNetwork.objects.get(name=network)
@@ -226,7 +229,7 @@ class SocialCallbackHandler(BaseHandler):
             return response.send(errors='Invalid network', status=404)
         
         #Use the name of the network to call the helper function
-        return getattr(self, network_name)(request, network, profile, response)
+        return getattr(self, network.name)(request, network, profile, response)
         
         
     def twitter(self, request, network, profile, response):
@@ -261,15 +264,14 @@ class SocialCallbackHandler(BaseHandler):
         #store the token in the session and in the db, in the future we will look in the session first, and then
         #the db if that fails
         request.session['%s_access_token' % network.name] = accessToken
-        params = cgi.parse_qs(access_token)
+        params = urlparse.parse_qs(accessToken)
         
         UserNetworkCredentials.objects.filter(profile=profile, network=network).delete()
         UserNetworkCredentials.objects.create(access_token=accessToken, 
                                               profile=profile,
                                               network=network,
                                               uuid=params['user_id'][0],
-                                              name_in_network=params['screen_name'][0],
-                                              result=accessToken)
+                                              name_in_network=params['screen_name'][0])
         return response.send()
 
 
@@ -299,11 +301,17 @@ class SocialCallbackHandler(BaseHandler):
                                 apiHandler='me?access_token=%s' % access_token,
                                 secure=True)
         
+        
         UserNetworkCredentials.objects.filter(profile=profile, network=network).delete()
         UserNetworkCredentials.objects.create(access_token=access_token,
                                               profile=profile,
                                               network=network,
                                               uuid=ret['id'],
-                                              name_in_network='',
-                                              result=result)
+                                              name_in_network=ret['name'])
         return response.send()
+    
+    def linkedin(self, request, network, profile, response):
+        """
+        Helper function to handle the callbacks for linkedin
+        """
+        raise NotImplementedError
