@@ -49,7 +49,7 @@ class ServerDeclaration():
         if not docstring:
             return ret
 
-        variable_declarations = re.findall(VAR_REGEX, docstring, flags=re.DOTALL)
+        variable_declarations = re.findall(VAR_REGEX, docstring)
         for declaration in variable_declarations:
             ret.append(self._get_dict_from_var_declaration(declaration))
         return ret
