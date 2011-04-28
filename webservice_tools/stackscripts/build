@@ -44,7 +44,7 @@ apache_tune
 system_sshd_permitrootlogin 'No'
 system_add_user $USER_NAME $USER_PASSWORD sudo
 apt-get -y install python-setuptools python2.6-dev python-simplejson libapache2-mod-wsgi python-pip python-crypto ipython
-pip install south
+easy_install South
 apt-get -y install gcc
 
 #deps
