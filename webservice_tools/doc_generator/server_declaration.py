@@ -2,7 +2,7 @@ import re
 from webservice_tools.utils import Resource
 call_map = {'GET': 'read', 'POST': 'create', 
             'PUT': 'update', 'DELETE': 'delete'}
-VAR_REGEX = r'\@[\w]+\ \[[\w\[\]]+\]\ .+ \n@?' # @parameter [type] some comment
+VAR_REGEX = r'\@[\w]+\ \[[\w\[\]]+\]\ .+' # @parameter [type] some comment
 
 class ServerDeclaration():
     
