@@ -77,7 +77,7 @@ class SocialFriendHandler(BaseHandler):
         friends = simplejson.loads(ret)
         return [x['id'] for x in friends]
     
-    def linkedin(self, request, profile, network, credentials):
+    def linkedin(self, profile, network, credentials):
         oauthRequest = oauth.makeOauthRequestObject('https://%s/v1/people/~/connections' % network.base_url, 
                                                     network.getCredentials(), method='GET',
                                                     token=oauth.OAuthToken.from_string(credentials.token))
