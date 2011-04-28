@@ -13,7 +13,7 @@
 #      default="lnserver">
 
 read -e -p "User Name:" USER_NAME
-read -e -s "User password:" USER_PASSWORD
+read -s -p "User password:" USER_PASSWORD
 read -e -p "Server Name:" SERVER_NAME
 read -e -p "Host name:" HOST_NAME
 read -e -p "Github Login:"  GITHUB_LOGIN
