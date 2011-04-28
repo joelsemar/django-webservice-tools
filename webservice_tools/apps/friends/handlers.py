@@ -46,7 +46,7 @@ class FriendRequestHandler(BaseHandler):
     def create(self, request, id, response):
         """
         Create a new friend request
-        API Handler: POST /requests/user/{id}
+        API Handler: POST /friends/requests/user/{id}
         Params:
           @id [id]: id of the friend being requested
           @message [string] (optional): message to send to the friend
@@ -138,7 +138,7 @@ class GroupHandler(BaseHandler):
     def read(self, request, id, response):
         """
         Get a group's details by ID
-        API Handler: GET /group/{id}
+        API Handler: GET /friends/group/{id}
         """
         profile = request.user.get_profile()
         try:
@@ -155,9 +155,9 @@ class GroupHandler(BaseHandler):
     def create(self, request, response):
         """
         Create a new Group
-        API Handler: POST /group
+        API Handler: POST /friends/group
         Params:
-            @name: name of the new group
+            @name [string] name of the new group
         """
         profile = request.user.get_profile()
         name = request.POST.get("name")
@@ -208,7 +208,7 @@ class GroupHandler(BaseHandler):
     def delete(self, request, id, response):
         """
         Delete a group
-        API Handler: DELETE /group/{id}
+        API Handler: DELETE /friends/group/{id}
         """
         profile = request.user.get_profile()
         try:
@@ -226,7 +226,7 @@ class GroupsHandler(BaseHandler):
     def read(self, request, response):
         """
         Get the groups of the logged in user
-        API Handler: GET /groups
+        API Handler: GET /friends/groups
         """
         profile = request.user.get_profile()
         friend_groups = FriendGroup.objects.filter(owner=profile)

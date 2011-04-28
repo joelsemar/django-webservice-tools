@@ -20,7 +20,6 @@ class GeoHandler(BaseHandler):
         API Handler: GET /services/geo
         GET Params:
             @address [string] the address you'd like to geocode
-            
             @lat [latitude] the latitude you'd like to reverse geocode, required if address is not supplied
             @lng [longitude] the longitude you'd like to reverse geocode, required if address is not supplied
         """

@@ -51,7 +51,7 @@ class ServerDeclaration():
 
         variable_declarations = re.findall(VAR_REGEX, docstring, flags=re.MULTILINE|re.DOTALL)
         if variable_declarations:
-            variable_declarations = [f for f in variable_declarations[0].split('@') if f.strip()]
+            variable_declarations = [f for f in variable_declarations[0].split('    @') if f.strip()]
         for declaration in variable_declarations:
             ret.append(self._get_dict_from_var_declaration(declaration))
         return ret
@@ -84,7 +84,7 @@ class ServerDeclaration():
                     all.append(entry)
                     if isinstance(callback, Resource):
                         handler_name =  callback.handler.__class__.__name__
-                        if handler_name not in handler_names and not getattr(callback.handler.__class__, 'abstract', False):
+                        if handler_name not in handler_names and not getattr(callback.handler.__class__, 'internal', False):
                             handler_names.append(handler_name)
                             ret.append(callback.handler)
         
