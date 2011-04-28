@@ -2,8 +2,8 @@ import re
 from webservice_tools.utils import Resource
 call_map = {'GET': 'read', 'POST': 'create', 
             'PUT': 'update', 'DELETE': 'delete'}
-VAR_REGEX = r'\@[\w]+\ \[[\w\[\]]+\]\ .+' # @parameter [type] some comment
-
+#VAR_REGEX = r'^[@][\w]+\ \[[\w\[\]]+\]\ .+' # @parameter [type] some comment
+VAR_REGEX = ex = '^\ +\@.+'
 class ServerDeclaration():
     
     def __init__(self):
@@ -49,13 +49,19 @@ class ServerDeclaration():
         if not docstring:
             return ret
 
-        variable_declarations = re.findall(VAR_REGEX, docstring)
+        variable_declarations = re.findall(VAR_REGEX, docstring, flags=re.MULTILINE|re.DOTALL)
+        if variable_declarations:
+            variable_declarations = [f for f in variable_declarations[0].split('@') if f.strip()]
         for declaration in variable_declarations:
             ret.append(self._get_dict_from_var_declaration(declaration))
         return ret
     
     def _get_dict_from_var_declaration(self, declaration):
-        param = re.search(r'^\@(?P<name>[\w]+)[\ ]+\[(?P<type>[\w\[\]]+)\][\ ]*(?P<comment>.*)', declaration, flags=re.DOTALL).groupdict()
+        param = re.search(r'^(?P<name>[\w]+)[\ ]+\[(?P<type>[\w\[\]]+)\][\ ]*(?P<comment>.*)', declaration, flags=re.DOTALL)
+        if not param:
+            return {}
+        param = param.groupdict()
+        param['comment'] = re.sub('\n', '<br />', param['comment'])
         if re.search('(optional)', declaration):
             param['comment'] = re.sub('\(optional\)', '', param['comment'])
             param['required'] = '0'

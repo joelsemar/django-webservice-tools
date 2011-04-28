@@ -72,7 +72,7 @@
                 <li>
                     <b>{{param.name}}</b>
                     -- <i>{{param.type}}</i>
-                    {%ifequal param.required '0' %}(optional){%endifequal%} {{param.comment}}
+                    {%ifequal param.required '0' %}(optional){%endifequal%} {% autoescape off %}{{param.comment}}{% endautoescape %}
                 </li>
                 {% endfor %}
                 {%else %}

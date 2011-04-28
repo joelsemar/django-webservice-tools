@@ -1,4 +1,4 @@
-from piston.handler import BaseHandler
+from webservice_tools.utils import BaseHandler
 from webservice_tools import  utils
 from webservice_tools.decorators import login_required
 from webservice_tools.apps.friends.models import FriendRequest, FriendGroup
