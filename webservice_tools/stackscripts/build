@@ -13,7 +13,7 @@
 #      default="lnserver">
 
 read -e -p "User Name:" USER_NAME
-read -e -s "User password:" USER_PASSWORD
+read -s -p "User password:" USER_PASSWORD
 read -e -p "Server Name:" SERVER_NAME
 read -e -p "Host name:" HOST_NAME
 read -e -p "Github Login:"  GITHUB_LOGIN
@@ -44,7 +44,7 @@ apache_tune
 system_sshd_permitrootlogin 'No'
 system_add_user $USER_NAME $USER_PASSWORD sudo
 apt-get -y install python-setuptools python2.6-dev python-simplejson libapache2-mod-wsgi python-pip python-crypto ipython
-pip install south
+easy_install South
 apt-get -y install gcc
 
 #deps

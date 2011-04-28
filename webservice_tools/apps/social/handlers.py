@@ -31,7 +31,6 @@ class SocialFriendHandler(BaseHandler):
         Get the list of friends from a social network for a user that has registered us with that network
         API Handler: GET /social/friends
         Params:
-          @extra [string] (optional) For twitter only, can be one of {followers|followees}
           @network [string] {twitter|facebook|linkedin}
         """
         network = request.GET.get('network')
@@ -71,14 +70,21 @@ class SocialFriendHandler(BaseHandler):
         return [x['id'] for x in friends['data']] 
         
     def twitter(self, profile, network, credentials):
-        oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/friends.json' % network.base_url, network.getCredentials(),
+        oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/friends.json' % network.base_url, 
+                                                    network.getCredentials(),
                                                     token=oauth.OAuthToken.from_string(credentials.token))
         ret = oauth.fetchResponse(oauthRequest, network.base_url).read()
         friends = simplejson.loads(ret)
         return [x['id'] for x in friends]
     
-    def linkedin(self, request, profile, network, credentials):
-        raise NotImplementedError
+    def linkedin(self, profile, network, credentials):
+        oauthRequest = oauth.makeOauthRequestObject('https://%s/v1/people/~/connections' % network.base_url, 
+                                                    network.getCredentials(), method='GET',
+                                                    token=oauth.OAuthToken.from_string(credentials.token))
+        ret = oauth.fetchResponse(oauthRequest, network.base_url).read()
+        friends = utils.fromXML(ret).person
+        return [urlparse.parse_qs(y['site_standard_profile_request']['url'])['key'][0] for y in friends]
+
         
 
 
@@ -88,11 +94,12 @@ class SocialPostHandler(BaseHandler):
     @login_required
     def create(self, request, response):
         """
-        Post a message a social network for a user that has registered us with that network
+        Post a message a social network for a user that has registered us with that network - NOTE Linkedin 
+        does NOT allow POSTING
         API Handler:
               POST /social/post
         PARAMS
-             @network [string] Name of the network to post to
+             @network [string] {twitter|facebook} Name of the network to post to
              @message [string] message to be posted
         """
         profile = request.user.get_profile()
@@ -267,6 +274,15 @@ class SocialCallbackHandler(BaseHandler):
         request.session['%s_access_token' % network.name] = accessToken
         params = urlparse.parse_qs(accessToken)
         
+        if network.name == 'linkedin':
+            oauthRequest = oauth.makeOauthRequestObject('https://%s/v1/people/~' % network.base_url, 
+                                network.getCredentials(), token=oauth.OAuthToken.from_string(accessToken), 
+                                method='GET')
+            ret = oauth.fetchResponse(oauthRequest, network.base_url).read()
+            ret = utils.fromXML(ret)
+            params['user_id'] = [urlparse.parse_qs(ret['site_standard_profile_request']['url'])['key'][0], '0']
+            params['screen_name'] = ['%s %s' % (ret['first_name'], ret['last_name']), '0']
+            
         UserNetworkCredentials.objects.filter(profile=profile, network=network).delete()
         UserNetworkCredentials.objects.create(access_token=accessToken, 
                                               profile=profile,
