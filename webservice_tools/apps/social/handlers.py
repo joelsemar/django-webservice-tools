@@ -276,7 +276,7 @@ class SocialCallbackHandler(BaseHandler):
         
         if network.name == 'linkedin':
             oauthRequest = oauth.makeOauthRequestObject('https://%s/v1/people/~' % network.base_url, 
-                                network.getCredentials(), token==oauth.OAuthToken.from_string(accessToken), 
+                                network.getCredentials(), token=oauth.OAuthToken.from_string(accessToken), 
                                 method='GET')
             ret = oauth.fetchResponse(oauthRequest, network.base_url).read()
             ret = utils.fromXML(ret)
