@@ -56,6 +56,11 @@ class Resource(PistonResource):
 
 
 class HandlerMetaClass(PistonHandlerMetaClass):
+    """
+    Little enhancement to the piston base class
+    """
+    
+    
     def __new__(cls, name, bases, attrs):
         
         new_cls = PistonHandlerMetaClass.__new__(cls, name, bases, attrs)
@@ -63,14 +68,39 @@ class HandlerMetaClass(PistonHandlerMetaClass):
             model = getattr(new_cls, 'model')
             if not new_cls.fields:
                 new_cls.fields = tuple(model._meta.get_all_field_names())
-        
             new_cls.fields += getattr(new_cls, 'extra_fields', ())
+            if new_cls.exclude:
+                fields = set(new_cls.fields)
+                for exclude in new_cls.exclude:
+                    if isinstance(exclude, basestring):
+                        fields.discard(exclude)
+
+                    elif isinstance(exclude, re._pattern_type):
+                        for field in fields.copy():
+                            if exclude.match(field):
+                                fields.discard(field)
+                new_cls.fields = fields
+                
         new_cls.exclude = ()
         return new_cls
 
 class BaseHandler(PistonBaseHandler):
     __metaclass__ = HandlerMetaClass
-
+    
+    def format_errors(self, form):
+        return [v[0].replace('This field', k.title()) for k, v in form.errors.items()]
+    
+    def create(self, request, response):
+        form = self.form(request.POST)
+        if form.is_valid():
+            form.save()
+            return response.send()
+        else:
+            return response.send(errors=self.format_errors(form))
+    
+    def update(self, request, id, response):
+        pass
+    
 
 class XMLEmitter(PistonXMLEmitter):
     def render(self, request):

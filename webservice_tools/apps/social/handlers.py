@@ -2,12 +2,13 @@ import datetime
 import urlparse
 import urllib
 import simplejson
-from piston.handler import BaseHandler
+
 from django.db import transaction, models
 from django.conf import settings
 from django.utils.importlib import import_module
 from django.http import HttpResponseRedirect, HttpResponse
 from webservice_tools import oauth, utils
+from webservice_tools.utils import BaseHandler
 from django.contrib.auth import authenticate, login, logout
 from webservice_tools.decorators import login_required
 from webservice_tools.response_util import ResponseObject

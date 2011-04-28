@@ -31,7 +31,7 @@ def data_delete(fn):
         try:
             request = [a for a in args if hasattr(a, 'user')][0]
         except IndexError:
-            return response.send(errors="Login required method called without request object", status=500)
+            return response.send(errors="Data delete decorated function called without request object", status=400)
         
         
         if request.raw_post_data and request.method == 'DELETE':
@@ -113,25 +113,4 @@ def profile(log_file):
 
         return _inner
     return _outer
-
-
-
-def make_b(fn):
-    def inner(*args, **kwargs):
-        b  = [i for i in args if i==1][0]
-        temp_args = [a for a in args]
-        temp_args[temp_args.index(b)] = 2
-        return fn(*temp_args, **kwargs)
-    return inner
-
-
-def foo(fn):
-    def inner(*args, **kwargs):
-        return fn(*args, **kwargs)
-    return inner
-
-def bar(fn):
-    def inner(*args, **kwargs):
-        return fn(*args, **kwargs)
-    return inner
 
