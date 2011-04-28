@@ -280,8 +280,8 @@ class SocialCallbackHandler(BaseHandler):
                                 method='GET')
             ret = oauth.fetchResponse(oauthRequest, network.base_url).read()
             ret = utils.fromXML(ret)
-            params['user_id'] = urlparse.parse_qs(ret['site_standard_profile_request']['url'])['key'][0]
-            params['screen_name'] = '%s %s' % (ret['first_name'], ret['last_name'])
+            params['user_id'] = [urlparse.parse_qs(ret['site_standard_profile_request']['url'])['key'][0], '0']
+            params['screen_name'] = ['%s %s' % (ret['first_name'], ret['last_name']), '0']
             
         UserNetworkCredentials.objects.filter(profile=profile, network=network).delete()
         UserNetworkCredentials.objects.create(access_token=accessToken, 
