@@ -15,7 +15,6 @@ from webservice_tools.response_util import ResponseObject
 from webservice_tools.apps.social.models import SocialNetwork, UserNetworkCredentials
 app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
 PROFILE_MODEL = models.get_model(app_label, model_name)
-
 NETWORK_HTTP_ERROR = "There was a problem reaching %s, please try again."
 
 class SocialNetworkError(Exception):

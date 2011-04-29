@@ -6,7 +6,7 @@
             function socialTest(){
                 var input = document.getElementById('url');
                 var form = document.getElementById('socialForm');
-                form.action = input.value;
+                form.action = {{baseURL}} + input.value;
                 form.submit();
                 return false;
             }
@@ -14,9 +14,9 @@
             
         </script>
     </head>
-    <h3> facebook or twitter</h3>
+    <h3>Network Name:</h3>
     <form id="socialForm" action='' method='POST'>
-        URL<input id='url' type='text' value='facebook'></input>
+        POST to {{baseURL}}<input id='url' type='text' value='facebook'></input>
         <button type='button' onclick='return socialTest()'>
             Submit
         </button>

@@ -22,7 +22,9 @@ from piston.resource import Resource as PistonResource
 from piston.handler import BaseHandler as PistonBaseHandler, HandlerMetaClass as PistonHandlerMetaClass
 from piston.emitters import Emitter, XMLEmitter as PistonXMLEmitter
 from webservice_tools.decorators import retry
-from django.conf import settings
+from django.conf import settings as django_settings
+from django.core.cache import cache
+from django.db import  models
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
@@ -36,6 +38,9 @@ YAHOO_APPID = "0NYrSEfV34E53zulq2mSDNG2tj6cR5IUlpDpguxqUx6mBs_GDVjIf5OguewjmQ--"
 YAHOO_LOCATION_URL = "http://local.yahooapis.com/LocalSearchService/V3/localSearch?"
 
 GOOGLE_QR_CODE_URL = "https://chart.googleapis.com/chart?cht=qr&chs=150x150&(data)s&chld=L|4"
+
+SITE_SETTINGS_KEY = '%s_site_settings' % django_settings.SERVER_NAME
+
 class Resource(PistonResource):
     def determine_emitter(self, request, *args, **kwargs):
         """
@@ -105,7 +110,7 @@ class BaseHandler(PistonBaseHandler):
 class XMLEmitter(PistonXMLEmitter):
     def render(self, request):
         result = super(XMLEmitter, self).render(request)
-        if settings.DEBUG:
+        if django_settings.DEBUG:
             result = prettyxml(minidom.parseString(result))
         return result
 
@@ -417,6 +422,20 @@ class PlacesSearch():
         args = friendlyURLEncode(self.arg_dict)
         return simplejson.loads(urllib2.urlopen(YAHOO_LOCATION_URL + args).read())
 
+
+
+def get_site_settings():
+    app_label, model_name = django_settings.SITE_SETTINGS_MODEL.split('.')
+    SITE_SETTINGS_MODEL = models.get_model(app_label, model_name)
+    site_settings = cache.get(SITE_SETTINGS_KEY)
+    if not site_settings:
+        try:
+            site_settings = SITE_SETTINGS_MODEL.objects.all().order_by('-when_created')[0]
+        except SITE_SETTINGS_MODEL.DoesNotExist:
+            raise Exception('Please create a row for your site settings.')
+        cache.set(SITE_SETTINGS_KEY, site_settings)
+    return cache.get(SITE_SETTINGS_KEY)
+    
             
 def generateNewPassword():
     # generates a new password

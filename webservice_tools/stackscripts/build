@@ -12,9 +12,12 @@
 #       eg: 'cbserver' in SportsClubFanatics/cbserver or 'BotannicalEdition/wdykbserver' on WhatDoYouKnow/BotannicalEdition/wdykbsever" 
 #      default="lnserver">
 
-read -e -p "User Name:" USER_NAME
+USER_NAME=appiction
 read -s -p "User password:" USER_PASSWORD
-read -e -p "Server Name:" SERVER_NAME
+if [!"$SERVER_NAME"]
+  then
+    read -e -p "Server Name:" SERVER_NAME
+fi    
 read -e -p "Host name:" HOST_NAME
 read -e -p "Github Login:"  GITHUB_LOGIN
 read -s -p "Github Password:" GITHUB_PASSWORD

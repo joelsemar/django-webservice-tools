@@ -9,5 +9,5 @@ urlpatterns = patterns('webservice_tools.views',
     ('amialive/?$', 'amialive'),
     ('docs/?$', Resource(DocHandler)),
     (r'^apiconsole/?$', direct_to_template, {'template': 'apiconsole.html', 'extra_context': {'baseURL': '/%s/' % settings.SERVER_NAME}}),
-    (r'^socialtest/?$', direct_to_template, {'template': 'socialtest.html', 'extra_context': {'baseURL': '/%s/' % settings.SERVER_NAME}}),
+    (r'^socialtest/?$', direct_to_template, {'template': 'socialtest.html', 'extra_context': {'baseURL': '/%s/social/' % settings.SERVER_NAME}}),
     )

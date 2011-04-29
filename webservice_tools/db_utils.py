@@ -39,13 +39,9 @@ class ExpirationManager(models.Manager):
     Manager auto filters out instances that expired, 
     Using the provided DateTimeField, (defaults to 'expires') doesn't get return if that time has passed
     """
-    def __init__(self, field='expires'):
-        self.kwarg = '%s__gte' % field
-        super(ExpirationManager, self).__init__()
-
     def get_query_set(self):
         now = datetime.datetime.utcnow()
-        return super(ExpirationManager, self).get_query_set().filter(**{self.kwarg: now})
+        return super(ExpirationManager, self).get_query_set().filter(**{'expires__gte': now})
 
     def all_with_expired(self):
         #returns all objects, expired or not or not
