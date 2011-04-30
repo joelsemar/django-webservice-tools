@@ -72,7 +72,7 @@ class HandlerMetaClass(PistonHandlerMetaClass):
         if hasattr(new_cls, 'model'):
             model = getattr(new_cls, 'model')
             if not new_cls.fields:
-                new_cls.fields = tuple(model._meta.get_all_field_names())
+                new_cls.fields = tuple([f for f in model._meta.get_all_field_names() if not f.startswith('_')])
             new_cls.fields += getattr(new_cls, 'extra_fields', ())
             if new_cls.exclude:
                 fields = set(new_cls.fields)
