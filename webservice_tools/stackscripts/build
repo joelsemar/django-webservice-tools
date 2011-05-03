@@ -14,17 +14,18 @@
 
 USER_NAME=appiction
 read -s -p "User password:" USER_PASSWORD
-if [!"$SERVER_NAME"]
+echo ""
+if [ -z "$SERVER_NAME"]
   then
-    read -e -p "Server Name:" SERVER_NAME
+    read -e -p "Server Name (something like lnserver):" SERVER_NAME
 fi    
 read -e -p "Github Login:"  GITHUB_LOGIN
 read -s -p "Github Password:" GITHUB_PASSWORD
 echo ""
-read -e -p "Repo name:" REPO_NAME
-read -e -p "Django version:" DJANGO_VER
-read -e -p "Server git path:" SERVER_GIT_PATH
-read -e -p "Hostname:" HOSTNAME
+read -e -p "Repo name (Would be LadiesNight for the above):" REPO_NAME
+read -e -p "Django version (1.3 as of May 3, 2011):" DJANGO_VER
+read -e -p "Server git path (lnserver in 'LadiesNight/lnserver' or 'BotannicalEdition/wdykbserver' in 'WhatDoYouKnow/BotannicalEdition/wdykbserver'):" SERVER_GIT_PATH
+read -e -p "Hostname (something like ws.ladiesnightserver.com):" HOSTNAME
 
 
 source ssinclude-1 #StackScript Bash Library
@@ -185,12 +186,14 @@ EOF
 /etc/init.d/postgresql restart
 
 cd $PROJECT_PATH
+mkdir -p "$PROJECT_PATH/logs"
 ./manage.py syncdb --noinput && echo "Syncing app db.."
 ./manage.py migrate && echo "Migrating if i can.."
 
 #Hook it up
 mkdir -p "$PROJECT_PATH/apache"
 mkdir -p "$PROJECT_PATH/static"
+
 ln -s /usr/local/lib/python2.6/dist-packages/django/contrib/admin/media $PROJECT_PATH/static/admin-media 
 
 cat > "$PROJECT_PATH/apache/django.wsgi" << EOF
@@ -218,3 +221,23 @@ cat > "/etc/apache2/sites-available/$HOSTNAME" << EOF
 EOF
 a2ensite "$HOSTNAME"
 /etc/init.d/apache2 restart
+
+#set hostname
+hostname $SERVER_NAME
+
+cat > "/etc/hosts" << EOF
+127.0.0.1 localhost $SERVER_NAME
+
+# The following lines are desirable for IPv6 capable hosts
+::1 ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
+EOF
+
+cat > "/etc/hostname" << EOF
+$SERVER_NAME
+EOF
+
