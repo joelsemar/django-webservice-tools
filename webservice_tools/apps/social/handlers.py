@@ -146,11 +146,27 @@ class SocialRegisterHandler(BaseHandler):
     @login_required
     def read(self, request, network, response=None):
         """
-        Forwards to POST
+        Attempts to gain permission to a user's data with a social network, if successful, will 
+        return a redirect to the network's servers, there the user will be prompted to login if 
+        necessary, and allow or deny us access. network = {facebook|twitter|linkedin}
+        API handler: POST /social/register/{network}
+        Params:
+            None
         """
-        return self.create(request, network, response)
+        profile = request.user.get_profile()
+
+        if not response:
+            response = ResponseObject()
+        
+        try:
+            network = SocialNetwork.objects.get(name=network)
+        except SocialNetwork.DoesNotExist:
+            return response.send(errors='Invalid network', status=404)
+                
+        #return the results of the helper function that has the name of the network referenced
+        return getattr(self, network.name)(request, network, response)
     
-    @login_required
+
     def create(self, request, network, response=None):
         """
         Attempts to gain permission to a user's data with a social network, if successful, will 
@@ -160,7 +176,7 @@ class SocialRegisterHandler(BaseHandler):
         Params:
             None
         """
-        profile = request.user.get_profile()
+        profile = PROFILE_MODEL.objects.get(user__username='test2')
 
         if not response:
             response = ResponseObject()
