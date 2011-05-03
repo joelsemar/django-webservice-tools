@@ -18,7 +18,6 @@ if [!"$SERVER_NAME"]
   then
     read -e -p "Server Name:" SERVER_NAME
 fi    
-read -e -p "Host name:" HOST_NAME
 read -e -p "Github Login:"  GITHUB_LOGIN
 read -s -p "Github Password:" GITHUB_PASSWORD
 echo ""
@@ -41,12 +40,13 @@ PROJECT_PATH="/var/www/$SERVER_NAME"
 system_update
 goodstuff
 system_install_git
-apt-get -y  install wget less vim
+apt-get -y install wget less vim
 apache_install
 apache_tune
 system_sshd_permitrootlogin 'No'
 system_add_user $USER_NAME $USER_PASSWORD sudo
 apt-get -y install python-setuptools python2.6-dev python-simplejson libapache2-mod-wsgi python-pip python-crypto ipython
+cd ~
 easy_install South
 apt-get -y install gcc
 
@@ -190,7 +190,8 @@ cd $PROJECT_PATH
 
 #Hook it up
 mkdir -p "$PROJECT_PATH/apache"
-ln -s /usr/local/lib/python2.6/dist-packages/django/contrib/admin/media $PROJECT_PATH/admin-media 
+mkdir -p "$PROJECT_PATH/static"
+ln -s /usr/local/lib/python2.6/dist-packages/django/contrib/admin/media $PROJECT_PATH/static/admin-media 
 
 cat > "$PROJECT_PATH/apache/django.wsgi" << EOF
 import os, sys

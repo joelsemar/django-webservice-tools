@@ -95,8 +95,7 @@ class SocialPostHandler(BaseHandler):
         """
         Post a message a social network for a user that has registered us with that network - NOTE Linkedin 
         does NOT allow POSTING
-        API Handler:
-              POST /social/post
+        API Handler: POST /social/post
         PARAMS
              @network [string] {twitter|facebook} Name of the network to post to
              @message [string] message to be posted
