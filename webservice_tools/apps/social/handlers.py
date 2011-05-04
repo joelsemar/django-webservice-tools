@@ -143,6 +143,7 @@ class SocialRegisterHandler(BaseHandler):
     
     model = SocialNetwork
     
+    
     @login_required
     def create(self, request, network, response=None):
         """
