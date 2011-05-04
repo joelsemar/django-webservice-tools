@@ -114,4 +114,5 @@ class ResponseObject():
         if self.doc:
             responseDict['doc'] = self.doc
         
-        return responseDict
+        return HttpResponse(responseDict, status=self._status)
+        
