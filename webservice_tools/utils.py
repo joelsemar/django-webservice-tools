@@ -63,6 +63,8 @@ class Resource(PistonResource):
 class HandlerMetaClass(PistonHandlerMetaClass):
     """
     Little enhancement to the piston base class
+    Allows you to declare extra_fields, so you can augment your fields with properties
+    and not have to declare every single field again
     """
     
     
