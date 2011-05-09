@@ -18,8 +18,7 @@ class WebServiceException():
         location = "%s in %s, line: %s" %(lastframe['filename'], lastframe['function'], lastframe['lineno'])
         response.addErrors([exception.message, location])
         logger = logging.getLogger('webservice')
-        logger.critical(','.join([exception.message, location]))
-        return HttpResponse(dumps(response.send()))
+        return HttpResponse(dumps(response.send()._container))
     
     
     def get_traceback_frames(self, tb):
