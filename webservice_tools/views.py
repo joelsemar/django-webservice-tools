@@ -104,12 +104,12 @@ def newResetPass(request, response):
         username = request.POST.get('email')
         
     if not username:
-        return response.send(errors='Username or email required', status=404)
+        return response.send(errors='Username or email required.', status=404)
     #email address of the first entry in the ADMINS tuple (you should set it to something meaningful)
     try:
         sent_from = settings.ADMINS[0][1]
     except IndexError:
-        return response.send(errors="Please supply an ADMIN email address in settings.py", status=500) 
+        return response.send(errors="Please supply an ADMIN email address in settings.py.", status=500) 
     
     try:
         user = User.objects.get(username=username)
@@ -118,12 +118,12 @@ def newResetPass(request, response):
             try:
                 user = User.objects.get(email=username)
             except User.DoesNotExist:
-                return response.send(errors='That user does not appear to exist', status=404)
+                return response.send(errors='That user does not appear to exist.', status=404)
         else:
-            return response.send(errors='That user does not appear to exist', status=404)
+            return response.send(errors='That user does not appear to exist.', status=404)
     
     if not user.email:
-        return response.send(errors="That user has not provided an email address")
+        return response.send(errors="That user has not provided an email address.")
     
     newPassword = generateNewPassword()
     user.set_password(newPassword)

@@ -139,11 +139,17 @@ class SocialPostHandler(BaseHandler):
 
 
 class SocialRegisterHandler(BaseHandler):
-    allowed_methods = ('POST',)
+    allowed_methods = ('POST', 'GET')
     
     model = SocialNetwork
     
-    
+    @login_required
+    def read(self, request, network, response=None):
+        """
+        Handler to allow GETs to this url
+        """
+        return self.create(request, network, response)
+        
     @login_required
     def create(self, request, network, response=None):
         """
@@ -174,7 +180,8 @@ class SocialRegisterHandler(BaseHandler):
         """        
         args = urllib.urlencode({'client_id' : network.getAppId(),
                                  'redirect_uri': network.getCallBackURL(request),
-                                 'scope': network.scope_string})
+                                 'scope': network.scope_string,
+                                 'response_type': 'token'})
     
         return HttpResponseRedirect(network.getAuthURL() + '?' + args)
     
