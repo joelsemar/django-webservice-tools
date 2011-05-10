@@ -29,16 +29,11 @@ JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
 GOOGLE_REVERSE_URL = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&key=%s'
-
 EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$"
-
 ZIP_CODE_REGEX = '^[\d]{5}$|^[\d]{5}\-[\d]{4}$'
-
 YAHOO_APPID = "0NYrSEfV34E53zulq2mSDNG2tj6cR5IUlpDpguxqUx6mBs_GDVjIf5OguewjmQ--"
 YAHOO_LOCATION_URL = "http://local.yahooapis.com/LocalSearchService/V3/localSearch?"
-
 GOOGLE_QR_CODE_URL = "https://chart.googleapis.com/chart?cht=qr&chs=150x150&(data)s&chld=L|4"
-
 SITE_SETTINGS_KEY = '%s_site_settings' % django_settings.SERVER_NAME
 
 class Resource(PistonResource):

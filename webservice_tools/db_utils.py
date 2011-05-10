@@ -2,6 +2,7 @@ import re
 import datetime
 from django.contrib.gis.db import models
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.query import QuerySet
 from django.db.models.fields.files import ImageField, ImageFieldFile
 from django.conf import settings
 
