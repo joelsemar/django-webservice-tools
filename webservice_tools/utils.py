@@ -661,3 +661,7 @@ def is_num(x):
         return True
     except ValueError:
         return False
+    
+def is_valid_location(lat=None, long=None):
+    return (-90 <= lat <= 90) and (-180 <= long <= 180)
+    
