@@ -13,7 +13,7 @@ class AppleRecieptHandler(utils.BaseHandler):
       import this handler, subclass it
       define a 'redeem' method, that will get passed the apple_receipt (see below for signature)
       grant the user your product in that method, if it gets called, the receipt has been verified
-       and entered into the database, (subsequent calls for the same receipt will be rejected
+       and entered into the database, (subsequent calls for the same receipt will be rejected)
        you can use apple_receipt.product_id to look up the product
        
      point a url to your handler
@@ -29,7 +29,7 @@ class AppleRecieptHandler(utils.BaseHandler):
         Receives receipt from client, verifies with apple, makes necessary db changes to provide the product
         API Handler: POST /receipt
         PARAMS:
-            receipt_data: this is the receipt data apple gave you in the transactionReceipt property of your receipt 
+            @receipt_data [string]: this is the receipt data apple gave you in the transactionReceipt property of your receipt 
         """ 
         receipt_data = request.POST.get('receipt_data')
         profile = request.user.get_profile()
