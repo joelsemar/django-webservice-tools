@@ -181,7 +181,7 @@ class SocialRegisterHandler(BaseHandler):
         args = urllib.urlencode({'client_id' : network.getAppId(),
                                  'redirect_uri': network.getCallBackURL(request),
                                  'scope': network.scope_string,
-                                 'response_type': 'token'})
+                                 'display': 'touch'})
     
         return HttpResponseRedirect(network.getAuthURL() + '?' + args)
     
