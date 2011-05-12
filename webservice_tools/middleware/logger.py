@@ -13,7 +13,7 @@ class LoggingMiddleware(object):
         if 'html' in response.get('Content-Type', '') or 'javascript' in response.get('Content-Type', ''):
             return response
         
-        log = "-------------------------------------\n%(timestamp)s\n%(headers)\n%(request)s\nHANDLER: %(method)s %(url)s\nRESPONSE\n%(response)s\n-------------------------------------\n" 
+        log = "-------------------------------------\n%(timestamp)s\n%(headers)s\n%(request)s\nHANDLER: %(method)s %(url)s\nRESPONSE\n%(response)s\n-------------------------------------\n" 
         msg = ""
         try:
             if request.GET:
