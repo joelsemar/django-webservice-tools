@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 from django.db.models.base import ModelBase
-from webservice_tools.apps.inapp_purchase import models
+from webservice_tools.apps.in_app_purchase import models
 for model_name in dir(models):
     m = getattr(models, model_name)
     if isinstance(m, ModelBase) and not m._meta.abstract:

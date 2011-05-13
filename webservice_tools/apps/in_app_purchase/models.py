@@ -25,6 +25,8 @@ class AppleReceipt(models.Model):
     
     class Meta:
         db_table = 'applereceipt'
+        verbose_name = "Apple Receipt"
+        verbose_name_plural = "Apple Receipts"
         
     def save(self, *args, **kwargs):
         if not self.id:

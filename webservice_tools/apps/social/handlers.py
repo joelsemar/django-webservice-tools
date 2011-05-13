@@ -52,7 +52,7 @@ class SocialFriendHandler(BaseHandler):
         social_friends_credentials = UserNetworkCredentials.objects.filter(network=network,
                                                                            uuid__in=friend_social_ids)
         
-        results = [{'id':cred.profile.id, 
+        results = [{'id':cred.profile.id,
                     'name_in_network':cred.name_in_network,
                     'username':cred.profile.user.username} for cred in social_friends_credentials]
         
@@ -69,7 +69,7 @@ class SocialFriendHandler(BaseHandler):
         return [x['id'] for x in friends['data']] 
         
     def twitter(self, profile, network, credentials):
-        oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/friends.json' % network.base_url, 
+        oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/friends.json' % network.base_url,
                                                     network.getCredentials(),
                                                     token=oauth.OAuthToken.from_string(credentials.token))
         ret = oauth.fetchResponse(oauthRequest, network.base_url).read()
@@ -77,7 +77,7 @@ class SocialFriendHandler(BaseHandler):
         return [x['id'] for x in friends]
     
     def linkedin(self, profile, network, credentials):
-        oauthRequest = oauth.makeOauthRequestObject('https://%s/v1/people/~/connections' % network.base_url, 
+        oauthRequest = oauth.makeOauthRequestObject('https://%s/v1/people/~/connections' % network.base_url,
                                                     network.getCredentials(), method='GET',
                                                     token=oauth.OAuthToken.from_string(credentials.token))
         ret = oauth.fetchResponse(oauthRequest, network.base_url).read()
@@ -118,26 +118,36 @@ class SocialPostHandler(BaseHandler):
             return response.send(errors="This user has not registered us with the network specified")
         
         #Call the name of the network as a helper method to implement the different posts
-        getattr(self, network.name)(credentials, network, message)
+        getattr(self, network.name)(request, credentials, network, message)
         
         return response.send()
     
-    def twitter(self, credentials, network, message):
+    def twitter(self, request, credentials, network, message):
         
         oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, network.getCredentials(),
                                                     token=oauth.OAuthToken.from_string(credentials.token), method='POST', params={'status': message})
         oauth.fetchResponse(oauthRequest, network.base_url)
         
-    def facebook(self, credentials, network, message):
+    def facebook(self, request, credentials, network, message):
+        postData = {'access_token': credentials.token, 'message': message}
+        postData.update(self.get_facebook_post_data(request))
         utils.makeAPICall(credentials.network.base_url,
                           '%s/feed' % credentials.uuid,
-                           postData={'access_token': credentials.token, 'message': message},
+                           postData=postData,
                            secure=True, deserializeAs='skip')   
     
-    def linkedin(self, credentials, network, message):
+    def linkedin(self, request, credentials, network, message):
         raise NotImplementedError
 
+    
+    def get_facebook_post_data(self, request):
+        """
+        Return a dictionary of parameters you'd like to augment the messge with
+        Go here to see what the possible parameters are: you'd like to give to the posted message to facebook
+        """
+        return {}
 
+    
 class SocialRegisterHandler(BaseHandler):
     allowed_methods = ('POST', 'GET')
     
@@ -281,8 +291,8 @@ class SocialCallbackHandler(BaseHandler):
         params = urlparse.parse_qs(accessToken)
         
         if network.name == 'linkedin':
-            oauthRequest = oauth.makeOauthRequestObject('https://%s/v1/people/~' % network.base_url, 
-                                network.getCredentials(), token=oauth.OAuthToken.from_string(accessToken), 
+            oauthRequest = oauth.makeOauthRequestObject('https://%s/v1/people/~' % network.base_url,
+                                network.getCredentials(), token=oauth.OAuthToken.from_string(accessToken),
                                 method='GET')
             ret = oauth.fetchResponse(oauthRequest, network.base_url).read()
             ret = utils.fromXML(ret)
@@ -290,7 +300,7 @@ class SocialCallbackHandler(BaseHandler):
             params['screen_name'] = ['%s %s' % (ret['first_name'], ret['last_name']), '0']
             
         UserNetworkCredentials.objects.filter(profile=profile, network=network).delete()
-        UserNetworkCredentials.objects.create(access_token=accessToken, 
+        UserNetworkCredentials.objects.create(access_token=accessToken,
                                               profile=profile,
                                               network=network,
                                               uuid=params['user_id'][0],

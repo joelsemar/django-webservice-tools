@@ -3,9 +3,10 @@ import datetime
 import base64
 from webservice_tools import utils
 from webservice_tools.decorators import login_required
+from webservice_tools.apps.in_app_purchase.models import AppleReceipt
 from django.db import transaction
 
-class AppleRecieptHandler(utils.BaseHandler):
+class AppleReceiptHandler(utils.BaseHandler):
     """
     Handler for utilizing apple's in app purchase
     Usage:
@@ -19,7 +20,6 @@ class AppleRecieptHandler(utils.BaseHandler):
      point a url to your handler
       
     """
-   
     allowed_methods = ('POST',)
     
     @login_required
