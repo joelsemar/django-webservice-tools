@@ -87,7 +87,7 @@ class DocHandler(BaseHandler):
 
 
 class PlacesHandler(BaseHandler):
-    abstract=True
+    internal=True
     allowed_methods = ('GET',)
     def read(self, request, response):
         return places_search(request, response)
