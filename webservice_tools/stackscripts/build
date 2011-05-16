@@ -140,22 +140,7 @@ echo "GRANT ALL PRIVILEGES ON DATABASE $SERVER_NAME to $SERVER_NAME" | sudo -u p
 
 echo "CREATE USER  $SERVER_NAME WITH PASSWORD '$SERVER_NAME' --createdb" | sudo -u postgres psql
 sudo -u postgres createdb -E utf8 -T template_postgis -O $SERVER_NAME $SERVER_NAME
-
 echo "GRANT ALL PRIVILEGES ON DATABASE $SERVER_NAME to $SERVER_NAME" | sudo -u postgres psql
-
-
-echo "CREATE USER  werd WITH PASSWORD 'werd' --createdb" | sudo -u postgres psql
-sudo -u postgres createdb -E utf8 -T template_postgis -O werd werd_prod
-echo "GRANT ALL PRIVILEGES ON DATABASE werd_prod to werd" | sudo -u postgres psql
-
-
-
-sudo -u postgres createdb -E utf8 -T template_postgis -O werd_dev werd
-echo "GRANT ALL PRIVILEGES ON DATABASE werd_dev to werd" | sudo -u postgres psql
-
-sudo -u postgres createdb -E utf8 -T template_postgis -O werd_test werd
-echo "GRANT ALL PRIVILEGES ON DATABASE werd_test to werd" | sudo -u postgres psql
-
 
 
 #set up for 'password' auth instead of ident (you know, so it actually works)

@@ -25,6 +25,7 @@ from webservice_tools.decorators import retry
 from django.conf import settings as django_settings
 from django.core.cache import cache
 from django.db import  models
+from django.core.paginator import EmptyPage, Paginator
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
@@ -659,4 +660,39 @@ def is_num(x):
     
 def is_valid_location(lat=None, long=None):
     return (-90 <= lat <= 90) and (-180 <= long <= 180)
+
+
+
+def auto_page(results, page_number=1, limit=10):
+    try:
+        page_number = int(page_number)
+        limit = int(page_limit)
+    except ValueError:
+        page_number = 1
+        limit = 10
+        
+    pages = Paginator(results, limit)
+    try:
+        page = pages.page(page_number)
+    except EmptyPage:
+        page = pages.page(1)
     
+    results = page.object_list
+    
+    try:
+        pages.page(page.next_page_number())
+        next_page = page.next_page_number()
+    except EmptyPage:
+        next_page = 'NO'
+    
+    try:
+        pages.page(page.previous_page_number())
+        previous_page = page.previous_page_number()
+    except EmptyPage:
+        previous_page = 'NO'
+        
+    page_dict = {'page': page_number,
+                 'next_page': next_page,
+                 'previous_page': previous_page,
+                 'total_pages': pages.num_pages}
+    return results, page_dict
