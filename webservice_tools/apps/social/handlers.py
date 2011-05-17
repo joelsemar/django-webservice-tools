@@ -119,7 +119,7 @@ class SocialPostHandler(BaseHandler):
         return response.send()
     
     def twitter(self, request, credentials, network):
-        message = get_twitter_post_data(request)
+        message = self.get_twitter_post_data(request)
         oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, network.getCredentials(),
                                                     token=oauth.OAuthToken.from_string(credentials.token), method='POST', params={'status': message})
         oauth.fetchResponse(oauthRequest, network.base_url)
@@ -136,7 +136,7 @@ class SocialPostHandler(BaseHandler):
         oauthRequest = oauth.makeOauthRequestObject('https://api.linkedin.com/v1/people/~/person-activities', 
                                                     network.getCredentials(), token=token, method='POST')
         headers = {'content_type':'application/xml'}
-        message = get_linkedin_post_data(request)
+        message = self.get_linkedin_post_data(request)
         raw_body = '<activity locale="en_US"><content-type>linkedin-html</content-type><body>%s</body></activity>' % message
         oauth.fetchResponse(oauthRequest, network.base_url, headers=headers, raw_body=raw_body)
 
