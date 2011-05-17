@@ -101,7 +101,6 @@ class SocialPostHandler(BaseHandler):
              @message [string] message to be posted
         """
         profile = request.user.get_profile()
-        message = request.POST.get('message', '')
         network = request.POST.get('network')
         
         try:
@@ -115,53 +114,59 @@ class SocialPostHandler(BaseHandler):
             return response.send(errors="This user has not registered us with the network specified")
         
         #Call the name of the network as a helper method to implement the different posts
-        getattr(self, network.name)(request, credentials, network, message)
+        getattr(self, network.name)(request, credentials, network)
         
         return response.send()
     
-    def twitter(self, request, credentials, network, message):
-        
+    def twitter(self, request, credentials, network):
+        message = get_twitter_post_data(request)
         oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, network.getCredentials(),
                                                     token=oauth.OAuthToken.from_string(credentials.token), method='POST', params={'status': message})
         oauth.fetchResponse(oauthRequest, network.base_url)
         
-    def facebook(self, request, credentials, network, message):
-        postData = {'access_token': credentials.token, 'message': message}
+    def facebook(self, request, credentials, network):
+        postData = {'access_token': credentials.token}
         postData.update(self.get_facebook_post_data(request))
         utils.makeAPICall(network.base_url,
                           '%s/feed' % credentials.uuid,
                            postData=postData,
                            secure=True, deserializeAs='skip')   
     
-    def linkedin(self, request, credentials, network, message):
-        raise NotImplementedError
-#
-#        oauthRequest = oauth.makeOauthRequestObject('https://%s/v1/people/~' % network.base_url,
-#                            network.getCredentials(), token=oauth.OAuthToken.from_string(accessToken),
-#                            method='GET')
-#        ret = oauth.fetchResponse(oauthRequest, network.base_url).read()        
-#        raise NotImplementedError        
-#params={
-#        'activity' : {
-#                      "@attributes" : {'locale':'en_US'},
-#                      'content-type':'linkedin-html',
-#                      'body':'test_post'}
-#        }
-#    
-#<activity locale="en_US"><content-type>linkedin-html</content-type><body>&lt;a href=&quot;http://www.linkedin.com/profile?viewProfile=&amp;key=ABCDEFG&quot;&gt;Richard Brautigan&lt;/a&gt; is reading about &lt;a href=&quot;http://www.tigers.com&quot;&gt;Tigers&lt;/a&gt;http://www.tigers.com&gt;Tigers&lt;/a&gt;.</body></activity>
+    def linkedin(self, request, credentials, network):
+        oauthRequest = oauth.makeOauthRequestObject('https://api.linkedin.com/v1/people/~/person-activities', 
+                                                    network.getCredentials(), token=token, method='POST')
+        headers = {'content_type':'application/xml'}
+        message = get_linkedin_post_data(request)
+        raw_body = '<activity locale="en_US"><content-type>linkedin-html</content-type><body>%s</body></activity>' % message
+        oauth.fetchResponse(oauthRequest, network.base_url, headers=headers, raw_body=raw_body)
+
     def get_facebook_post_data(self, request):
         """
         Return a dictionary of parameters you'd like to augment the messge with
         Go here to see what the possible parameters are: you'd like to give to the posted message to facebook
         """
+        message = request.POST.get('message')
+        if message:
+            return {'message': message}
         return {}
 
-    def get_linked_past_data(self, request):
+    def get_linkedin_post_data(self, request):
         """
         Return the string to post to Linked-in
         """
-        return {}
+        message = request.POST.get('message')
+        if message:
+            return message
+        return ''
 
+    def get_twitter_post_data(self, request):
+        """
+        Return the string to post to Twitter
+        """
+        message = request.POST.get('message')
+        if message:
+            return message
+        return ''
     
 class SocialRegisterHandler(BaseHandler):
     allowed_methods = ('POST', 'GET')
