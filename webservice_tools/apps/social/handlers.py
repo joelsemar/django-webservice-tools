@@ -135,12 +135,30 @@ class SocialPostHandler(BaseHandler):
     
     def linkedin(self, request, credentials, network, message):
         raise NotImplementedError
-
-    
+#
+#        oauthRequest = oauth.makeOauthRequestObject('https://%s/v1/people/~' % network.base_url,
+#                            network.getCredentials(), token=oauth.OAuthToken.from_string(accessToken),
+#                            method='GET')
+#        ret = oauth.fetchResponse(oauthRequest, network.base_url).read()        
+#        raise NotImplementedError        
+#params={
+#        'activity' : {
+#                      "@attributes" : {'locale':'en_US'},
+#                      'content-type':'linkedin-html',
+#                      'body':'test_post'}
+#        }
+#    
+#<activity locale="en_US"><content-type>linkedin-html</content-type><body>&lt;a href=&quot;http://www.linkedin.com/profile?viewProfile=&amp;key=ABCDEFG&quot;&gt;Richard Brautigan&lt;/a&gt; is reading about &lt;a href=&quot;http://www.tigers.com&quot;&gt;Tigers&lt;/a&gt;http://www.tigers.com&gt;Tigers&lt;/a&gt;.</body></activity>
     def get_facebook_post_data(self, request):
         """
         Return a dictionary of parameters you'd like to augment the messge with
         Go here to see what the possible parameters are: you'd like to give to the posted message to facebook
+        """
+        return {}
+
+    def get_linked_past_data(self, request):
+        """
+        Return the string to post to Linked-in
         """
         return {}
 
