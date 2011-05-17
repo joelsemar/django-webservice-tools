@@ -696,3 +696,14 @@ def auto_page(results, page_number=1, limit=10):
                  'previous_page': previous_page,
                  'total_pages': pages.num_pages}
     return results, page_dict
+
+def HTMLEscape(html):
+    html_escape_table = {
+                         "&": "&amp;",
+                         '"': "&quot;",
+                         "'": "&apos;",
+                         ">": "&gt;",
+                         "<": "&lt;",
+                         }
+    
+    return "".join(html_escape_table.get(c,c) for c in html)
