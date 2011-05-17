@@ -120,8 +120,9 @@ class SocialPostHandler(BaseHandler):
     
     def twitter(self, request, credentials, network):
         message = self.get_twitter_post_data(request)
-        oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, network.getCredentials(),
-                                                    token=oauth.OAuthToken.from_string(credentials.token), method='POST', params={'status': message})
+        oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, 
+                                                    network.getCredentials(), token=oauth.OAuthToken.from_string(credentials.token), 
+                                                    method='POST', params={'status': message})
         oauth.fetchResponse(oauthRequest, network.base_url)
         
     def facebook(self, request, credentials, network):
@@ -134,7 +135,8 @@ class SocialPostHandler(BaseHandler):
     
     def linkedin(self, request, credentials, network):
         oauthRequest = oauth.makeOauthRequestObject('https://api.linkedin.com/v1/people/~/person-activities', 
-                                                    network.getCredentials(), token=credentials.token, method='POST')
+                                                    network.getCredentials(), token=oauth.OAuthToken.from_string(credentials.token), 
+                                                    method='POST')
         headers = {'content_type':'application/xml'}
         message = self.get_linkedin_post_data(request)
         raw_body = '<activity locale="en_US"><content-type>linkedin-html</content-type><body>%s</body></activity>' % message
