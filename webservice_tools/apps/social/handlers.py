@@ -134,7 +134,7 @@ class SocialPostHandler(BaseHandler):
     
     def linkedin(self, request, credentials, network):
         oauthRequest = oauth.makeOauthRequestObject('https://api.linkedin.com/v1/people/~/person-activities', 
-                                                    network.getCredentials(), token=token, method='POST')
+                                                    network.getCredentials(), token=credentials.token, method='POST')
         headers = {'content_type':'application/xml'}
         message = self.get_linkedin_post_data(request)
         raw_body = '<activity locale="en_US"><content-type>linkedin-html</content-type><body>%s</body></activity>' % message
