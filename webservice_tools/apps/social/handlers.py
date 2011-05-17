@@ -101,16 +101,13 @@ class SocialPostHandler(BaseHandler):
              @message [string] message to be posted
         """
         profile = request.user.get_profile()
-        message = request.POST.get('message')
+        message = request.POST.get('message', '')
         network = request.POST.get('network')
         
         try:
             network = SocialNetwork.objects.get(name=network)
         except SocialNetwork.DoesNotExist:
             return response.send(errors='Invalid network', status=404)
-        
-        if not message:
-            return response.send(errors="Message to be posted is required", status=499)
         
         try:
             credentials = UserNetworkCredentials.objects.get(network=network, profile=profile)
