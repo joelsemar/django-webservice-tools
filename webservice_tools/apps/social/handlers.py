@@ -119,59 +119,56 @@ class SocialPostHandler(BaseHandler):
         return response.send()
     
     def twitter(self, request, credentials, network):
-        params = self.get_twitter_param_data(request)
+        message = self.get_twitter_post_data(request)
         oauthRequest = oauth.makeOauthRequestObject('https://%s/1/statuses/update.json' % network.base_url, 
                                                     network.getCredentials(), token=oauth.OAuthToken.from_string(credentials.token), 
-                                                    method='POST', params=params)
+                                                    method='POST', params={'status': message})
         oauth.fetchResponse(oauthRequest, network.base_url)
         
     def facebook(self, request, credentials, network):
         postData = {'access_token': credentials.token}
-        postData.update(self.get_facebook_param_data(request))
+        postData.update({'message':self.get_facebook_post_data(request)})
         utils.makeAPICall(network.base_url,
                           '%s/feed' % credentials.uuid,
                            postData=postData,
                            secure=True, deserializeAs='skip')   
     
     def linkedin(self, request, credentials, network):
-        params = self.get_linkedin_param_data(request)
         oauthRequest = oauth.makeOauthRequestObject('https://api.linkedin.com/v1/people/~/person-activities', 
                                                     network.getCredentials(), token=oauth.OAuthToken.from_string(credentials.token), 
-                                                    method='POST', params=params)
+                                                    method='POST')
         headers = {'content_type':'application/xml'}
-        raw_body = '<activity locale="en_US"><content-type>linkedin-html</content-type><body>%s</body></activity>' % params['message']
+        message = self.get_linkedin_post_data(request)
+        raw_body = '<activity locale="en_US"><content-type>linkedin-html</content-type><body>%s</body></activity>' % message
         oauth.fetchResponse(oauthRequest, network.base_url, headers=headers, raw_body=raw_body)
 
-    def get_facebook_param_data(self, request):
+    def get_facebook_post_data(self, request):
         """
         Return a dictionary of parameters you'd like to augment the messge with
         Go here to see what the possible parameters are: you'd like to give to the posted message to facebook
         """
         message = request.POST.get('message')
         if message:
-            return {'message': message}
-        return {}
+            return message
+        return ''
 
-    def get_linkedin_param_data(self, request):
+    def get_linkedin_post_data(self, request):
         """
-        Return a parameter dictionary including message
+        Return the string to post to Linked-in
         """
         message = request.POST.get('message')
         if message:
-            return {'message' : message}
-        return {}
+            return message
+        return ''
 
-    def get_twitter_param_data(self, request):
+    def get_twitter_post_data(self, request):
         """
-        Return the string to post to Twitter.
-        Example dictionary to return:
-            {'status':"I'm posting to twitter from an app",
-             'oauth_callback':'http://ws.getherdata.com/getserver/social/callback/twitter'}
+        Return the string to post to Twitter
         """
         message = request.POST.get('message')
         if message:
-            return {'status' : message}
-        return {}
+            return message
+        return ''
     
 class SocialRegisterHandler(BaseHandler):
     allowed_methods = ('POST', 'GET')
