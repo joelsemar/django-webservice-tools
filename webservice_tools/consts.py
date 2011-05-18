@@ -132,3 +132,4 @@ TIME_ZONES = (
     'Pacific/Enderbury'
     'Pacific/Kiritimati',
 )
+TIME_ZONE_CHOICES = tuple([(x, x) for x in TIME_ZONES])
