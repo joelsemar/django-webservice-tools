@@ -707,3 +707,13 @@ def HTMLEscape(html):
                          }
     
     return "".join(html_escape_table.get(c,c) for c in html)
+
+def get_user_from_session(session_key):
+    """
+    Takes session_key and returns the user associated
+    """
+    from django.contrib.sessions.models import Session
+    from django.contrib.auth.models import User
+    session = Session.objects.get(session_key=session_key)
+    uid = session.get_decoded().get('_auth_user_id')
+    return User.objects.get(pk=uid)

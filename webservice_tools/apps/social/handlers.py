@@ -127,7 +127,7 @@ class SocialPostHandler(BaseHandler):
         
     def facebook(self, request, credentials, network):
         postData = {'access_token': credentials.token}
-        postData.update({'message':self.get_facebook_post_data(request)})
+        postData.update(self.get_facebook_post_data(request))
         utils.makeAPICall(network.base_url,
                           '%s/feed' % credentials.uuid,
                            postData=postData,
