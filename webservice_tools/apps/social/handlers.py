@@ -46,8 +46,12 @@ class SocialFriendHandler(BaseHandler):
         except UserNetworkCredentials.DoesNotExist:
             return response.send(errors='Either %s does not exist or we do not have credentials for that user.' % network.name)
         
-        #Use the name of the network to call the helper function
-        friend_social_ids = getattr(self, network.name)(profile, network, credentials)
+        
+        try:
+            #Use the name of the network to call the helper function
+            friend_social_ids = getattr(self, network.name)(profile, network, credentials)
+        except HTTPError:
+            return response.send(errors=NETWORK_HTTP_ERROR % network.name)
         
         social_friends_credentials = UserNetworkCredentials.objects.filter(network=network,
                                                                            uuid__in=friend_social_ids)
@@ -113,8 +117,12 @@ class SocialPostHandler(BaseHandler):
         except UserNetworkCredentials.DoesNotExist:
             return response.send(errors="This user has not registered us with the network specified")
         
-        #Call the name of the network as a helper method to implement the different posts
-        getattr(self, network.name)(request, credentials, network)
+        
+        try:
+            #Call the name of the network as a helper method to implement the different posts
+            getattr(self, network.name)(request, credentials, network)
+        except HTTPError:
+            return response.send(errors=NETWORK_HTTP_ERROR % network.name)
         
         return response.send()
     
