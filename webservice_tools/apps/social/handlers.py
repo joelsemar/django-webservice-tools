@@ -2,7 +2,7 @@ import datetime
 import urlparse
 import urllib
 import simplejson
-
+from urllib2 import HTTPError
 from django.db import transaction, models
 from django.conf import settings
 from django.utils.importlib import import_module
