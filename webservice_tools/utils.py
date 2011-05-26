@@ -44,7 +44,7 @@ class Resource(PistonResource):
         """
         em = kwargs.pop('emitter_format', None)
         
-        accept_header = request.META.get('HTTP_ACCEPT')
+        accept_header = request.META.get('HTTP_ACCEPT', '')
         if 'text/xml' in accept_header:
             em = 'xml'
         elif 'application/json' in accept_header:
