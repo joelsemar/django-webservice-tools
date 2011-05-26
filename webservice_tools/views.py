@@ -129,7 +129,8 @@ def newResetPass(request, response):
     user.set_password(newPassword)
     user.save()
     send_mail('Password Reset',
-              'The password for the username "%s" has been successfully reset, your new password is "%s",  please change as soon as possible' % (user.username, newPassword),
+              """The password for the login: "%s" has been successfully reset, your new password is "%s",  
+              please change this as soon as possible for your security.\n""" % (user.username, newPassword),
               '%s' % sent_from, [user.email, ])
     
     request.session['RESET_PASS'] = True
