@@ -264,6 +264,8 @@ class SocialRegisterHandler(BaseHandler):
 class SocialCallbackHandler(BaseHandler):
     allowed_methods = ('GET',)
     
+    internal = True
+    
     @login_required
     def read(self, request, network, response=None):
         """
