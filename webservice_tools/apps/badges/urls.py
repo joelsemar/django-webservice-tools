@@ -4,6 +4,6 @@ from webservice_tools.apps.badges.handlers import BadgeHandler
 from django.contrib import admin
 admin.autodiscover()  
 urlpatterns = patterns('',
-    (r'^/?$', Resource(BadgeHandler)),
+    (r'^/(?P<id>[\d]+)/?$', Resource(BadgeHandler)),
     
 )

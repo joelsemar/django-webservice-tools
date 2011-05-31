@@ -2,7 +2,6 @@ from django.conf.urls.defaults import *
 from webservice_tools.utils import Resource
 from webservice_tools.apps.friends.handlers import FriendsHandler, FriendRequestHandler, GroupHandler, GroupsHandler 
 urlpatterns = patterns('',
-    (r'^/?$', Resource(FriendsHandler)),
     (r'^(?P<id>[\d])/?$', Resource(FriendsHandler)),
     (r'^requests/?$', Resource(FriendRequestHandler)),
     (r'^request/user/(?P<id>[\d]+)/?$', Resource(FriendRequestHandler)),
