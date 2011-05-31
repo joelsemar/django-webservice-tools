@@ -1,7 +1,7 @@
 from piston.handler import BaseHandler
 from webservice_tools.decorators import login_required
 from webservice_tools.response_util import ResponseObject
-
+from django.db import models
 from webservice_tools.apps.badges.models import BadgeToUser, BadgeModel, consts
 from django.conf import settings
 app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
