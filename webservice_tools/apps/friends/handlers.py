@@ -12,12 +12,12 @@ class FriendsHandler(BaseHandler):
     allowed_methods = ('GET', 'DELETE')
     
     @login_required
-    def read(self, request, response):
+    def read(self, request, id, response):
         """
-        Return a list of the users friends
-        API Handler: GET /friends
+        Return a list of a users friends
+        API Handler: GET /friends/{id}
         """
-        profile = request.user.get_profile()
+        profile = PROFILE_MODEL.objects.get(id=id)
         friends = profile.friends.all()
         response.set(friends=[p.dict() for p in friends])
         return response.send()
