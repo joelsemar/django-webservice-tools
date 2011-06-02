@@ -1,6 +1,7 @@
 from piston.handler import BaseHandler
 from webservice_tools.decorators import login_required
 from webservice_tools.response_util import ResponseObject
+from webservice_tools import utils
 from django.db import models
 from webservice_tools.apps.badges.models import BadgeToUser, BadgeModel, consts
 from django.conf import settings
@@ -33,4 +34,24 @@ class BadgeHandler(BaseHandler):
                             'won': badge in users_badges})
                 
         response.set(badges=ret)
+        return response.send()
+
+
+class WonSinceHandler(BaseHandler):
+    allowed_methods=('GET',)
+    
+    @login_required
+    def read(self, request, response):
+        """
+        Return a count of badges won since a certain date
+        API Handler: GET /badges/count
+        Params:
+           @since [datetime] format "2011-12-25 18:22" 
+        """
+        profile = request.user.get_profile()
+        since = request.GET.get('since')
+        since = utils.default_time_parse(since)
+        since = since or datetime.datetime(1970, 1, 1)
+        count = BadgeToUser.objects.filter(winner=profile, when_created__gte=since).count()
+        response.set(count=count)
         return response.send()
