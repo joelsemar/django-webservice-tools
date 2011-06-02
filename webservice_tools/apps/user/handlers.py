@@ -135,6 +135,8 @@ class LoginHandler(utils.BaseHandler):
         if request.path.startswith('/logout'):
             return self.read(request)
         
+        #logout before logging in to prevent multiple sessions
+        logout(request)
         username = request.POST.get('username') or request.POST.get('email')
         password = request.POST.get('password')
         
