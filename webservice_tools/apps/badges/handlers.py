@@ -38,7 +38,7 @@ class BadgeHandler(BaseHandler):
         return response.send()
 
 
-class WonSinceHandler(BaseHandler):
+class BadgesWonSinceHandler(BaseHandler):
     allowed_methods=('GET',)
     
     @login_required
