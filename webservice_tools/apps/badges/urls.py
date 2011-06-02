@@ -5,5 +5,5 @@ from django.contrib import admin
 admin.autodiscover()  
 urlpatterns = patterns('',
     (r'^(?P<id>[\d]+)/?$', Resource(BadgeHandler)),
-    (r'^since/?$', Resource(BadgesWonCountHandler)),
+    (r'^count/?$', Resource(BadgesWonCountHandler)),
 )
