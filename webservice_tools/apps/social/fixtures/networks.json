@@ -1,0 +1,56 @@
+[
+    {
+        "pk": 3, 
+        "model": "social.socialnetwork", 
+        "fields": {
+            "display_name": "LinkedIn", 
+            "name": "linkedin", 
+            "app_secret": "APPSECRET", 
+            "base_url": "api.linkedin.com", 
+            "request_token_path": "uas/oauth/requestToken", 
+            "post_url": " ", 
+            "auth_path": "uas/oauth/authorize", 
+            "access_token_path": "uas/oauth/accessToken", 
+            "scope_string": "publish_stream, offline_access", 
+            "api_key": "API KEY", 
+            "app_id": "", 
+            "friends_url": " "
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "social.socialnetwork", 
+        "fields": {
+            "display_name": "Twitter", 
+            "name": "twitter", 
+            "app_secret": "APPSECRET", 
+            "base_url": "api.twitter.com", 
+            "request_token_path": "oauth/request_token", 
+            "post_url": " ", 
+            "auth_path": "oauth/authorize", 
+            "access_token_path": "oauth/access_token", 
+            "scope_string": "publish_stream, offline_access", 
+            "api_key": "API KEY", 
+            "app_id": "", 
+            "friends_url": " "
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "social.socialnetwork", 
+        "fields": {
+            "display_name": "FaceBook", 
+            "name": "facebook", 
+            "app_secret": "APP SECRET", 
+            "base_url": "graph.facebook.com", 
+            "request_token_path": "NONE", 
+            "post_url": " ", 
+            "auth_path": "oauth/authorize", 
+            "access_token_path": "oauth/access_token", 
+            "scope_string": "publish_stream, offline_access", 
+            "api_key": "API KEY", 
+            "app_id": "APP ID", 
+            "friends_url": " "
+        }
+    }
+]

@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 class BaseProfile(models.Model):
     user = models.OneToOneField(User)
     if 'webservice_tools.apps.friends' in settings.INSTALLED_APPS:
-        friends = models.ManyToManyField('self')
+        friends = models.ManyToManyField('self', blank=True)
         
     def __unicode__(self):
         return self.user.username

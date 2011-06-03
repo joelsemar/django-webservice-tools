@@ -1,4 +1,5 @@
 import random
+import re
 import datetime
 import passwordpieces
 from django.contrib.auth.models import User
@@ -6,7 +7,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
 from webservice_tools.response_util import ResponseObject
-from webservice_tools.utils import GeoCode, strToBool, is_valid_email, ReverseGeoCode, PlacesSearch, BaseHandler
+from webservice_tools.utils import GeoCode, strToBool, is_valid_email, ReverseGeoCode, YahooPlacesSearch,  GooglePlacesSearch, BaseHandler
 from django.http import HttpResponse
 from django.views.generic.simple import direct_to_template
 from webservice_tools.doc_generator.server_declaration import ServerDeclaration
@@ -179,8 +180,23 @@ def generateNewPassword():
            passwordpieces.PASSWORD_SPECIAL_CHARACTERS[random.randint(0, len(passwordpieces.PASSWORD_SPECIAL_CHARACTERS) - 1)]
 
 
+def google_places_search(request, response):
+    lat = request.GET.get('lat')
+    lng = request.GET.get('lng')
+    query  = request.GET.get('query', '')
+    query = re.sub(' ', '|', query)
+    radius = request.GET.get('radius', 20)
+    if not lat and lng:
+        response.addErrors("Please provide either a lat/lng pair or location string")
+        return None, response
+    latlng = '%s,%s' % (lat, lng)
+    
+    api_key = getattr(settings, 'GOOGLE_PLACES_API_KEY', '')
+    result = GooglePlacesSearch(latlng=latlng, radius=radius, api_key=api_key, types=query)
+    return result.fetch()['results'], response
+    
 
-def places_search(request, response):
+def yahoo_places_search(request, response):
     lat = request.GET.get('lat')
     lng = request.GET.get('lng')
     location = request.GET.get('location')
@@ -197,7 +213,7 @@ def places_search(request, response):
     if hasattr(settings, 'YAHOO_APPID'):
         query_args['app_id'] = settings.YAHOO_APPID
 
-    locations = PlacesSearch(**query_args).fetch()
+    locations = YahooPlacesSearch(**query_args).fetch()
     ret = locations['ResultSet']
     if isinstance(ret, dict):
         ret = [ret,]

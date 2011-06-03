@@ -36,7 +36,8 @@ YAHOO_APPID = "0NYrSEfV34E53zulq2mSDNG2tj6cR5IUlpDpguxqUx6mBs_GDVjIf5OguewjmQ--"
 YAHOO_LOCATION_URL = "http://local.yahooapis.com/LocalSearchService/V3/localSearch?"
 GOOGLE_QR_CODE_URL = "https://chart.googleapis.com/chart?cht=qr&chs=150x150&(data)s&chld=L|4"
 SITE_SETTINGS_KEY = '%s_site_settings' % django_settings.SERVER_NAME
-
+GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?sensor=false&"
+GOOGLE_PLACES_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json?sensor=false&"
 class Resource(PistonResource):
     def determine_emitter(self, request, *args, **kwargs):
         """
@@ -368,7 +369,7 @@ class ReverseGeoCode():
         return ret
             
 
-class PlacesSearch():
+class YahooPlacesSearch():
     
     def __init__(self, lat=None, lng=None, query='*', app_id=YAHOO_APPID, **kwargs):
         self.app_id = app_id
@@ -382,13 +383,21 @@ class PlacesSearch():
         if lng:
             self.arg_dict['longitude'] = lng
         
-        
     def fetch(self):
         args = friendlyURLEncode(self.arg_dict)
         return simplejson.loads(urllib2.urlopen(YAHOO_LOCATION_URL + args).read())
 
 
+class GooglePlacesSearch():
+    
+    def __init__(self, latlng, radius, api_key, types=''):
+        self.arg_dict = {'location': latlng, 'radius': radius, 'types': types, 'key': api_key}
 
+    def fetch(self):
+        args = friendlyURLEncode(self.arg_dict)
+        return simplejson.loads(urllib2.urlopen(GOOGLE_PLACES_SEARCH_URL + args).read())
+   
+        
 def get_site_settings():
     app_label, model_name = django_settings.SITE_SETTINGS_MODEL.split('.')
     SITE_SETTINGS_MODEL = models.get_model(app_label, model_name)
