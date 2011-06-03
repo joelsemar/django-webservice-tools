@@ -157,7 +157,7 @@ class SocialPostHandler(BaseHandler):
         """
         message = request.POST.get('message')
         if message:
-            return {'status': message}
+            return {'message': message}
         return {}
 
     def get_linkedin_post_data(self, request):
