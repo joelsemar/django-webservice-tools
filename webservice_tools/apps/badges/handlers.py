@@ -47,7 +47,7 @@ class BadgesWonCountHandler(BaseHandler):
         Return a count of badges won since a certain date
         API Handler: GET /badges/count
         Params:
-           @since [datetime] format "2011-12-25 18:22" 
+           @since [datetime] format "2011-12-25 18:22:11" 
         """
         profile = request.user.get_profile()
         since = request.GET.get('since')
