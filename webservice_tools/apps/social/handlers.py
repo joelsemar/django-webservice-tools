@@ -201,7 +201,8 @@ class SocialRegisterHandler(BaseHandler):
             None
         """
         profile = request.user.get_profile()
-
+        if request.META.get('HTTP_REFERER'):
+            request.session['last_url'] = request.META['HTTP_REFERER']
         if not response:
             response = ResponseObject()
         
@@ -285,6 +286,9 @@ class SocialCallbackHandler(BaseHandler):
             return response.send(errors='Invalid network', status=404)
         
         #Use the name of the network to call the helper function
+        if request.session.get('last_url'):
+            getattr(self, network.name)(request, network, profile, response)
+            return HttpResponseRedirect(request.session.get('last_url'))
         return getattr(self, network.name)(request, network, profile, response)
         
         
