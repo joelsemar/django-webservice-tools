@@ -186,8 +186,8 @@ def google_places_search(request, response):
     query  = request.GET.get('query', '')
     query = re.sub(' ', '|', query)
     radius = request.GET.get('radius', 20)
-    if not lat and lng:
-        response.addErrors("Please provide either a lat/lng pair or location string")
+    if not (lat and lng):
+        response.addErrors("Please provide lat and lng.")
         return None, response
     latlng = '%s,%s' % (lat, lng)
     
