@@ -396,6 +396,13 @@ class GooglePlacesSearch():
     def fetch(self):
         args = friendlyURLEncode(self.arg_dict)
         return simplejson.loads(urllib2.urlopen(GOOGLE_PLACES_SEARCH_URL + args).read())
+
+
+
+def google_places_details(reference):
+    api_key = getattr(settings, 'GOOGLE_PLACES_API_KEY', '')
+    args = friendlyURLEncode({'reference': reference, 'key': api_key})
+    return simplejson.loads(urllib2.urlopen(GOOGLE_PLACES_DETAILS_URL + args).read())['result']
    
         
 def get_site_settings():

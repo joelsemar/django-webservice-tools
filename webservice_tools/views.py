@@ -185,16 +185,21 @@ def google_places_search(request, response):
     lng = request.GET.get('lng')
     query  = request.GET.get('query', '')
     query = re.sub(' ', '|', query)
-    radius = request.GET.get('radius', 20)
-    if not (lat and lng):
-        response.addErrors("Please provide lat and lng.")
-        return None, response
-    latlng = '%s,%s' % (lat, lng)
+    radius = request.GET.get('radius', 5000)
+    location = request.GET.get('location')
+        
+    if location:
+        lng, lat = GeoCode(address=location, apiKey=settings.GOOGLE_API_KEY).getCoords()
     
+    if not (lat and lng):
+        response.addErrors("Please provide lat and lng or location.")
+        return None, response
+    
+    latlng = '%s,%s' % (lat, lng) 
     api_key = getattr(settings, 'GOOGLE_PLACES_API_KEY', '')
     result = GooglePlacesSearch(latlng=latlng, radius=radius, api_key=api_key, types=query)
     return result.fetch()['results'], response
-    
+
 
 def yahoo_places_search(request, response):
     lat = request.GET.get('lat')
