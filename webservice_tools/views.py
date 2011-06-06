@@ -91,7 +91,7 @@ class PlacesHandler(BaseHandler):
     internal=True
     allowed_methods = ('GET',)
     def read(self, request, response):
-        return places_search(request, response)
+        return google_places_search(request, response)
     
 
 def newResetPass(request, response):
@@ -180,25 +180,30 @@ def generateNewPassword():
            passwordpieces.PASSWORD_SPECIAL_CHARACTERS[random.randint(0, len(passwordpieces.PASSWORD_SPECIAL_CHARACTERS) - 1)]
 
 
-def google_places_search(request, response):
+def google_places_search_view(request, response):
     lat = request.GET.get('lat')
     lng = request.GET.get('lng')
-    query  = request.GET.get('query', '')
-    query = re.sub(' ', '|', query)
     radius = request.GET.get('radius', 5000)
-    location = request.GET.get('location')
-        
+    location = request.GET.get('location', '')
+    query  = request.GET.get('query', '')
+    
+    result, errors = google_places_search_view(lat=lat, lng=lng, location=location, radius=radius, query=query)
+    if errors:
+        response.addErrors(errors)
+    return result, response
+
+def google_places_search(lat='', lng='', location='', radius=5000, query=''):
+    query = re.sub(',', '|', query)
     if location:
         lng, lat = GeoCode(address=location, apiKey=settings.GOOGLE_API_KEY).getCoords()
     
     if not (lat and lng):
-        response.addErrors("Please provide lat and lng or location.")
-        return None, response
+        return None, "Please provide lat and lng or location."
     
     latlng = '%s,%s' % (lat, lng) 
     api_key = getattr(settings, 'GOOGLE_PLACES_API_KEY', '')
     result = GooglePlacesSearch(latlng=latlng, radius=radius, api_key=api_key, types=query)
-    return result.fetch()['results'], response
+    return result.fetch()['results'], None
 
 
 def yahoo_places_search(request, response):
