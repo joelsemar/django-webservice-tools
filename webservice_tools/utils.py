@@ -595,7 +595,10 @@ def default_time_parse(time_string):
         try:
             return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M")
         except ValueError:
-            return None
+            try:
+                return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M:%S.%f")
+            except ValueError:
+                return None
 
 def simpleReadConfigFile(filename):
     """Reads in config file 

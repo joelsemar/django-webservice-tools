@@ -55,5 +55,5 @@ class BadgesWonCountHandler(BaseHandler):
         since = since or datetime.datetime(1970, 1, 1)
         now  = datetime.datetime.utcnow()
         count = BadgeToUser.objects.filter(winner=profile, when_created__gte=since).count()
-        response.set(count=count, timestamp=now.strftime("%Y-%m-%d %H:%M:%S"))
+        response.set(count=count, timestamp=now.strftime("%Y-%m-%d %H:%M:%S.%f"))
         return response.send()
