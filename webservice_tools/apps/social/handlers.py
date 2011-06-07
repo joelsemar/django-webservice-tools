@@ -296,7 +296,6 @@ class SocialCallbackHandler(BaseHandler):
         """
         Helper function to handle the callbacks for twitter 
         """
-        
         # The first step is to make sure there is an unauthed_token in the session, and that it matches the one 
         # the provider gave us back
         unauthed_token = request.session.get('%s_unauthed_token' % network.name, None)
