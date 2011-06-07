@@ -26,6 +26,8 @@ from django.conf import settings as django_settings
 from django.core.cache import cache
 from django.db import  models
 from django.core.paginator import EmptyPage, Paginator
+from django.contrib.gis.geos import fromstr
+
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
@@ -584,8 +586,8 @@ def iso_8601_parse(time_string):
 
 def default_time_parse(time_string):
     """
-    Expects times in the format "2011-12-25 18:22"
-    Returns None on error
+    Expects times in the formats: "2011-12-25 18:22",  "2011-12-25 18:22:12".  "2011-12-25 18:22:12.241512"
+    Returns None on error 
     """
     if not time_string or not isinstance(time_string, basestring):
         return None
@@ -703,3 +705,7 @@ def get_user_from_session(session_key):
     session = Session.objects.get(session_key=session_key)
     uid = session.get_decoded().get('_auth_user_id')
     return User.objects.get(pk=uid)
+
+
+def location_from_coords(lat, lng):
+    return fromstr("POINT(%.5f %5f)" % (float(lat), float(lng)))
