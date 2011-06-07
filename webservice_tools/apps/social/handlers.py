@@ -97,8 +97,7 @@ class SocialPostHandler(BaseHandler):
     @login_required
     def create(self, request, response):
         """
-        Post a message a social network for a user that has registered us with that network - NOTE Linkedin 
-        does NOT allow POSTING
+        Post a message a social network for a user that has registered us with that network
         API Handler: POST /social/post
         PARAMS
              @network [string] {twitter|facebook} Name of the network to post to
