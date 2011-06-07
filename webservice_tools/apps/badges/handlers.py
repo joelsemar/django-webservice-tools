@@ -47,7 +47,7 @@ class BadgesWonCountHandler(BaseHandler):
         Return a count of badges won since a certain date
         API Handler: GET /badges/count
         Params:
-           @since [datetime] format "2011-12-25 18:22:11" 
+           @since [datetime] format "2011-12-25 18:22:11.123822" 
         """
         profile = request.user.get_profile()
         since = request.GET.get('since')
@@ -55,5 +55,5 @@ class BadgesWonCountHandler(BaseHandler):
         since = since or datetime.datetime(1970, 1, 1)
         now  = datetime.datetime.utcnow()
         count = BadgeToUser.objects.filter(winner=profile, when_created__gte=since).count()
-        response.set(count=count, timestamp=now.strftime("%Y-%m-%d %H:%M:%S"))
+        response.set(count=count, timestamp=now.strftime("%Y-%m-%d %H:%M:%S.%f"))
         return response.send()

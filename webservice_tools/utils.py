@@ -26,6 +26,8 @@ from django.conf import settings as django_settings
 from django.core.cache import cache
 from django.db import  models
 from django.core.paginator import EmptyPage, Paginator
+from django.contrib.gis.geos import fromstr
+
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
@@ -400,7 +402,7 @@ class GooglePlacesSearch():
 
 
 def google_places_details(reference):
-    api_key = getattr(settings, 'GOOGLE_PLACES_API_KEY', '')
+    api_key = getattr(django_settings, 'GOOGLE_PLACES_API_KEY', '')
     args = friendlyURLEncode({'reference': reference, 'key': api_key})
     return simplejson.loads(urllib2.urlopen(GOOGLE_PLACES_DETAILS_URL + args).read())['result']
    
@@ -452,11 +454,12 @@ def truncate(s, length, etc=u"..."):
 
 
 
-def formatPhoneNumber(number):
+def format_phone(number):
+    number = re.sub('[\(|\)\.\-\+a-zA-Z]', '', number)
     m = re.search("\+?1?(\d{3})(\d{3})(\d{4})", number)
     if m:
         return u"(%s) %s-%s" % m.groups()
-    return m
+    return number
 
 def makeAPICall(domain, apiHandler, postData=None, rawPostData=None, queryData=None, userName=None,
                  password=None, secure=False, timeout=5, deserializeAs='json', headers={}):
@@ -584,8 +587,8 @@ def iso_8601_parse(time_string):
 
 def default_time_parse(time_string):
     """
-    Expects times in the format "2011-12-25 18:22"
-    Returns None on error
+    Expects times in the formats: "2011-12-25 18:22",  "2011-12-25 18:22:12".  "2011-12-25 18:22:12.241512"
+    Returns None on error 
     """
     if not time_string or not isinstance(time_string, basestring):
         return None
@@ -595,7 +598,10 @@ def default_time_parse(time_string):
         try:
             return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M")
         except ValueError:
-            return None
+            try:
+                return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M:%S.%f")
+            except ValueError:
+                return None
 
 def simpleReadConfigFile(filename):
     """Reads in config file 
@@ -700,3 +706,7 @@ def get_user_from_session(session_key):
     session = Session.objects.get(session_key=session_key)
     uid = session.get_decoded().get('_auth_user_id')
     return User.objects.get(pk=uid)
+
+
+def location_from_coords(lat, lng):
+    return fromstr("POINT(%.5f %5f)" % (float(lat), float(lng)))
