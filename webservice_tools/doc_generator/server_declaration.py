@@ -3,7 +3,7 @@ from webservice_tools.utils import Resource
 call_map = {'GET': 'read', 'POST': 'create', 
             'PUT': 'update', 'DELETE': 'delete'}
 #VAR_REGEX = r'^[@][\w]+\ \[[\w\[\]]+\]\ .+' # @parameter [type] some comment
-VAR_REGEX = ex = '^\s+\@.+'
+VAR_REGEX = ex = '^[\s\t\ ]+\@.+'
 class ServerDeclaration():
     
     def __init__(self):
