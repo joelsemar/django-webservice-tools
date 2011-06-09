@@ -404,7 +404,10 @@ class GooglePlacesSearch():
 def google_places_details(reference):
     api_key = getattr(django_settings, 'GOOGLE_PLACES_API_KEY', '')
     args = friendlyURLEncode({'reference': reference, 'key': api_key})
-    return simplejson.loads(urllib2.urlopen(GOOGLE_PLACES_DETAILS_URL + args).read())['result']
+    try:
+        return simplejson.loads(urllib2.urlopen(GOOGLE_PLACES_DETAILS_URL + args).read())['result']
+    except KeyError:
+        return None
    
         
 def get_site_settings():

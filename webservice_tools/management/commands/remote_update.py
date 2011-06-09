@@ -1,4 +1,4 @@
-stagifrom django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand
 import pexpect
 from django.conf import settings
 class Command(BaseCommand):
