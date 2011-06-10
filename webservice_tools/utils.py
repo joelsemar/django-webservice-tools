@@ -658,7 +658,7 @@ def is_valid_location(lat=None, long=None):
 def auto_page(results, page_number=1, limit=10):
     try:
         page_number = int(page_number)
-        limit = int(page_limit)
+        limit = int(limit)
     except ValueError:
         page_number = 1
         limit = 10

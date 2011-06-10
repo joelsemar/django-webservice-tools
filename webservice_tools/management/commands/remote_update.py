@@ -17,4 +17,4 @@ class Command(BaseCommand):
             domain = 'staging.appiction.com'
         command = 'cd /var/www/%s && sudo -u www-data git reset --hard && sudo -u www-data git pull && sudo ./manage.py migrate && sudo /etc/init.d/apache2 restart' % server_name
         p = pexpect.spawn('ssh -t %s@%s %s' % (username, domain, command))
-        p.interact(pexpect.EOF)
+        p.interact()
