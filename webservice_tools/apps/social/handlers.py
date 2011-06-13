@@ -86,7 +86,7 @@ class SocialFriendHandler(BaseHandler):
                                                     token=oauth.OAuthToken.from_string(credentials.token))
         ret = oauth.fetchResponse(oauthRequest, network.base_url).read()
         friends = utils.fromXML(ret).person
-        return [urlparse.parse_qs(y['site_standard_profile_request']['url'])['key'][0] for y in friends]
+        return [urlparse.parse_qs(y['site_standard_profile_request']['url'])['key'][0] for y in friends if y['site_standard_profile_request']]
 
         
 
