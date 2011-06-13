@@ -455,7 +455,7 @@ def truncate(s, length, etc=u"..."):
 
 
 def format_phone(number):
-    number = re.sub('[\(|\)\.\-\+a-zA-Z]', '', number)
+    number = re.sub('[\(|\)\.\-\ \+a-zA-Z]', '', number)
     m = re.search("\+?1?(\d{3})(\d{3})(\d{4})", number)
     if m:
         return u"(%s) %s-%s" % m.groups()

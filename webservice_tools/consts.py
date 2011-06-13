@@ -133,3 +133,13 @@ TIME_ZONES = (
     'Pacific/Kiritimati',
 )
 TIME_ZONE_CHOICES = tuple([(x, x) for x in TIME_ZONES])
+
+DAYS_OF_THE_WEEK = ({'name':'Monday', 'abbrv':'mon'},
+                    {'name':'Tuesday', 'abbrv':'tue'},
+                    {'name':'Wednesday', 'abbrv':'wed'},
+                    {'name':'Thursday', 'abbrv':'thu'},
+                    {'name':'Friday', 'abbrv':'fri'},
+                    {'name':'Saturday', 'abbrv':'sat'},
+                    {'name':'Sunday', 'abbrv':'sun'})
+
+DAYS_OF_THE_WEEK_CHOICES = tuple([(x['abbrv'], x['name']) for x in DAYS_OF_THE_WEEK]) 
