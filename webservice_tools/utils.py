@@ -404,7 +404,10 @@ class GooglePlacesSearch():
 def google_places_details(reference):
     api_key = getattr(django_settings, 'GOOGLE_PLACES_API_KEY', '')
     args = friendlyURLEncode({'reference': reference, 'key': api_key})
-    return simplejson.loads(urllib2.urlopen(GOOGLE_PLACES_DETAILS_URL + args).read())['result']
+    try:
+        return simplejson.loads(urllib2.urlopen(GOOGLE_PLACES_DETAILS_URL + args).read())['result']
+    except KeyError:
+        return None
    
         
 def get_site_settings():
@@ -655,7 +658,7 @@ def is_valid_location(lat=None, long=None):
 def auto_page(results, page_number=1, limit=10):
     try:
         page_number = int(page_number)
-        limit = int(page_limit)
+        limit = int(limit)
     except ValueError:
         page_number = 1
         limit = 10

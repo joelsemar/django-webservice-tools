@@ -33,12 +33,12 @@ def data_delete(fn):
         except IndexError:
             return response.send(errors="Data delete decorated function called without request object", status=400)
         
-        
         if request.raw_post_data and request.method == 'DELETE':
             request.DELETE = QueryDict(request.raw_post_data)
             t_args = [a for a in args]
             t_args[t_args.index(request)] = request
-        return fn(*t_args, **kwargs)
+            return fn(*t_args, **kwargs)
+        return fn(*args, **kwargs)
     return inner
 
 
