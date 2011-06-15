@@ -32,7 +32,7 @@ class FriendsHandler(BaseHandler):
                                      Q(user__last_name__icontains=query) | Q(user__email__icontains=query))
         
         friends, page_dict = utils.auto_page(friends, page_number=page_number, limit=limit)
-        friends = [f.dict() for f in friends()]
+        friends = [f.dict() for f in friends]
         response.set(friends=friends, paging=paging_dict)
         return response.send()
     
