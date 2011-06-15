@@ -33,7 +33,7 @@ class FriendsHandler(BaseHandler):
         
         friends, page_dict = utils.auto_page(friends, page_number=page_number, limit=limit)
         friends = [f.dict() for f in friends]
-        response.set(friends=friends, paging=paging_dict)
+        response.set(friends=friends, paging=page_dict)
         return response.send()
     
     @login_required
