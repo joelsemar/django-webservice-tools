@@ -21,7 +21,10 @@ class ProvideResponse(object):
         if ('html' in accept_header or 'admin' in request.path or 'static' in request.path) and not data_format:
             return None
         
-        kwargs['response'] = ResponseObject()
+        if getattr(settings, 'MESSAGES_ENABLED', False):
+            kwargs['response'] = ResponseObject(request=request)
+        else:
+            kwargs['response'] = ResponseObject()
         if request.META.get("HTTP_SHOW_DOC"):
             if hasattr(view, 'callmap'):
                 doc = getattr(view.handler, view.callmap[request.method]).func_doc
