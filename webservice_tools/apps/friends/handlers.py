@@ -3,6 +3,7 @@ from webservice_tools import  utils
 from webservice_tools.decorators import login_required
 from webservice_tools.apps.friends.models import FriendRequest, FriendGroup
 from django.db import models
+from django.db.models import Q
 from django.conf import settings
 app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
 PROFILE_MODEL = models.get_model(app_label, model_name)
@@ -16,10 +17,23 @@ class FriendsHandler(BaseHandler):
         """
         Return a list of a users friends
         API Handler: GET /friends/{id}
+        PARAMS:
+            @page_number [integer] Page number to start paging on (optional)
+            @limit [integer] number of results to display on page (optional)
+            @query [string] query to filter against friends (optional)
         """
+        page_number = request.GET.get('page_number', 1)
+        limit = request.GET.get('limit', 10)
+        query = request.GET.get('query', '')
         profile = PROFILE_MODEL.objects.get(id=id)
         friends = profile.friends.all()
-        response.set(friends=[p.dict() for p in friends])
+        if query:
+            friends = friends.filter(Q(user__username__icontains=query) | Q(user__first_name__icontains=query) | 
+                                     Q(user__last_name__icontains=query) | Q(user__email__icontains=query))
+        
+        friends, page_dict = utils.auto_page(friends, page_number=page_number, limit=limit)
+        friends = [f.dict() for f in friends()]
+        response.set(friends=friends, paging)
         return response.send()
     
     @login_required
@@ -148,7 +162,7 @@ class GroupHandler(BaseHandler):
                                  status=404)
         
         members = [profile.dict() for profile in friendgroup.members.all()]
-        response.set(name=friendgroup.name, members = members)
+        response.set(name=friendgroup.name, members=members)
         return response.send()
     
     @login_required
@@ -169,7 +183,7 @@ class GroupHandler(BaseHandler):
         except FriendGroup.DoesNotExist:
             pass
         
-        new_group = FriendGroup.objects.create(name=name,  owner=profile)
+        new_group = FriendGroup.objects.create(name=name, owner=profile)
         response.set(new_group_id=new_group.id, new_group_name=new_group.name)
         return response.send()
         

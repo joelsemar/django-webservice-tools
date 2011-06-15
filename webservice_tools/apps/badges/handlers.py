@@ -19,7 +19,10 @@ class BadgeHandler(BaseHandler):
         API Handler: GET /badges/{id}
         """
         all_badges = BadgeModel.objects.all()
-        profile = PROFILE_MODEL.objects.get(id=id)
+        try:
+            profile = PROFILE_MODEL.objects.get(id=id)
+        except PROFILE_MODEL.DoesNotExist:
+            return response.send(errors="Not found", status=404)
         users_badges = [b.badge for b in BadgeToUser.objects.filter(winner=profile)]
         
         ret = []

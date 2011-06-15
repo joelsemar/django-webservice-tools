@@ -10,7 +10,7 @@ class AppleReceiptHandler(utils.BaseHandler):
     """
     Handler for utilizing apple's in app purchase
     Usage:
-      place webservice_tools.apps.inapp_purchase in your 'INSTALLED_APPS'
+      place webservice_tools.apps.in_app_purchase in your 'INSTALLED_APPS'
       import this handler, subclass it
       define a 'redeem' method, that will get passed the apple_receipt (see below for signature)
       grant the user your product in that method, if it gets called, the receipt has been verified
@@ -59,10 +59,10 @@ class AppleReceiptHandler(utils.BaseHandler):
         apple_receipt = AppleReceipt.objects.create(**receipt)
         
         transaction.commit()
-        return self.redeem(apple_receipt, response)
+        return self.redeem(request, apple_receipt, response)
         
     
-    def redeem(self, apple_receipt, response):
+    def redeem(self, request, apple_receipt, response):
         """
         After an apple receipt is posted, the handler will call this method,
         Do what you need to do and return response.send() (you can look up your purchased product via apple_receipt.product_id
