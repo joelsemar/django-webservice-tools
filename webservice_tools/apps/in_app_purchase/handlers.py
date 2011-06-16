@@ -78,7 +78,7 @@ class AndroidReceiptHandler(utils.BaseHandler):
     @transaction.commit_manually
     def create(self, request, response):
         """
-        Receives json payload from Android market place, verfies signauture, enters receipt into the db and calls your redeem function
+        Receives json payload from Android market place, verfies signauture, provides product.
         API Handler: POST /receipt/android
         PARAMS:
            @json_payload [string]: json payload received from android
