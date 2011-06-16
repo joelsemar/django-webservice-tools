@@ -111,7 +111,11 @@ class BaseBadge(object):
                         pass
             if self.check_badge(user, badge, instance):
                 BadgeToUser.objects.create(badge=badge, winner=user)
-        
+                self.badge_won_callback(user, badge, instance)
+
+    def badge_won_callback(self, user, badge, instance):
+        pass
+    
     def __init__(self):
         post_save.connect(self.callback, sender=self.model) 
 
