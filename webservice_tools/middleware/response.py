@@ -1,4 +1,5 @@
 from webservice_tools.response_util import ResponseObject
+from webservice_tools.models import StoredHandlerResponse
 from django.conf import settings
 class ProvideResponse(object):
     
@@ -8,7 +9,6 @@ class ProvideResponse(object):
         Provides a response object for the view based on the 'accept' header
         Optionally provides the docstring to the view in debug mode
         """
-        
         data_format = None
         accept_header = request.META.get('HTTP_ACCEPT', '')
         if 'text/xml' in accept_header and 'html' not in accept_header:
@@ -33,5 +33,20 @@ class ProvideResponse(object):
             if data_format == 'json' and doc:
                 doc = doc.replace('\n', '<br/>')
             kwargs['response'].doc=doc
+        request.handler_id = str(view.handler.__class__)
         
         return None
+
+
+
+
+class StoreResponse(object):
+    
+    def process_response(self, request, response):
+        if request.META.get('HTTP_STORE_RESPONSE'):
+            if hasattr(request, 'handler_id'):
+                handler_id = request.handler_id
+                stored_response = StoredHandlerResponse.objects.get_or_create(handler_id=handler_id, method=request.method)[0]
+                stored_response.response = response.content
+                stored_response.save()
+        return response

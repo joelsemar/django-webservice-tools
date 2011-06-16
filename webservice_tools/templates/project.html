@@ -32,6 +32,7 @@
                 list-style-type: none;
             }
         </style>
+		<script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js'></script>
     </head>
     <body>
         <a name='top'><h1>{{servername}} API Documentation</h1></a>
@@ -81,6 +82,10 @@
                 {%else %}
                 None
                 {% endif %}
+				{% if method.example_response %}
+				<a href="#{{handler.name}}" onclick="$('#{{handler.name}}{{method.request_method}}').toggle()">See Example</a>
+				<div id='{{handler.name}}{{method.request_method}}' style='display:none'><pre>{{method.example_response}}</pre></div>
+				{% endif %}
             </ul>
             {% endfor %} <a href='#top' style='margin-top:20px;display:block;'>Return to top</a>
         </div>

@@ -51,6 +51,10 @@
                 if (Ext.getDom('showdoc').checked) {
                     headers['Show-Doc'] = true;
                 }
+                if (Ext.getDom('store_response').checked) {
+                    headers['Store-Response'] = true;
+                }
+                
                 
                 Ext.get('result').update('')
                 Ext.Ajax.request({
@@ -74,9 +78,9 @@
                             map = new google.maps.Map(document.getElementById("mapCanvas"), myOptions);
                             mapResults(Ext.util.JSON.decode(responseObject.responseText));
                         }
-						else{
-							Ext.get('mapCanvas').setHeight('0px');
-						}
+                        else {
+                            Ext.get('mapCanvas').setHeight('0px');
+                        }
                         if (update) {
                             if (responseObject.getResponseHeader('content-type').indexOf('xml') != -1) {
                                 data = formatXML(responseObject.responseText)
@@ -111,8 +115,8 @@
                 var key_map = new Ext.KeyMap(document.body, {
                     key: 13, // Ext.EventObject.ENTER,
                     fn: function(){
-						sendCall(true)
-					}
+                        sendCall(true)
+                    }
                 });
             });
             function formatXML(string){
@@ -137,14 +141,14 @@
                 }
                 var lat, lng;
                 if (obj.hasOwnProperty('geolocation')) {
-					var c = obj.geolocation.split(',');
-					lat = c[1];
-					lng = c[0];
-				}
-				else {
-					lat = obj.lat || obj.latitude || obj.Latitude;
-					lng = obj.long || obj.lng || obj.longitude || obj.Longitude;
-				}
+                    var c = obj.geolocation.split(',');
+                    lat = c[1];
+                    lng = c[0];
+                }
+                else {
+                    lat = obj.lat || obj.latitude || obj.Latitude;
+                    lng = obj.long || obj.lng || obj.longitude || obj.Longitude;
+                }
                 if (lat & lng) {
                     coords.push([lat, lng, '<pre class="infoWindowContent">' + JSON.stringify(obj, null, '  ') + '</pre>']);
                 }
@@ -215,6 +219,9 @@
         Show Doc: <input type='checkbox' name='showdoc' id= 'showdoc'>
         <br>
         Map Results: <input type='checkbox' name='mapresults' id= 'mapresults' onclick='toggleCenterInput(this)'>
+        <br>
+        <br>
+        Store Response: <input type='checkbox' name='store_response' id= 'store_response'>
         <br>
         <div id='centerInput' style='display:none'>
             Map Center: <input type='text' value='30.407503,-97.715391' id='mapCenter'>

@@ -1,5 +1,6 @@
 import re
 from webservice_tools.utils import Resource
+from webservice_tools.models import StoredHandlerResponse
 call_map = {'GET': 'read', 'POST': 'create', 
             'PUT': 'update', 'DELETE': 'delete'}
 #VAR_REGEX = r'^[@][\w]+\ \[[\w\[\]]+\]\ .+' # @parameter [type] some comment
@@ -17,7 +18,13 @@ class ServerDeclaration():
     
     def get_methods(self, handler):
         ret = []
+        id = str(handler.__class__)
+        stored_responses = StoredHandlerResponse.objects.filter(handler_id=id)
         for request_method in handler.allowed_methods:
+            stored_response = [s for s in stored_responses if s.method == request_method]
+            example_response = ''
+            if stored_response:
+                example_response = stored_response[0].response
             method_name = call_map[request_method]
             method = getattr(handler, method_name)
             docstring = method.__doc__
@@ -25,9 +32,11 @@ class ServerDeclaration():
             if hasattr(method, 'authentication_required'):
                 auth_required=True
             api_handler = self._get_method_api_handler(docstring)
+            
             ret.append({'name': method_name, 'request_method': request_method,
                         'url': api_handler.get('url'), 'comment': api_handler.get('comment'),
-                        'params': self._get_method_params(docstring), 'auth_required': auth_required})
+                        'params': self._get_method_params(docstring), 'auth_required': auth_required,
+                        'example_response': example_response})
         return ret
             
     def _get_method_api_handler(self, docstring):
