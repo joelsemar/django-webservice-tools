@@ -110,7 +110,7 @@ class ResponseObject():
         responseDict['errors'] = self._errors
         responseDict['success'] = self.success
         if self._messages:
-            responseDict['messages'] = self._messages
+            responseDict['data']['messages'] = self._messages
         if self.doc:
             responseDict['doc'] = self.doc
         
