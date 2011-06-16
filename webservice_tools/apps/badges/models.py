@@ -37,7 +37,7 @@ class BadgeModel(models.Model):
     image = models.ImageField(upload_to=image_path, blank=True, null=True)
     hi_res_thumb = models.ImageField(upload_to=hi_res_thumb_path, blank=True, null=True)
     hi_res_image = models.ImageField(upload_to=hi_res_image_path, blank=True, null=True)
-    badge_action = models.CharField(choices=consts.BADGE_ACTION_CHOICES, max_length=2)
+    badge_action = models.CharField(choices=consts.BADGE_ACTION_CHOICES, max_length=32)
     required_number = models.PositiveIntegerField(default=0)
     badge_order = models.PositiveIntegerField(default=0)
     
@@ -97,7 +97,7 @@ class BaseBadge(object):
         """
         Return the user this action pertains to
         """
-        raise NotImplementedError
+        return instance.profile
     
     def callback(self, **kwargs):
         badges = BadgeModel.objects.filter(badge_action=self.action)
@@ -110,7 +110,7 @@ class BaseBadge(object):
                         continue
                     except BadgeToUser.DoesNotExist:
                         pass
-            if self.check_badge(user, badge):
+            if self.check_badge(user, badge, instance):
                 BadgeToUser.objects.create(badge=badge, winner=user)
         
     def __init__(self):

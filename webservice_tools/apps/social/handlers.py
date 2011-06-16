@@ -104,7 +104,9 @@ class SocialPostHandler(BaseHandler):
              @message [string] message to be posted
         """
         profile = request.user.get_profile()
-        network = request.POST.get('network')
+        networks = request.POST.get('network')
+        
+        networks = [n.strip() for n in network.split('|') if n.strip()]
         
         try:
             network = SocialNetwork.objects.get(name=network)
