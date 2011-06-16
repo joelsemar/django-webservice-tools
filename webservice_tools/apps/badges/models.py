@@ -38,7 +38,7 @@ class BadgeModel(models.Model):
     hi_res_thumb = models.ImageField(upload_to=hi_res_thumb_path, blank=True, null=True)
     hi_res_image = models.ImageField(upload_to=hi_res_image_path, blank=True, null=True)
     badge_action = models.CharField(choices=consts.BADGE_ACTION_CHOICES, max_length=32)
-    badge_type = models.CharField(choices=consts.BADGE_TYPE_CHOICES)
+    badge_type = models.CharField(choices=consts.BADGE_TYPE_CHOICES, default='')
     required_number = models.PositiveIntegerField(default=0)
     badge_order = models.PositiveIntegerField(default=0)
     
