@@ -67,10 +67,6 @@ class BadgeToUser(models.Model):
             message_data = utils.toDict(self.badge)
             message_sent.send(sender=self.winner.user, message=[message_text, message_data])
             badge = self.badge
-            if badge.badge_type == consts.RANK_BADGE:
-                self.winner.rank_badge = badge.thumb and badge.thumb.url or ''
-                self.winner.hi_res_rank_badge = badge.hi_res_thumb and badge.hi_res_thumb.url or ''
-                self.winner.save()
         super(BadgeToUser, self).save(*args, **kwargs)
 
 
