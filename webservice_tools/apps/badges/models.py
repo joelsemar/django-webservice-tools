@@ -61,7 +61,7 @@ class BadgeToUser(models.Model):
             if hasattr(consts, 'BADGE_AWARDED_TEMPLATE'):
                 message_template = consts.BADGE_AWARDED_TEMPLATE
             else:
-                message_template =  "You've earned the %{name}s badge!"
+                message_template =  "You've earned the %(name)s badge!"
             message_text = message_template % {'name': self.badge.name}
             message_data = utils.toDict(self.badge)
             message_sent.send(sender=self.winner.user, message=[message_text, message_data])
