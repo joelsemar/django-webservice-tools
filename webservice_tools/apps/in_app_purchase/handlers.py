@@ -71,17 +71,19 @@ class AppleReceiptHandler(utils.BaseHandler):
 
 
 class AndroidReceiptHandler(utils.BaseHandler):
-    """
-    Receives json payload from Android market place, verfies signauture, enters receipt into the db and calls your redeem function
-    API Handler: POST /receipt/android
-    PARAMS:
-       @json_payload [string]: json payload received from android
-    """
+    
     allowed_methods = ('POST',)
     
     @login_required
     @transaction.commit_manually
     def create(self, request, response):
+        """
+        Receives json payload from Android market place, verfies signauture, enters receipt into the db and calls your redeem function
+        API Handler: POST / receipt / android
+        PARAMS:
+           @json_payload [string]: json payload received from android
+        """
+
         android_receipt = None
         self.redeem(request, android_receipt, response)
     
