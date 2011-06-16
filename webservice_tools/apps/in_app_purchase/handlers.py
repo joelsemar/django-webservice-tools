@@ -70,7 +70,7 @@ class AppleReceiptHandler(utils.BaseHandler):
         raise NotImplementedError
 
 
-class AndroidReceiptHandler(BaseHandler):
+class AndroidReceiptHandler(utils.BaseHandler):
     """
     Receives json payload from Android market place, verfies signauture, enters receipt into the db and calls your redeem function
     API Handler: POST /receipt/android
