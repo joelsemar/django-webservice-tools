@@ -27,7 +27,7 @@ class AppleReceiptHandler(utils.BaseHandler):
     def create(self, request, response):
         """
         Receives receipt from client, verifies with apple, makes necessary db changes to provide the product
-        API Handler: POST /receipt
+        API Handler: POST /receipt/apple
         PARAMS:
             @receipt_data [string]: this is the receipt data apple gave you in the transactionReceipt property of your receipt 
         """ 
@@ -68,3 +68,27 @@ class AppleReceiptHandler(utils.BaseHandler):
         Do what you need to do and return response.send() (you can look up your purchased product via apple_receipt.product_id
         """
         raise NotImplementedError
+
+
+class AndroidReceiptHandler(BaseHandler):
+    """
+    Receives json payload from Android market place, verfies signauture, enters receipt into the db and calls your redeem function
+    API Handler: POST /receipt/android
+    PARAMS:
+       @json_payload [string]: json payload received from android
+    """
+    allowed_methods = ('POST',)
+    
+    @login_required
+    @transaction.commit_manually
+    def create(self, request, response):
+        android_receipt = None
+        self.redeem(request, android_receipt, response)
+    
+    def redeem(self, request, apple_receipt, response):
+        """
+        After an android receipt is posted, the handler will call this method,
+        Do what you need to do and return response.send() (you can look up your purchased product via apple_receipt.product_id
+        """
+        raise NotImplementedError
+    
