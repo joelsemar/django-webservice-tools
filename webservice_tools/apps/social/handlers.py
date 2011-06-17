@@ -106,7 +106,7 @@ class SocialPostHandler(BaseHandler):
         profile = request.user.get_profile()
         networks = request.POST.get('network')
         
-        networks = [n.strip() for n in network.split('|') if n.strip()]
+        networks = [n.strip() for n in networks.split('|') if n.strip()]
         
         try:
             network = SocialNetwork.objects.get(name=network)
