@@ -28,6 +28,7 @@ class BadgeHandler(BaseHandler):
         ret = []
         for badge in all_badges:
                 ret.append({'name': badge.name,
+                            'id': badge.id,
                             'description': badge.description,
                             'won_description': badge.won_description,
                             'thumb_url': badge.thumb and badge.thumb.url or '',
