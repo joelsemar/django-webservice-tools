@@ -35,6 +35,7 @@ class BadgeHandler(BaseHandler):
                             'hi_res_thumb_url': badge.hi_res_thumb and badge.hi_res_thumb.url or '',
                             'hi_res_image_url': badge.hi_res_image and badge.hi_res_image.url or '',
                             'order': badge.badge_order,
+                            'won_count': len([b for b in users_badges if b == badge]),
                             'won': badge in users_badges})
                 
         response.set(badges=ret)
