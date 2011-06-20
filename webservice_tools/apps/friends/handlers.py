@@ -25,7 +25,10 @@ class FriendsHandler(BaseHandler):
         page_number = request.GET.get('page_number', 1)
         limit = request.GET.get('limit', 10)
         query = request.GET.get('query', '')
-        profile = PROFILE_MODEL.objects.get(id=id)
+        try:
+            profile = PROFILE_MODEL.objects.get(id=id)
+        except PROFILE_MODEL.DoesNotExist:
+            return response.send(errors="Not found", status=404)
         friends = profile.friends.all()
         if query:
             friends = friends.filter(Q(user__username__icontains=query) | Q(user__first_name__icontains=query) | 
