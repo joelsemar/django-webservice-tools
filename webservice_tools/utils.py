@@ -27,7 +27,7 @@ from django.core.cache import cache
 from django.db import  models
 from django.core.paginator import EmptyPage, Paginator
 from django.contrib.gis.geos import fromstr
-
+from django.http import HttpResponse
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
@@ -60,7 +60,7 @@ class Resource(PistonResource):
     
     def error_handler(self, e, request, meth, em_format):
         ret = {"success": False, "data": {}, "errors": [str(e)]}
-        return simplejson.dumps(ret)
+        return HttpResponse(simplejson.dumps(ret))
     
     
 class BaseHandler(PistonBaseHandler):
