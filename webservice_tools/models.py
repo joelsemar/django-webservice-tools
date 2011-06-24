@@ -15,6 +15,9 @@ class StoredHandlerRequest(models.Model):
     test = models.BooleanField(default=False)
     when_created = models.DateTimeField(default=datetime.datetime.utcnow)
     
+    def __unicode__(self):
+        return "%s %s" % (self.method, self.path)
+    
     def serialize(self):
         stored_params = [p.dict() for p in self.storedhttpparam_set.all()]
         return simplejson.dumps({'method': self.method, 'path': self.path,

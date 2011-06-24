@@ -43,6 +43,15 @@
         <script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js'>
         </script>
         <script type="application/javascript">
+        	var value_factory = {
+				
+				random_email: function(){
+					
+				}
+				
+			}
+			
+			
             var TEST_LINKS = [];
             var CURRENT_TEST_LINK = 0;
             function run_test(test_runner, div_id){
@@ -71,7 +80,7 @@
                         $("#" + close_control_id).click(function(){
                             $(result_div).toggle();
                         })
-                        setTimeout(next_test, '4000');
+                        setTimeout(next_test, '400');
                     }
                     
                     
@@ -96,7 +105,6 @@
                         next_link.onclick();
                     }
                     else {
-                        window.location.hash = "top";
                         TEST_LINKS = [];
                     }
                     
@@ -128,10 +136,11 @@
         <div class='handlerdiv'>
             <a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
             {%for method in handler.methods %}
-            <div style='margin-top:25px;'>
-               <a name ="{{handler.name}}{{method.request_method}}"> <b style='color:red;'><a name="{{handler.name}}{{method.request_method}}"></a>{{method.request_method}}</b></a>
+            <a name='{{handler.name}}{{method.request_method}}_anchor'> <div style='margin-top:25px;'>
+               <b style='color:red;'>{{method.request_method}}</b>
                 /{{servername}}{{method.url}}
             </div>
+			</a>
             <div style='margin-left: 30px;'>
                 {% autoescape off %}
                 {{method.comment}}
@@ -161,7 +170,7 @@
                 {% if method.tests %}
                 {% for test in method.tests %}
 				 <button type="button" onclick='run_test(this,"{{handler.name}}{{method.request_method}}_response_div")'
-				     class='test_link' test_data="{{test}}" anchor="{{handler.name}}{{method.request_method}}">Run Test</button>
+				     class='test_link' test_data="{{test}}" anchor="{{handler.name}}{{method.request_method}}_anchor">Run Test</button>
                 {% endfor %}
                 <div id='{{handler.name}}{{method.request_method}}_response_div' class='response_divs' style="display:none;">
                 </div>
