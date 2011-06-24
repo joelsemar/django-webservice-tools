@@ -155,7 +155,8 @@ class KeepAliveHandler(BaseHandler):
         Health check url for ec2 instances
         
         """
-        return HttpResponse(str(datetime.datetime.utcnow()))
+        response.set(timestamp=datetime.datetime.utcnow())
+        return response.send()
 
 
 def changePass(request):
