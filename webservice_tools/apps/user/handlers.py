@@ -129,7 +129,7 @@ class LoginHandler(utils.BaseHandler):
         POST Params
           @username [string] The users's unique identifier, (may be an email address in some cases)
           @password [password] The user's password
-        
+          @email [email] alternative for username where applicable
         """
         #all calls to this handler via '/logout should..
         if request.path.startswith('/logout'):

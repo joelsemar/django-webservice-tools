@@ -57,11 +57,9 @@ class Resource(PistonResource):
             em = request.GET.get('format', 'json')
 
         return em
-    """
     def error_handler(self, e, request, meth, em_format):
         ret = {"success": False, "data": {}, "errors": [str(e)]}
         return HttpResponse(simplejson.dumps(ret))
-    """
     
 class BaseHandler(PistonBaseHandler):
     
@@ -397,8 +395,10 @@ class YahooPlacesSearch():
 
 class GooglePlacesSearch():
     
-    def __init__(self, latlng, radius, api_key, types=''):
+    def __init__(self, latlng, radius, api_key, types='', name=''):
         self.arg_dict = {'location': latlng, 'radius': radius, 'types': types, 'key': api_key}
+        if name:
+            self.arg_dict['name'] = name
 
     def fetch(self):
         args = friendlyURLEncode(self.arg_dict)

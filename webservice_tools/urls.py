@@ -6,7 +6,7 @@ urlpatterns = patterns('webservice_tools.views',
     (r'geo$', Resource(GeoHandler)),
     (r'resetpass/?$', Resource(ResetPassHandler)),
     (r'locations/?$', Resource(PlacesHandler)),
-    (r'amialive/?$', 'amialive'),
+    (r'amialive/?$', Resource(KeepAliveHandler)),
     (r'docs/?$', Resource(DocHandler)),
     (r'^apiconsole/?$', direct_to_template, {'template': 'apiconsole.html', 'extra_context': {'baseURL': '/%s/' % settings.SERVER_NAME}}),
     

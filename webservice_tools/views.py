@@ -147,13 +147,15 @@ def resetPass(request, dataFormat='json'):
     """
     return newResetPass(request, ResponseObject(dataFormat=dataFormat))
 
+class KeepAliveHandler(BaseHandler):
+    allowed_methods= ('GET',)
 
-def amialive(request, response=None):
-    """
-    Health check url for ec2 instances
-    
-    """
-    return HttpResponse(str(datetime.datetime.utcnow()))
+    def read(self, request, response):
+        """
+        Health check url for ec2 instances
+        
+        """
+        return HttpResponse(str(datetime.datetime.utcnow()))
 
 
 def changePass(request):
@@ -192,7 +194,7 @@ def google_places_search_view(request, response):
         response.addErrors(errors)
     return result, response
 
-def google_places_search(lat='', lng='', location='', radius=5000, query=''):
+def google_places_search(lat='', lng='', location='', radius=5000, query='', name=''):
     query = re.sub(',', '|', query)
     if location:
         lng, lat = GeoCode(address=location, apiKey=settings.GOOGLE_API_KEY).getCoords()
@@ -202,7 +204,7 @@ def google_places_search(lat='', lng='', location='', radius=5000, query=''):
     
     latlng = '%s,%s' % (lat, lng) 
     api_key = getattr(settings, 'GOOGLE_PLACES_API_KEY', '')
-    result = GooglePlacesSearch(latlng=latlng, radius=radius, api_key=api_key, types=query)
+    result = GooglePlacesSearch(latlng=latlng, radius=radius, api_key=api_key, types=query, name=name)
     return result.fetch()['results'], None
 
 

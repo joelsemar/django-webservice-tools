@@ -43,53 +43,108 @@
         <script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js'>
         </script>
         <script type="application/javascript">
-        	var value_factory = {
-				
-				random_email: function(){
-					
+            var value_factory = {
+            
+                random_email: function(){
+					var ret = '';
+                    for (var i=0;i<5;i++){
+						ret += get_random_letter();
+					}
+					ret += '@'
+					for (var i=0;i<5;i++){
+                        ret += get_random_letter();
+                    }
+					ret += ".com"
+					return ret
+                }
+                
+            }
+            var TEST_LINKS = [];
+            var CURRENT_TEST_LINK = 0;
+            var TEST_USER = {};
+			function prep_params(params){
+				ret = {};
+				for (key in params){
+					if (params.hasOwnProperty(key)){
+						if (is_template(params[key])){
+							ret[key] = value_factory[params[key].replace(/%/g, '')]()
+						}
+						else{
+							ret[key] = params[key]
+						}
+					}
 				}
+				return ret;
+			}
+			
+			function is_template(value){
+				return value[0] == "%" && value[value.length-1] == "%"
 				
 			}
 			
-			
-            var TEST_LINKS = [];
-            var CURRENT_TEST_LINK = 0;
             function run_test(test_runner, div_id){
-                var test = JSON.parse($(test_runner).attr("test_data"));
-                var result_div = "#" + div_id;
-                var close_control_id = div_id + "_X"
-                $.ajax({
-                    url: test.path,
-                    data: test.params,
-                    type: test.method,
-                    complete: function(response){
-                        var parameters = "";
-                        for (key in test.params) {
-                            if (test.params.hasOwnProperty(key)) {
-                                parameters += " | " + key + "=" + test.params[key];
-                            }
-                            parameters += "<br/>"
-                        }
-                        var html = "<span class='closing_x' id='" + close_control_id + "';'>X</span>";
-                        html += "URL:" + test.path + "</br>";
-                        html += "Parameters:<span class='test_request_params'>" + parameters || "None" + "</span></br>"
-                        html += "Result: <br><pre>" + response.responseText + "</pre>";
-                        
-                        $(result_div).html(html);
-                        $(result_div).toggle();
-                        $("#" + close_control_id).click(function(){
-                            $(result_div).toggle();
-                        })
-                        setTimeout(next_test, '400');
-                    }
+				function _run_test(){
+					var test = JSON.parse($(test_runner).attr("test_data"));
+	                var result_div = "#" + div_id;
+	                var close_control_id = div_id + "_X"
+	                
+	                var params = prep_params(test.params)
+	                var store_result_for_test_user = false;
+	                if ($(test_runner).attr("create_user_test")){
+	                    store_result_for_test_user = true;
+	                }
+	                $.ajax({
+	                    url: test.path,
+	                    data: params,
+	                    type: test.method,
+	                    complete: function(response){
+	                        var parameters = "";
+	                        for (key in test.params) {
+	                            if (test.params.hasOwnProperty(key)) {
+	                                parameters += " | " + key + "=" + test.params[key];
+	                            }
+	                            
+	                        }
+	                        parameters += "<br/>"
+	                        var html = "<span class='closing_x' id='" + close_control_id + "';'>Hide X</span>";
+	                        html += "URL:" + test.path + "<br />";
+	                        html += "Parameters:<span class='test_request_params'>" + parameters || "None" + "</span><br />"
+	                        html += "Result: <br /><pre>" + response.responseText + "</pre>";
+	                        
+	                        $(result_div).html(html);
+	                        $(result_div).show();
+	                        $("#" + close_control_id).click(function(){
+	                            $(result_div).toggle();
+	                        })
+	                        setTimeout(next_test, '1200');
+	                        if (store_result_for_test_user && !TEST_USER.username){
+	                            TEST_USER.username = params.username || params.email;
+	                            TEST_USER.password = params.password;
+	                        }
+	                    }
                     
                     
                 })
+					
+				}
+				if ($(test_runner).attr("auth_required")) {
+                    login(_run_test);           
+                }
+				else{
+					_run_test()
+				}
+                
                 
             }
             
             function run_all_tests(){
-                TEST_LINKS = $(".test_link")
+                
+				TEST_LINKS =  $(".test_link");
+				TEST_LINKS.sort(function(a, b){
+					return JSON.parse($(b).attr('test_data')).priority - JSON.parse($(a).attr('test_data')).priority
+					
+				});
+				console.log(TEST_LINKS);
                 CURRENT_TEST_LINK = 0;
                 var first_test = TEST_LINKS[CURRENT_TEST_LINK];
                 window.location.hash = $(first_test).attr('anchor');
@@ -111,6 +166,40 @@
                 }
                 
             }
+            
+            function login(callback){
+				var callback = callback || function(){};
+				var params;
+				var test;
+				var links = $(".test_link");
+				for (var i = 0; i < links.length; i++) {
+					var elem = links[i];
+					if ($(elem).attr('auth_test')) {
+						test = JSON.parse($(elem).attr('test_data'))
+						params = test.params
+					}
+				}
+				if (TEST_USER.username && TEST_USER.password) {
+					params = TEST_USER;
+				}
+                $.ajax({
+                  url: test.path,
+	              data: params,
+	              type: test.method,
+				  complete: function(){
+				  	callback();
+				  }
+				})
+			}
+			function is_logged_in(){
+				return document.cookie.indexOf('sessionid=') !== -1
+			}
+			
+			function get_random_letter(){
+				var letters = 'abcdefghijklmnopqrsqtuvwxyz';
+				return letters[Math.floor(Math.random()*26)]
+			}
+			
         </script>
     </head>
     <body>
@@ -124,6 +213,8 @@
         <br>
         Feel free to email the developer with questions, or hop into #appiction-dev on freenode 
         (If you don't have an IRC client installed, you can just go <a href='staging.appiction.com'>here</a>
+		<br>
+		<button onclick="run_all_tests()">Run Available Tests</button>
         <h2>Resources</h2>
         <ul>
             {% for handler in handlers %}
@@ -135,12 +226,12 @@
         {% for handler in handlers %}
         <div class='handlerdiv'>
             <a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
-            {%for method in handler.methods %}
-            <a name='{{handler.name}}{{method.request_method}}_anchor'> <div style='margin-top:25px;'>
-               <b style='color:red;'>{{method.request_method}}</b>
-                /{{servername}}{{method.url}}
-            </div>
-			</a>
+            {%for method in handler.methods %}<a name='{{handler.name}}{{method.request_method}}_anchor'>
+                <div style='margin-top:25px;'>
+                    <b style='color:red;'>{{method.request_method}}</b>
+                    /{{servername}}{{method.url}}
+                </div>
+            </a>
             <div style='margin-left: 30px;'>
                 {% autoescape off %}
                 {{method.comment}}
@@ -169,8 +260,18 @@
                 {% endif %}
                 {% if method.tests %}
                 {% for test in method.tests %}
-				 <button type="button" onclick='run_test(this,"{{handler.name}}{{method.request_method}}_response_div")'
-				     class='test_link' test_data="{{test}}" anchor="{{handler.name}}{{method.request_method}}_anchor">Run Test</button>
+                <button type="button" onclick='run_test(this,"{{handler.name}}{{method.request_method}}_response_div")' class='test_link' test_data="{{test}}" anchor="{{handler.name}}{{method.request_method}}_anchor"
+                     {%  if 'auth_test' in test %} 
+					       auth_test="True"
+					 {%  endif %}
+					 {% if 'create_user_test' in test %}
+					    create_user_test="True"
+					 {% endif %}
+                    {%  if method.auth_required %}
+                        auth_required="True"
+                    {%  endif %}>
+                    	Run Test
+                </button>
                 {% endfor %}
                 <div id='{{handler.name}}{{method.request_method}}_response_div' class='response_divs' style="display:none;">
                 </div>
