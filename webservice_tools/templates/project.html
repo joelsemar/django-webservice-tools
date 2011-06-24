@@ -31,8 +31,79 @@
             ul {
                 list-style-type: none;
             }
+            
+            .closing_x {
+                height: 15px;
+                width: 15px;
+                float: right;
+                margin-right: 75px;
+                cursor: pointer;
+            }
         </style>
-		<script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js'></script>
+        <script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js'>
+        </script>
+        <script type="application/javascript">
+            var TEST_LINKS = [];
+            var CURRENT_TEST_LINK = 0;
+            function run_test(test_runner, div_id){
+                var test = JSON.parse($(test_runner).attr("test_data"));
+                var result_div = "#" + div_id;
+                var close_control_id = div_id + "_X"
+                $.ajax({
+                    url: test.path,
+                    data: test.params,
+                    type: test.method,
+                    complete: function(response){
+                        var parameters = "";
+                        for (key in test.params) {
+                            if (test.params.hasOwnProperty(key)) {
+                                parameters += " | " + key + "=" + test.params[key];
+                            }
+                            parameters += "<br/>"
+                        }
+                        var html = "<span class='closing_x' id='" + close_control_id + "';'>X</span>";
+                        html += "URL:" + test.path + "</br>";
+                        html += "Parameters:<span class='test_request_params'>" + parameters || "None" + "</span></br>"
+                        html += "Result: <br><pre>" + response.responseText + "</pre>";
+                        
+                        $(result_div).html(html);
+                        $(result_div).toggle();
+                        $("#" + close_control_id).click(function(){
+                            $(result_div).toggle();
+                        })
+                        setTimeout(next_test, '4000');
+                    }
+                    
+                    
+                })
+                
+            }
+            
+            function run_all_tests(){
+                TEST_LINKS = $(".test_link")
+                CURRENT_TEST_LINK = 0;
+                var first_test = TEST_LINKS[CURRENT_TEST_LINK];
+                window.location.hash = $(first_test).attr('anchor');
+                first_test.onclick();
+            }
+            
+            function next_test(){
+                if (TEST_LINKS.length) {
+                    CURRENT_TEST_LINK += 1;
+                    var next_link = TEST_LINKS[CURRENT_TEST_LINK];
+                    if (next_link) {
+                        window.location.hash = $(next_link).attr('anchor');
+                        next_link.onclick();
+                    }
+                    else {
+                        window.location.hash = "top";
+                        TEST_LINKS = [];
+                    }
+                    
+                }
+                
+            }
+        </script>
     </head>
     <body>
         <a name='top'><h1>{{servername}} API Documentation</h1></a>
@@ -42,9 +113,9 @@
         <br/>
         Appiction strives to develop webservices in a RESTful style, if you are not familiar 
         with our API's, please check out the notes on data formats and return values <a href='#dataformat'>here.</a>
-		
-		Feel free to email the developer with questions, or hop into #appiction-dev on freenode
-		(If you don't have an IRC client installed, you can just go <a href='staging.appiction.com'>here</a>
+        <br>
+        Feel free to email the developer with questions, or hop into #appiction-dev on freenode 
+        (If you don't have an IRC client installed, you can just go <a href='staging.appiction.com'>here</a>
         <h2>Resources</h2>
         <ul>
             {% for handler in handlers %}
@@ -58,7 +129,7 @@
             <a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
             {%for method in handler.methods %}
             <div style='margin-top:25px;'>
-                <b style='color:red;'>{{method.request_method}}</b>
+               <a name ="{{handler.name}}{{method.request_method}}"> <b style='color:red;'><a name="{{handler.name}}{{method.request_method}}"></a>{{method.request_method}}</b></a>
                 /{{servername}}{{method.url}}
             </div>
             <div style='margin-left: 30px;'>
@@ -82,10 +153,19 @@
                 {%else %}
                 None
                 {% endif %}
-				{% if method.example_response %}
-				<a href="#{{handler.name}}" onclick="$('#{{handler.name}}{{method.request_method}}').toggle()">See Example</a>
-				<div id='{{handler.name}}{{method.request_method}}' style='display:none'><pre>{{method.example_response}}</pre></div>
-				{% endif %}
+                {% if method.example_response %}<a href="#{{handler.name}}" onclick="$('#{{handler.name}}{{method.request_method}}').toggle()">See Example</a>
+                <div id='{{handler.name}}{{method.request_method}}' style='display:none'>
+                    <pre>{{method.example_response}}</pre>
+                </div>
+                {% endif %}
+                {% if method.tests %}
+                {% for test in method.tests %}
+				 <button type="button" onclick='run_test(this,"{{handler.name}}{{method.request_method}}_response_div")'
+				     class='test_link' test_data="{{test}}" anchor="{{handler.name}}{{method.request_method}}">Run Test</button>
+                {% endfor %}
+                <div id='{{handler.name}}{{method.request_method}}_response_div' class='response_divs' style="display:none;">
+                </div>
+                {% endif %}
             </ul>
             {% endfor %} <a href='#top' style='margin-top:20px;display:block;'>Return to top</a>
         </div>

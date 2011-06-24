@@ -37,7 +37,7 @@ class ResponseObject():
             self.headers[k] = v
     
     
-    def addErrors(self, errors, status=500):
+    def addErrors(self, errors, status=400):
         
         self.success = False
         

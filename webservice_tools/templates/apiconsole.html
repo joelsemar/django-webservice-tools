@@ -55,6 +55,9 @@
                     headers['Store-Response'] = true;
                 }
                 
+				if (Ext.getDom('store_as_test').checked) {
+                    headers['Store_As_Test'] = true;
+                }
                 
                 Ext.get('result').update('')
                 Ext.Ajax.request({
@@ -219,6 +222,8 @@
         Show Doc: <input type='checkbox' name='showdoc' id= 'showdoc'>
         <br>
         Map Results: <input type='checkbox' name='mapresults' id= 'mapresults' onclick='toggleCenterInput(this)'>
+		<br>
+        Store Request As Test: <input type='checkbox' name='store_as_test' id= 'store_as_test'>
         <br>
         <br>
         Store Response: <input type='checkbox' name='store_response' id= 'store_response'>

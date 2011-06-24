@@ -1,7 +1,7 @@
 import re
 from webservice_tools.utils import Resource
-from webservice_tools.models import StoredHandlerResponse
-call_map = {'GET': 'read', 'POST': 'create', 
+from webservice_tools.models import StoredHandlerResponse, StoredHandlerRequest
+call_map = {'GET': 'read', 'POST': 'create',
             'PUT': 'update', 'DELETE': 'delete'}
 #VAR_REGEX = r'^[@][\w]+\ \[[\w\[\]]+\]\ .+' # @parameter [type] some comment
 VAR_REGEX = ex = '^[\s\t\ ]+\@.+'
@@ -20,23 +20,26 @@ class ServerDeclaration():
         ret = []
         id = str(handler.__class__)
         stored_responses = StoredHandlerResponse.objects.filter(handler_id=id)
+        all_tests = StoredHandlerRequest.objects.filter(handler_id=id, test=True)
         for request_method in handler.allowed_methods:
             stored_response = [s for s in stored_responses if s.method == request_method]
+            tests = [t.serialize() for t in all_tests if t.method == request_method]
             example_response = ''
             if stored_response:
                 example_response = stored_response[0].response
+            
             method_name = call_map[request_method]
             method = getattr(handler, method_name)
             docstring = method.__doc__
             auth_required = False
             if hasattr(method, 'authentication_required'):
-                auth_required=True
+                auth_required = True
             api_handler = self._get_method_api_handler(docstring)
             
             ret.append({'name': method_name, 'request_method': request_method,
                         'url': api_handler.get('url'), 'comment': api_handler.get('comment'),
                         'params': self._get_method_params(docstring), 'auth_required': auth_required,
-                        'example_response': example_response})
+                        'example_response': example_response, "tests": tests})
         return ret
             
     def _get_method_api_handler(self, docstring):
@@ -45,8 +48,8 @@ class ServerDeclaration():
         
         api_handler = re.search(r'api handler\:? (?P<method>post|put|get|delete)[\ ](?P<url>.+)', docstring, flags=re.IGNORECASE)
         if api_handler:
-            ret =  api_handler.groupdict()
-            comment = re.search(r'^(?P<comment>.*)api handler', docstring, flags= re.IGNORECASE|re.DOTALL)
+            ret = api_handler.groupdict()
+            comment = re.search(r'^(?P<comment>.*)api handler', docstring, flags=re.IGNORECASE | re.DOTALL)
             if comment:
                 ret['comment'] = comment.groupdict()['comment'].replace('\n', '<br/>')
             return ret
@@ -58,7 +61,7 @@ class ServerDeclaration():
         if not docstring:
             return ret
 
-        variable_declarations = re.findall(VAR_REGEX, docstring, flags=re.MULTILINE|re.DOTALL)
+        variable_declarations = re.findall(VAR_REGEX, docstring, flags=re.MULTILINE | re.DOTALL)
         if variable_declarations:
             variable_declarations = [f for f in variable_declarations[0].split('    @') if f.strip()]
         for declaration in variable_declarations:
@@ -92,7 +95,7 @@ class ServerDeclaration():
                     callback = entry._get_callback()
                     all.append(entry)
                     if isinstance(callback, Resource):
-                        handler_name =  callback.handler.__class__.__name__
+                        handler_name = callback.handler.__class__.__name__
                         if handler_name not in handler_names and not getattr(callback.handler.__class__, 'internal', False):
                             handler_names.append(handler_name)
                             ret.append(callback.handler)

@@ -57,11 +57,11 @@ class Resource(PistonResource):
             em = request.GET.get('format', 'json')
 
         return em
-    
+    """
     def error_handler(self, e, request, meth, em_format):
         ret = {"success": False, "data": {}, "errors": [str(e)]}
         return HttpResponse(simplejson.dumps(ret))
-    
+    """
     
 class BaseHandler(PistonBaseHandler):
     

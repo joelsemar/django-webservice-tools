@@ -1,6 +1,9 @@
+import re
 from webservice_tools.response_util import ResponseObject
-from webservice_tools.models import StoredHandlerResponse
+from webservice_tools.models import StoredHandlerResponse, StoredHandlerRequest, StoredHttpParam
+from webservice_tools.doc_generator.server_declaration import ServerDeclaration
 from django.conf import settings
+from django.db import transaction
 class ProvideResponse(object):
     
     
@@ -32,7 +35,7 @@ class ProvideResponse(object):
                 doc = view.func_doc
             if data_format == 'json' and doc:
                 doc = doc.replace('\n', '<br/>')
-            kwargs['response'].doc=doc
+            kwargs['response'].doc = doc
         request.handler_id = str(view.handler.__class__)
         
         return None
@@ -41,6 +44,27 @@ class ProvideResponse(object):
 
 
 class StoreResponse(object):
+    @transaction.commit_on_success
+    def process_view(self, request, view, args, kwargs):
+        test = False
+        if request.META.get('HTTP_STORE_AS_TEST'):
+            test = True 
+        if hasattr(view, 'callmap') and hasattr(request, 'handler_id'):
+            server_declaration = ServerDeclaration()
+            handlers = server_declaration.handler_list
+            handler_data = [h for h in handlers if h['name'] == re.sub('Handler$', '', view.handler.__class__.__name__)]
+            method_data = [m for m in handler_data[0]['methods'] if m['request_method'] == request.method]
+            
+            stored_handler_request = StoredHandlerRequest.objects.create(path=request.path, method=request.method,
+                                                                          handler_id=request.handler_id, test=test)
+                
+            for param in method_data[0]['params']:
+                
+                name = param['name']
+                if name in getattr(request, request.method):
+                    value = str(getattr(request, request.method).get(name))
+                    StoredHttpParam.objects.create(name=name, value=value, request=stored_handler_request)
+
     
     def process_response(self, request, response):
         if request.META.get('HTTP_STORE_RESPONSE'):
