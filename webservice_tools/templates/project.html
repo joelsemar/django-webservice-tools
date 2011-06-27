@@ -299,6 +299,9 @@
             <li>
                 <i>data</i>
                 Here you will find the actual data (if any) of the response
+				The data  section will always contain a 'messages' list.
+				The 'messages' list will contain any necessary messages and alerts needed to send to the client.
+				
             </li>
             <li>
                 <i>errors</i>
@@ -308,12 +311,13 @@
         For example, creating a new user, with JSON, might return:<pre class='example'>
 {
     "success": true,
-    "errors": [], 
+    "errors": [],
     "data": {
         "user": {
-            "username": "foo@bar.com", 
+            "username": "foo@bar.com",
             "id": 3
-        }
+        },
+	 "messages": []
     }, 
 }
 			</pre>
@@ -322,7 +326,10 @@
     "errors": [
         "Email already in use"
     ], 
-    "data": {}, 
+	
+    "data": {
+      "messages": [],
+    }, 
     "success": false
 }
 			</pre>
@@ -335,6 +342,7 @@
         &lt;username&gt;baz@bar.com&lt;/username&gt;
         &lt;id&gt;4&lt;/id&gt;
       &lt;/user&gt;
+      &lt;messages/&gt;
     &lt;/data&gt;
     &lt;success&gt;True&lt;/success&gt;
   &lt;/response&gt;
@@ -347,7 +355,9 @@
   &lt;errors&gt;
     &lt;resource&gt;Email already in use&lt;/resource&gt;
   &lt;/errors&gt;
-  &lt;data/&gt;
+  &lt;data&gt;
+    &lt;messages/&gt;
+  &lt;/data&gt;	
   &lt;success&gt;False&lt;/success&gt;
 &lt;/response&gt;	
 	
