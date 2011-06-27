@@ -155,7 +155,7 @@ class KeepAliveHandler(BaseHandler):
         Health check url for ec2 instances
         
         """
-        response.set(timestamp=datetime.datetime.utcnow())
+        response.set(timestamp=datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f"))
         return response.send()
 
 
