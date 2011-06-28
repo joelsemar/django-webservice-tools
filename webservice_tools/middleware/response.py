@@ -36,7 +36,8 @@ class ProvideResponse(object):
             if data_format == 'json' and doc:
                 doc = doc.replace('\n', '<br/>')
             kwargs['response'].doc = doc
-        request.handler_id = str(view.handler.__class__)
+        if hasattr(view, 'handler'):
+            request.handler_id = str(view.handler.__class__)
         
         return None
 
