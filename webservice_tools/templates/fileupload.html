@@ -3,7 +3,7 @@
     <head>
         <script type="text/javascript">
             
-            function socialTest(){
+            function fileTest(){
                 var input = document.getElementById('url');
                 var form = document.getElementById('fileForm');
                 form.action = "{{baseURL}}" + input.value;
@@ -16,10 +16,10 @@
     </head>
     <h3>Network Name:</h3>
 	
-    <form id="socialForm" action='' method='POST' enctype='multipart/form-data'>
+    <form id="fileForm" action='' method='POST' enctype='multipart/form-data'>
     	<input type='file' name='file'></file>
         POST to {{baseURL}}<input id='url' type='text' value='test '></input>
-        <button type='button' onclick='return socialTest()'>
+        <button type='button' onclick='return fileTest()'>
             Submit
         </button>
     </form>
