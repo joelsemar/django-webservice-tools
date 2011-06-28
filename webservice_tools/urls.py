@@ -9,5 +9,6 @@ urlpatterns = patterns('webservice_tools.views',
     (r'amialive/?$', Resource(KeepAliveHandler)),
     (r'docs/?$', Resource(DocHandler)),
     (r'^apiconsole/?$', direct_to_template, {'template': 'apiconsole.html', 'extra_context': {'baseURL': '/%s/' % settings.SERVER_NAME}}),
+    (r'^uploadtest/?$', direct_to_template, {'template': 'fileupload.html', 'extra_context': {'baseURL': '/%s/' % settings.SERVER_NAME}}),
     
     )

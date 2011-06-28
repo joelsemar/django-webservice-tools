@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+    <head>
+        <script type="text/javascript">
+            
+            function socialTest(){
+                var input = document.getElementById('url');
+                var form = document.getElementById('fileForm');
+                form.action = "{{baseURL}}" + input.value;
+                form.submit();
+                return false;
+            }
+        
+            
+        </script>
+    </head>
+    <h3>Network Name:</h3>
+	
+    <form id="socialForm" action='' method='POST' enctype='multipart/form-data'>
+    	<input type='file' name='file'></file>
+        POST to {{baseURL}}<input id='url' type='text' value='test '></input>
+        <button type='button' onclick='return socialTest()'>
+            Submit
+        </button>
+    </form>
+</html>
