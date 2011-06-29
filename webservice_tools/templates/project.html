@@ -210,9 +210,10 @@
         <br/>
         Appiction strives to develop webservices in a RESTful style, if you are not familiar 
         with our API's, please check out the notes on data formats and return values <a href='#dataformat'>here.</a>
+		Read <a href="#statuscodes">here</a> to see a list of the HTTP Status codes you may encounter.
         <br>
         Feel free to email the developer with questions, or hop into #appiction-dev on freenode 
-        (If you don't have an IRC client installed, you can just go <a href='staging.appiction.com'>here</a>
+        (If you don't have an IRC client installed, you can just go <a href='staging.appiction.com/irc'>here</a>
 		<br>
 		<button onclick="run_all_tests()">Run Available Tests</button>
         <h2>Resources</h2>
@@ -363,5 +364,21 @@
 	
 	
 </pre>
+<a name='statuscodes'><h2>HTTP Status Codes</h2></a>
+HTTP Status codes are defined here: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+We try to follow this specification as closely as possible. Please make us aware if you find a case where we fail to do so.
+
+The main ones we make use of:
+
+200 -- OK
+201 -- Resource Created
+301 -- Resourced Moved Permanently
+302 -- Resource Moved Temporarily
+304 -- Not Modified
+400 -- Invalid Input
+401 -- Unauthorized
+404 -- Resource Not Found
+500 -- Internal Server Error
+
     </body>
 </html>
