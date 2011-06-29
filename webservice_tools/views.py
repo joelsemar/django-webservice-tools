@@ -153,7 +153,7 @@ class KeepAliveHandler(BaseHandler):
     def read(self, request, response):
         """
         Health check url for ec2 instances
-        
+        API Handler: GET /services/amialive
         """
         response.set(timestamp=datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f"))
         return response.send()
