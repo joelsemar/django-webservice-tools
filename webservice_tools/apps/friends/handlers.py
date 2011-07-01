@@ -127,7 +127,7 @@ class FriendRequestHandler(BaseHandler):
         API Handler: PUT /friends/requests/{id}
         Params:
            @id [id] friend request id
-           @accept [boolean] accept or reject? (optional, defaults to True)
+           @accept [boolean] accept? (optional, defaults to True)
         """
         profile = request.user.get_profile()
         try:
