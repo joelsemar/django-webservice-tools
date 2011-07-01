@@ -36,9 +36,21 @@
                 height: 15px;
                 width: 15px;
                 float: right;
-                margin-right: 75px;
+                margin-right: 25%;
                 cursor: pointer;
             }
+			#table_outer{
+				height:200px;
+				overflow: auto;
+                overflow-x: hidden;
+				width: 85%;
+				margin: 0 auto;
+			}
+			.param_label{
+                display: inline-block;
+                padding: 10px;
+                width: 150px;
+			}
         </style>
         <script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js'>
         </script>
@@ -98,7 +110,6 @@
                         data: params,
                         type: test.method,
                         complete: function(response){
-                            debugger;
                             var parameters = "";
                             for (key in test.params) {
                                 if (test.params.hasOwnProperty(key)) {
@@ -171,7 +182,7 @@
                         next_link.onclick();
                     }
                     else {
-						alert("Ran: " + (passed+failed) + ' Passed: ' + passed + " Failed: "+ failed)
+                        alert("Ran: " + (passed + failed) + ' Passed: ' + passed + " Failed: " + failed)
                         TEST_LINKS = [];
                     }
                     
@@ -214,6 +225,34 @@
                 var letters = 'abcdefghijklmnopqrsqtuvwxyz';
                 return letters[Math.floor(Math.random() * 26)]
             }
+			
+			function create_test(handler, method){
+				var data = $("#"+handler+method+"_form :input[value]").serialize();
+				var url = $("#"+handler+method + "_url").val();
+				
+				var headers = {};
+				if ($("#"+handler+method + "_save")[0].checked){
+					headers["Store_As_Test"] = true;
+				}
+				    
+				$.ajax({
+					url: url,
+					data: data,
+					type: method,
+					headers: headers,
+					complete: function(response){
+					   var result_div = '#'+handler+method+"_response_div";
+					   var close_control_id = handler+method+ "_X";
+					   var html = "<span class='closing_x' id='" + close_control_id + "';'>Hide X</span>";
+					   html += "Result: <br /><pre>" + response.responseText + "</pre>";
+					   $(result_div).show();
+					   $(result_div).html(html);
+					   $("#" + close_control_id).click(function(){
+                                $(result_div).toggle();
+                       })
+					}
+				})
+			}
         </script>
     </head>
     <body>
@@ -241,6 +280,37 @@
             </li>
             {% endfor %}
         </ul>
+        {% if changelog_entries %}<h2>Recent API Changes:</h2>
+		<div id='table_outer'>
+        <table width='100%'>
+            <tr>
+                <td height="20px">
+                    <b>Description</b>
+                </td>
+                <td height="20px">
+                    <b>Time</b>
+                </td>
+                <td height="20px">
+                    <b>By</b>
+                </td>
+            </tr>
+            {% for entry in changelog_entries %}
+            <tr>
+                <td height="20px">
+                	{{entry.description}}
+                    
+                </td>
+                <td height="20px">
+                    {{entry.when_created}} (UTC/GMT)
+                </td>
+                <td height="20px">
+                    {{entry.entered_by}}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+		</div>
+        {% endif %}
         {% for handler in handlers %}
         <div class='handlerdiv'>
         <a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
@@ -286,7 +356,8 @@
             {% endfor %}
         </ul>
         {% endif %}
-        {% if method.example_response %}<a href="#{{handler.name}}" onclick="$('#{{handler.name}}{{method.request_method}}').toggle()">See Example</a>
+		<button type="button"  onclick="$('#{{handler.name}}{{method.request_method}}_form').toggle()">Try Call</button>
+        {% if method.example_response %}<button type="button"" onclick="$('#{{handler.name}}{{method.request_method}}').toggle()">See Example</button>
         <div id='{{handler.name}}{{method.request_method}}' style='display:none'>
             <pre>{{method.example_response}}</pre>
         </div>
@@ -294,21 +365,32 @@
         {% if method.tests %}
         {% for test in method.tests %}
         <button type="button" onclick='run_test(this,"{{handler.name}}{{method.request_method}}_response_div")' class='test_link' test_data="{{test}}" anchor="{{handler.name}}{{method.request_method}}_anchor"
-{%  if 'auth_test' in test %}
- auth_test="True"
-{%  endif %}
-{%  if 'create_user_test' in test %}
- create_user_test="True"
-{%  endif %}
-{%  if method.auth_required %}
- auth_required="True"
-{%  endif %}>
- Run Test
+      {%  if 'auth_test' in test %}
+          auth_test="True"
+      {%  endif %}
+      {%  if 'create_user_test' in test %}
+          create_user_test="True"
+       {%  endif %}
+       {%  if method.auth_required %}
+         auth_required="True"
+       {%  endif %}>
+            Run Test
         </button>
         {% endfor %}
+		{% endif %}
+		<form class="newTestForm" id="{{handler.name}}{{method.request_method}}_form" style="display:none;">
+            <div class='param_label'> Url:</div> <input type="text" id="{{handler.name}}{{method.request_method}}_url" size=30 value="/{{servername}}{{method.url}}"><br/>
+            {% for param in method.params %}
+            <div class='param_label'> {{param.name}}:</div> <input type='text' name="{{param.name}}" size=30></input><br/>
+            {% endfor %}
+			Save As Test: <input type='checkbox' id="{{handler.name}}{{method.request_method}}_save">
+            <button type="button" onclick="create_test('{{handler.name}}','{{method.request_method}}')">Send</button>
+			
+        </form>
         <div id='{{handler.name}}{{method.request_method}}_response_div' class='response_divs' style="display:none;">
         </div>
-        {% endif %}
+		
+        
         </ul>
         {% endfor %} <a href='#top' style='margin-top:20px;display:block;'>Return to top</a>
     </div>

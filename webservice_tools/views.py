@@ -7,10 +7,11 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
 from webservice_tools.response_util import ResponseObject
-from webservice_tools.utils import GeoCode, strToBool, is_valid_email, ReverseGeoCode, YahooPlacesSearch,  GooglePlacesSearch, BaseHandler
+from webservice_tools.utils import GeoCode, strToBool, is_valid_email, ReverseGeoCode, YahooPlacesSearch, GooglePlacesSearch, BaseHandler
 from django.http import HttpResponse
 from django.views.generic.simple import direct_to_template
 from webservice_tools.doc_generator.server_declaration import ServerDeclaration
+from webservice_tools.models import APIChangeLogEntry
 
 class GeoHandler(BaseHandler):
     allowed_methods = ('GET',)
@@ -83,12 +84,13 @@ class DocHandler(BaseHandler):
         context = {'handlers': server_declaration.handler_list}
         context['servername'] = getattr(settings, 'SERVER_NAME', '')
         context['developer_email'] = getattr(settings, 'ADMINS')[1][1]
+        context['changelog_entries'] = APIChangeLogEntry.objects.all()
         
         return direct_to_template(request, 'project.html', extra_context=context)
 
 
 class PlacesHandler(BaseHandler):
-    internal=True
+    internal = True
     allowed_methods = ('GET',)
     def read(self, request, response):
         return google_places_search(request, response)
@@ -148,7 +150,7 @@ def resetPass(request, dataFormat='json'):
     return newResetPass(request, ResponseObject(dataFormat=dataFormat))
 
 class KeepAliveHandler(BaseHandler):
-    allowed_methods= ('GET',)
+    allowed_methods = ('GET',)
 
     def read(self, request, response):
         """
@@ -188,7 +190,7 @@ def google_places_search_view(request, response):
     lng = request.GET.get('lng')
     radius = request.GET.get('radius', 5000)
     location = request.GET.get('location', '')
-    query  = request.GET.get('query', '')
+    query = request.GET.get('query', '')
     
     result, errors = google_places_search_view(lat=lat, lng=lng, location=location, radius=radius, query=query)
     if errors:
@@ -229,7 +231,7 @@ def yahoo_places_search(request, response):
     locations = YahooPlacesSearch(**query_args).fetch()
     ret = locations['ResultSet']
     if isinstance(ret, dict):
-        ret = [ret,]
+        ret = [ret, ]
         
     return ret, response
 

@@ -55,8 +55,13 @@ class StoredHttpParam(models.Model):
     
 class APIChangeLogEntry(models.Model):
     description = models.CharField(max_length=256)
-    entered_by = models.CharField(max_length=256)
-    when_created = models.DateTimeField(default=datetime.datetime.utcnow)
+    entered_by = models.CharField(max_length=256, default="Joel")
+    when_created = models.DateTimeField(default=datetime.datetime.utcnow, editable=False)
     
     def __unicode__(self):
         return "%s -- %s" % (self.description, self.entered_by)
+    
+    class Meta:
+        verbose_name = "API ChangeLog Entry"
+        verbose_name_plural = "API ChangeLog Entries"
+        ordering = ('-when_created',)
