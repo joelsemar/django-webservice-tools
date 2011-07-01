@@ -85,7 +85,7 @@
                             ret[key] = params[key]
                         }
                     }
-                }</a>
+                }
                 return ret;
             }
             
@@ -282,7 +282,8 @@
             </li>
             {% endfor %}
         </ul>
-        {% if changelog_entries %}<h2><a name='changelog'>Recent API Changes:</a></h2>
+        {% if changelog_entries %}
+		<h2><a name='changelog'>Recent API Changes:</a></h2>
 		<div id='table_outer'>
         <table width='100%'>
             <tr>
