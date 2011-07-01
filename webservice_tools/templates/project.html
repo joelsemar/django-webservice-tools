@@ -46,105 +46,116 @@
             var value_factory = {
             
                 random_email: function(){
-					var ret = '';
-                    for (var i=0;i<5;i++){
-						ret += get_random_letter();
-					}
-					ret += '@'
-					for (var i=0;i<5;i++){
+                    var ret = '';
+                    for (var i = 0; i < 5; i++) {
                         ret += get_random_letter();
                     }
-					ret += ".com"
-					return ret
+                    ret += '@'
+                    for (var i = 0; i < 5; i++) {
+                        ret += get_random_letter();
+                    }
+                    ret += ".com"
+                    return ret
                 }
                 
             }
             var TEST_LINKS = [];
             var CURRENT_TEST_LINK = 0;
             var TEST_USER = {};
-			function prep_params(params){
-				ret = {};
-				for (key in params){
-					if (params.hasOwnProperty(key)){
-						if (is_template(params[key])){
-							ret[key] = value_factory[params[key].replace(/%/g, '')]()
-						}
-						else{
-							ret[key] = params[key]
-						}
-					}
-				}
-				return ret;
-			}
-			
-			function is_template(value){
-				return value[0] == "%" && value[value.length-1] == "%"
-				
-			}
-			
-            function run_test(test_runner, div_id){
-				function _run_test(){
-					var test = JSON.parse($(test_runner).attr("test_data"));
-	                var result_div = "#" + div_id;
-	                var close_control_id = div_id + "_X"
-	                
-	                var params = prep_params(test.params)
-	                var store_result_for_test_user = false;
-	                if ($(test_runner).attr("create_user_test")){
-	                    store_result_for_test_user = true;
-	                }
-	                $.ajax({
-	                    url: test.path,
-	                    data: params,
-	                    type: test.method,
-	                    complete: function(response){
-	                        var parameters = "";
-	                        for (key in test.params) {
-	                            if (test.params.hasOwnProperty(key)) {
-	                                parameters += " | " + key + "=" + test.params[key];
-	                            }
-	                            
-	                        }
-	                        parameters += "<br/>"
-	                        var html = "<span class='closing_x' id='" + close_control_id + "';'>Hide X</span>";
-	                        html += "URL:" + test.path + "<br />";
-	                        html += "Parameters:<span class='test_request_params'>" + parameters || "None" + "</span><br />"
-	                        html += "Result: <br /><pre>" + response.responseText + "</pre>";
-	                        
-	                        $(result_div).html(html);
-	                        $(result_div).show();
-	                        $("#" + close_control_id).click(function(){
-	                            $(result_div).toggle();
-	                        })
-	                        setTimeout(next_test, '1200');
-	                        if (store_result_for_test_user && !TEST_USER.username){
-	                            TEST_USER.username = params.username || params.email;
-	                            TEST_USER.password = params.password;
-	                        }
-	                    }
-                    
-                    
-                })
-					
-				}
-				if ($(test_runner).attr("auth_required")) {
-                    login(_run_test);           
+            function prep_params(params){
+                ret = {};
+                for (key in params) {
+                    if (params.hasOwnProperty(key)) {
+                        if (is_template(params[key])) {
+                            ret[key] = value_factory[params[key].replace(/%/g, '')]()
+                        }
+                        else {
+                            ret[key] = params[key]
+                        }
+                    }
                 }
-				else{
-					_run_test()
-				}
+                return ret;
+            }
+            
+            function is_template(value){
+                return value[0] == "%" && value[value.length - 1] == "%"
+                
+            }
+            
+            function run_test(test_runner, div_id){
+                function _run_test(){
+                    var test = JSON.parse($(test_runner).attr("test_data"));
+                    var result_div = "#" + div_id;
+                    var close_control_id = div_id + "_X"
+                    
+                    var params = prep_params(test.params)
+                    var store_result_for_test_user = false;
+                    if ($(test_runner).attr("create_user_test")) {
+                        store_result_for_test_user = true;
+                    }
+                    $.ajax({
+                        url: test.path,
+                        data: params,
+                        type: test.method,
+                        complete: function(response){
+                            debugger;
+                            var parameters = "";
+                            for (key in test.params) {
+                                if (test.params.hasOwnProperty(key)) {
+                                    parameters += " | " + key + "=" + test.params[key];
+                                }
+                                
+                            }
+                            parameters += "<br/>"
+                            var html = "<span class='closing_x' id='" + close_control_id + "';'>Hide X</span>";
+                            html += "URL:" + test.path + "<br />";
+                            html += "Parameters:<span class='test_request_params'>" + parameters || "None" + "</span><br />"
+                            html += "Result: <br /><pre>" + response.responseText + "</pre>";
+                            
+                            $(result_div).html(html);
+                            $(result_div).show();
+                            $("#" + close_control_id).click(function(){
+                                $(result_div).toggle();
+                            })
+                            setTimeout(next_test, '1200');
+                            if (store_result_for_test_user && !TEST_USER.username) {
+                                TEST_USER.username = params.username || params.email;
+                                TEST_USER.password = params.password;
+                            }
+                            if (response.status == 500) {
+                                failed += 1;
+                            }
+                            else {
+                                passed += 1;
+                            }
+                            
+                        }
+                        
+                        
+                    })
+                    
+                }
+                if ($(test_runner).attr("auth_required")) {
+                    login(_run_test);
+                }
+                else {
+                    _run_test()
+                }
                 
                 
             }
             
+            var passed;
+            var failed;
             function run_all_tests(){
-                
-				TEST_LINKS =  $(".test_link");
-				TEST_LINKS.sort(function(a, b){
-					return JSON.parse($(b).attr('test_data')).priority - JSON.parse($(a).attr('test_data')).priority
-					
-				});
-				console.log(TEST_LINKS);
+                passed = 0;
+                failed = 0;
+                TEST_LINKS = $(".test_link");
+                TEST_LINKS.sort(function(a, b){
+                    return JSON.parse($(b).attr('test_data')).priority - JSON.parse($(a).attr('test_data')).priority
+                    
+                });
+                console.log(TEST_LINKS);
                 CURRENT_TEST_LINK = 0;
                 var first_test = TEST_LINKS[CURRENT_TEST_LINK];
                 window.location.hash = $(first_test).attr('anchor');
@@ -160,6 +171,7 @@
                         next_link.onclick();
                     }
                     else {
+						alert("Ran: " + (passed+failed) + ' Passed: ' + passed + " Failed: "+ failed)
                         TEST_LINKS = [];
                     }
                     
@@ -168,38 +180,40 @@
             }
             
             function login(callback){
-				var callback = callback || function(){};
-				var params;
-				var test;
-				var links = $(".test_link");
-				for (var i = 0; i < links.length; i++) {
-					var elem = links[i];
-					if ($(elem).attr('auth_test')) {
-						test = JSON.parse($(elem).attr('test_data'))
-						params = test.params
-					}
-				}
-				if (TEST_USER.username && TEST_USER.password) {
-					params = TEST_USER;
-				}
+                var callback = callback ||
+                function(){
+                };
+                var params;
+                var test;
+                var links = $(".test_link");
+                for (var i = 0; i < links.length; i++) {
+                    var elem = links[i];
+                    if ($(elem).attr('auth_test')) {
+                        test = JSON.parse($(elem).attr('test_data'))
+                        params = test.params
+                    }
+                }
+                if (TEST_USER.username && TEST_USER.password) {
+                    params = TEST_USER;
+                }
                 $.ajax({
-                  url: test.path,
-	              data: params,
-	              type: test.method,
-				  complete: function(){
-				  	callback();
-				  }
-				})
-			}
-			function is_logged_in(){
-				return document.cookie.indexOf('sessionid=') !== -1
-			}
-			
-			function get_random_letter(){
-				var letters = 'abcdefghijklmnopqrsqtuvwxyz';
-				return letters[Math.floor(Math.random()*26)]
-			}
-			
+                    url: test.path,
+                    data: params,
+                    type: test.method,
+                    complete: function(){
+                        callback();
+                    }
+                })
+            }
+            
+            function is_logged_in(){
+                return document.cookie.indexOf('sessionid=') !== -1
+            }
+            
+            function get_random_letter(){
+                var letters = 'abcdefghijklmnopqrsqtuvwxyz';
+                return letters[Math.floor(Math.random() * 26)]
+            }
         </script>
     </head>
     <body>
@@ -210,12 +224,15 @@
         <br/>
         Appiction strives to develop webservices in a RESTful style, if you are not familiar 
         with our API's, please check out the notes on data formats and return values <a href='#dataformat'>here.</a>
-		Read <a href="#statuscodes">here</a> to see a list of the HTTP Status codes you may encounter.
+        Read <a href="#statuscodes">here</a>
+        to see a list of the HTTP Status codes you may encounter.
         <br>
         Feel free to email the developer with questions, or hop into #appiction-dev on freenode 
         (If you don't have an IRC client installed, you can just go <a href='staging.appiction.com/irc'>here</a>
-		<br>
-		<button onclick="run_all_tests()">Run Available Tests</button>
+        <br>
+        <button onclick="run_all_tests()">
+            Run Available Tests
+        </button>
         <h2>Resources</h2>
         <ul>
             {% for handler in handlers %}
@@ -226,90 +243,104 @@
         </ul>
         {% for handler in handlers %}
         <div class='handlerdiv'>
-            <a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
-            {%for method in handler.methods %}<a name='{{handler.name}}{{method.request_method}}_anchor'>
-                <div style='margin-top:25px;'>
-                    <b style='color:red;'>{{method.request_method}}</b>
-                    /{{servername}}{{method.url}}
-                </div>
-            </a>
-            <div style='margin-left: 30px;'>
-                {% autoescape off %}
-                {{method.comment}}
-                {% endautoescape %}
+        <a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
+        {%for method in handler.methods %}<a name='{{handler.name}}{{method.request_method}}_anchor'>
+            <div style='margin-top:25px;'>
+                <b style='color:red;'>{{method.request_method}}</b>
+                /{{servername}}{{method.url}}
             </div>
-            {% if method.auth_required %} <i style='margin-left:30px'>Requires Authentication</i>{% endif %}
-            <p style='margin-left:30px'>
-                <strong>Parameters</strong>
-            </p>
-            <ul class='paramlist'>
-                {% if method.params %} 
-                {% for param in method.params %}
-                <li>
-                    <b>{{param.name}}</b>
-                    -- <i>{{param.type}}</i>
-                    {%ifequal param.required '0' %}(optional){%endifequal%} {% autoescape off %}{{param.comment}}{% endautoescape %}
-                </li>
-                {% endfor %}
-                {%else %}
-                None
-                {% endif %}
-                {% if method.example_response %}<a href="#{{handler.name}}" onclick="$('#{{handler.name}}{{method.request_method}}').toggle()">See Example</a>
-                <div id='{{handler.name}}{{method.request_method}}' style='display:none'>
-                    <pre>{{method.example_response}}</pre>
-                </div>
-                {% endif %}
-                {% if method.tests %}
-                {% for test in method.tests %}
-                <button type="button" onclick='run_test(this,"{{handler.name}}{{method.request_method}}_response_div")' class='test_link' test_data="{{test}}" anchor="{{handler.name}}{{method.request_method}}_anchor"
-                     {%  if 'auth_test' in test %} 
-					       auth_test="True"
-					 {%  endif %}
-					 {% if 'create_user_test' in test %}
-					    create_user_test="True"
-					 {% endif %}
-                    {%  if method.auth_required %}
-                        auth_required="True"
-                    {%  endif %}>
-                    	Run Test
-                </button>
-                {% endfor %}
-                <div id='{{handler.name}}{{method.request_method}}_response_div' class='response_divs' style="display:none;">
-                </div>
-                {% endif %}
-            </ul>
-            {% endfor %} <a href='#top' style='margin-top:20px;display:block;'>Return to top</a>
+        </a>
+        <div style='margin-left: 30px;'>
+            {% autoescape off %}
+            {{method.comment}}
+            {% endautoescape %}
         </div>
-        {%endfor %} <a name='dataformat'><h2>Notes on data format and return values.</h2></a>
-        <p>
-        The format of return values default to JSON. In order to switch to another format, you can:
-        <ul>
+        {% if method.auth_required %} <i style='margin-left:30px'>Requires Authentication</i>{% endif %}
+        <p style='margin-left:30px'>
+            <strong>Parameters</strong>
+        </p>
+        <ul class='paramlist'>
+            {% if method.params %} 
+            {% for param in method.params %}
             <li>
-                Specify 'text/xml' or 'application/json' in the 'Accept' header of your request
+                <b>{{param.name}}</b>
+                -- <i>{{param.type}}</i>
+                {%ifequal param.required '0' %}(optional){%endifequal%} {% autoescape off %}{{param.comment}}{% endautoescape %}
             </li>
-            <li>
-                provide a format in the url, such as GET /user?format=xml
-            </li>
+            {% endfor %}
+            {%else %}
+            None
+            {% endif %}
         </ul>
-        All responses contain 3 values:
-        <ul>
+        {% if method.return_vals %}
+        <p style='margin-left:30px'>
+            <strong>Return Values</strong>
+        </p>
+        <ul class='paramlist'>
+            {% for param in method.return_vals %}
             <li>
-                <i>success</i>
-                This is a boolean value indicating the success/failure of the request
+                <b>{{param.name}}</b>
+                -- <i>{{param.type}}</i>
+                {% autoescape off %}{{param.comment}}{% endautoescape %}
             </li>
-            <li>
-                <i>data</i>
-                Here you will find the actual data (if any) of the response
-				The data  section will always contain a 'messages' list.
-				The 'messages' list will contain any necessary messages and alerts needed to send to the client.
-				
-            </li>
-            <li>
-                <i>errors</i>
-                A list of errors that occured during the request.
-            </li>
+            {% endfor %}
         </ul>
-        For example, creating a new user, with JSON, might return:<pre class='example'>
+        {% endif %}
+        {% if method.example_response %}<a href="#{{handler.name}}" onclick="$('#{{handler.name}}{{method.request_method}}').toggle()">See Example</a>
+        <div id='{{handler.name}}{{method.request_method}}' style='display:none'>
+            <pre>{{method.example_response}}</pre>
+        </div>
+        {% endif %}
+        {% if method.tests %}
+        {% for test in method.tests %}
+        <button type="button" onclick='run_test(this,"{{handler.name}}{{method.request_method}}_response_div")' class='test_link' test_data="{{test}}" anchor="{{handler.name}}{{method.request_method}}_anchor"
+{%  if 'auth_test' in test %}
+ auth_test="True"
+{%  endif %}
+{%  if 'create_user_test' in test %}
+ create_user_test="True"
+{%  endif %}
+{%  if method.auth_required %}
+ auth_required="True"
+{%  endif %}>
+ Run Test
+        </button>
+        {% endfor %}
+        <div id='{{handler.name}}{{method.request_method}}_response_div' class='response_divs' style="display:none;">
+        </div>
+        {% endif %}
+        </ul>
+        {% endfor %} <a href='#top' style='margin-top:20px;display:block;'>Return to top</a>
+    </div>
+    {%endfor %} <a name='dataformat'><h2>Notes on data format and return values.</h2></a>
+    <p>
+    The format of return values default to JSON. In order to switch to another format, you can:
+    <ul>
+        <li>
+            Specify 'text/xml' or 'application/json' in the 'Accept' header of your request
+        </li>
+        <li>
+            provide a format in the url, such as GET /user?format=xml
+        </li>
+    </ul>
+    All responses contain 3 values:
+    <ul>
+        <li>
+            <i>success</i>
+            This is a boolean value indicating the success/failure of the request
+        </li>
+        <li>
+            <i>data</i>
+            Here you will find the actual data (if any) of the response
+            The data  section will always contain a 'messages' list.
+            The 'messages' list will contain any necessary messages and alerts needed to send to the client.
+        </li>
+        <li>
+            <i>errors</i>
+            A list of errors that occured during the request.
+        </li>
+    </ul>
+    For example, creating a new user, with JSON, might return:<pre class='example'>
 {
     "success": true,
     "errors": [],
@@ -322,7 +353,7 @@
     }, 
 }
 			</pre>
-        or, if there was an error:<pre class='example'>
+    or, if there was an error:<pre class='example'>
 {
     "errors": [
         "Email already in use"
@@ -334,7 +365,7 @@
     "success": false
 }
 			</pre>
-        in XML:<pre class='example'>
+    in XML:<pre class='example'>
 &lt;?xml version='1.0' encoding='utf-8'?&gt;
   &lt;response&gt;
     &lt;errors/&gt;
@@ -350,7 +381,7 @@
 &lt;/pre&gt;
 			
 		</pre>
-        or:<pre class='example'>
+    or:<pre class='example'>
 <?xml version='1.0' encoding='utf-8'?>
 &lt;response&gt;
   &lt;errors&gt;
@@ -364,8 +395,8 @@
 	
 	
 </pre>
-<a name='statuscodes'><h2>HTTP Status Codes</h2></a>
-<pre>
+    <a name='statuscodes'><h2>HTTP Status Codes</h2></a>
+    <pre>
 HTTP Status codes are defined <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">here:</a> 
 We try to follow this specification as closely as possible. Please make us aware if you find a case where we fail to do so.
 

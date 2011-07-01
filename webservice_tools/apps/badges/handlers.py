@@ -17,6 +17,19 @@ class BadgeHandler(BaseHandler):
         """
         Return a list of all badges and whether or not this user has won them
         API Handler: GET /badges/{id}
+        
+        Returns:
+            @name [string] name of the badge
+            @description [string] description of the badge 
+            @won_description [string] past tense description after the badge is won
+            @image_url [url] image for the badge
+            @hi_res_image_url [url] url of the hi res image for the badge
+            @thumb_url [url] thumbnail image for the badge
+            @hi_res_thumb_url [url] hi res thumbnail image 
+            @id [id] id of the badge 
+            @order [integer] order, entered by users, allowing them to order badges on the screein 
+            @won [bool] has the user won the badge? 
+            @won_count [integer] number of times the badge has by won by this user 
         """
         all_badges = BadgeModel.objects.all()
         try:
@@ -53,6 +66,10 @@ class BadgesWonCountHandler(BaseHandler):
         API Handler: GET /badges/count
         Params:
            @since [datetime] format "2011-12-25 18:22:11.123822" 
+        
+        Returns:
+           @count [number] number of times the user has won this particular badge
+           @timestamp [timestamp] current server timestamp (for use with 'since')
         """
         profile = request.user.get_profile()
         since = request.GET.get('since')

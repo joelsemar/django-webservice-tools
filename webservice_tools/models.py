@@ -53,3 +53,10 @@ class StoredHttpParam(models.Model):
     def dict(self):
         return {'name': self.name, 'value':self.value}
     
+class APIChangeLogEntry(models.Model):
+    description = models.CharField(max_length=256)
+    entered_by = models.CharField(max_length=256)
+    when_created = models.DateTimeField(default=datetime.datetime.utcnow)
+    
+    def __unicode__(self):
+        return "%s -- %s" % (self.description, self.entered_by)

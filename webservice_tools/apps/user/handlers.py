@@ -126,10 +126,16 @@ class LoginHandler(utils.BaseHandler):
         """
         Allows the user to login
         API Handler: POST /login
-        POST Params
-          @username [string] The users's unique identifier, (may be an email address in some cases)
-          @password [password] The user's password
-          @email [email] alternative for username where applicable
+        
+        POST Params:
+           @username [string] The users's unique identifier, (may be an email address in some cases)
+           @password [password] The user's password
+           @email [email] alternative for username where applicable
+        
+        Returns:
+            @username [string] users username
+            @id [id] id of the user
+            @email [email] user's email address
         """
         #all calls to this handler via '/logout should..
         if request.path.startswith('/logout'):

@@ -4,7 +4,11 @@ from webservice_tools.models import StoredHandlerResponse, StoredHandlerRequest
 call_map = {'GET': 'read', 'POST': 'create',
             'PUT': 'update', 'DELETE': 'delete'}
 #VAR_REGEX = r'^[@][\w]+\ \[[\w\[\]]+\]\ .+' # @parameter [type] some comment
-VAR_REGEX = ex = '^[\s\t\ ]+\@.+'
+VAR_REGEX = r'^[\s\t\ ]+\@.+'
+VAR_SPLIT_REGEX = r'[\s\t\ ]+\@'
+
+RETURN_VAL_REGEX = r'^[\s\t\ ]+\@\@.+'
+RETURN_VAL_SPLIT_REGEX = r'[\s\t\ ]+\@\@'
 class ServerDeclaration():
     
     def __init__(self):
@@ -39,7 +43,7 @@ class ServerDeclaration():
             ret.append({'name': method_name, 'request_method': request_method,
                         'url': api_handler.get('url'), 'comment': api_handler.get('comment'),
                         'params': self._get_method_params(docstring), 'auth_required': auth_required,
-                        'example_response': example_response, "tests": tests})
+                        'return_vals': self._get_return_vals(docstring),'example_response': example_response, "tests": tests})
         return ret
             
     def _get_method_api_handler(self, docstring):
@@ -56,18 +60,25 @@ class ServerDeclaration():
         return {}
     
     def _get_method_params(self, docstring):
-        
-        ret = []
-        if not docstring:
-            return ret
-
-        variable_declarations = re.findall(VAR_REGEX, docstring, flags=re.MULTILINE | re.DOTALL)
-        if variable_declarations:
-            variable_declarations = [f for f in variable_declarations[0].split('    @') if f.strip()]
-        for declaration in variable_declarations:
-            ret.append(self._get_dict_from_var_declaration(declaration))
-        return ret
+        return self._parse_params(docstring, VAR_REGEX, VAR_SPLIT_REGEX, 0)
+            
+    def _get_return_vals(self, docstring):
+       if 'Returns:' in docstring:
+           return self._parse_params(docstring, VAR_REGEX, VAR_SPLIT_REGEX, 1)
+       return []
+       
+    def _parse_params(self, docstring, regex, split_regex, idx):
+       ret = []
+       if not docstring:
+           return ret
     
+       params = re.findall(regex, docstring.split('Returns:')[idx], flags=re.MULTILINE | re.DOTALL)
+       if params:
+           params = [f.strip() for f in re.split(split_regex, params[0]) if f.strip()]
+       for param in params:
+           ret.append(self._get_dict_from_var_declaration(param))
+       return ret
+     
     def _get_dict_from_var_declaration(self, declaration):
         param = re.search(r'^(?P<name>[\w]+)[\ ]+\[(?P<type>[\w\[\]]+)\][\ ]*(?P<comment>.*)', declaration, flags=re.DOTALL)
         if not param:
@@ -81,7 +92,8 @@ class ServerDeclaration():
             param['required'] = '1' 
         return param
 
-
+   
+    
     def crawl_urls(self):
         ret = []
         handler_names = []

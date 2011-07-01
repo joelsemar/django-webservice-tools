@@ -21,6 +21,9 @@ class FriendsHandler(BaseHandler):
             @page_number [integer] Page number to start paging on (optional)
             @limit [integer] number of results to display on page (optional)
             @query [string] query to filter against friends (optional)
+        
+        Returns:
+            @friends [User_list] see user documentation for return values
         """
         page_number = request.GET.get('page_number', 1)
         limit = request.GET.get('limit', 10)
@@ -58,7 +61,9 @@ class FriendsHandler(BaseHandler):
         
 
 class FriendRequestHandler(BaseHandler):
+    model = FriendRequest
     allowed_methods = ('POST', 'GET', 'PUT', 'DELETE')
+    exclude = ()
     @login_required
     def create(self, request, id, response):
         """
@@ -100,6 +105,14 @@ class FriendRequestHandler(BaseHandler):
         """
         Return a list of the users' current friend requests
         API Handler: GET /friends/requests
+        
+        Returns:
+           @outgoing_requests [FriendRequest_list]
+           @pending_requests [FriendRequest_list]
+           @message [string] message sent from requesting user
+           @when_created [datetime] when the request was sent
+           @request_from [User] see user documentation for details
+           @request_to [User] see user documentation for details
         """
         profile = request.user.get_profile()
         pending_requests = FriendRequest.objects.filter(request_to=profile)
