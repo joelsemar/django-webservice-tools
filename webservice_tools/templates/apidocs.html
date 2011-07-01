@@ -1,0 +1,274 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js'></script>
+        {% include 'doc_css.html' %}
+		{% include 'doc_javascript.html' %}
+    </head>
+    <body>
+        <a name='top'><h1>{{servername}} API Documentation</h1></a>
+        Developer: {{developer_email}}
+        <br/>
+        Try calls in the <a href='/{{servername}}/services/apiconsole'>API Console</a>
+        <br/>
+        Appiction strives to develop webservices in a RESTful style, if you are not familiar 
+        with our API's, please check out the notes on data formats and return values <a href='#dataformat'>here.</a>
+        Read <a href="#statuscodes">here</a>
+        to see a list of the HTTP Status codes you may encounter.
+        <br>
+        Feel free to email the developer with questions, or hop into #appiction-dev on freenode 
+        (If you don't have an IRC client installed, you can just go <a href='staging.appiction.com/irc'>here</a>
+        <br />
+        <button onclick="run_all_tests()">
+            Run Available Tests
+        </button>
+        {% if changelog_entries %}
+        <h2><a name='changelog'>Recent API Changes:</a></h2>
+        <div id='table_outer'>
+        <table width='100%'>
+            <tr>
+                <td height="20px">
+                    <b>Description</b>
+                </td>
+                <td height="20px">
+                    <b>Time</b>
+                </td>
+                <td height="20px">
+                    <b>By</b>
+                </td>
+            </tr>
+            {% for entry in changelog_entries %}
+            <tr>
+                <td height="20px">
+                    {{entry.description}}
+                    
+                </td>
+                <td height="20px">
+                    {{entry.when_created}} (UTC/GMT)
+                </td>
+                <td height="20px">
+                    {{entry.entered_by}}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        </div>
+        {% endif %}
+        <div id="main">
+          <a name='resourcetable'></a>  
+          <div id="nav_menu">
+            <h2>Resources</h2>
+		     <hr />
+              <ul >
+                  {% for handler in handlers %}
+                    <li >
+                      <a href='#resourcetable' onclick='load_handler("#{{handler.name}}");' id="{{handler.name}}_link">
+                	    <div class="menuitem">{{handler.name}}</div></a>
+                     </li>
+                  {% endfor %}
+               </ul>
+             <h2>General Info</h2>
+              <ul>
+               <li><a href="#resourcetable" onclick ="$('#dynamic_docs').html($('#dataformats').html())">
+            	 <div class="menuitem">Data formats and return values</div></li>
+               <li><a href="#resourcetable" onclick ="$('#dynamic_docs').html($('#status_codes').html())">
+            	 <div class="menuitem">HTTP Status Codes</div></li>
+              </ul>   
+          </div> 
+		  <div id="dynamic_docs"></div> 
+        </div>
+        
+        
+        {% for handler in handlers %}
+        <div class='handlerdiv' id="{{handler.name}}" style="display:none">
+        <a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
+        {%for method in handler.methods %}<a name='{{handler.name}}{{method.request_method}}_anchor'>
+            <div style='margin-top:25px;'>
+                <b style='color:red;'>{{method.request_method}}</b>
+                /{{servername}}{{method.url}}
+            </div>
+        </a>
+        <div style='margin-left: 30px;'>
+            {% autoescape off %}
+            {{method.comment}}
+            {% endautoescape %}
+        </div>
+        {% if method.auth_required %} <i style='margin-left:30px'>Requires Authentication</i>{% endif %}
+        <p style='margin-left:30px'>
+            <strong>Parameters</strong>
+        </p>
+        <ul class='paramlist'>
+            {% if method.params %} 
+            {% for param in method.params %}
+            <li>
+                <b>{{param.name}}</b>
+                -- <i>{{param.type}}</i>
+                {%ifequal param.required '0' %}(optional){%endifequal%} {% autoescape off %}{{param.comment}}{% endautoescape %}
+            </li>
+            {% endfor %}
+            {%else %}
+            None
+            {% endif %}
+        </ul>
+        {% if method.return_vals %}
+        <p style='margin-left:30px'>
+            <strong>Return Values</strong>
+        </p>
+        <ul class='paramlist'>
+            {% for param in method.return_vals %}
+            <li>
+                <b>{{param.name}}</b>
+                -- <i>{{param.type}}</i>
+                {% autoescape off %}{{param.comment}}{% endautoescape %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <button type="button"  onclick="$('#{{handler.name}}{{method.request_method}}_form').toggle()">Try Call</button>
+        {% if method.example_response %}<button type="button"" onclick="$('#{{handler.name}}{{method.request_method}}').toggle()">See Example</button>
+        <div id='{{handler.name}}{{method.request_method}}' style='display:none'>
+            <pre>{{method.example_response}}</pre>
+        </div>
+        {% endif %}
+        {% if method.tests %}
+        {% for test in method.tests %}
+        <button type="button" onclick='run_test(this,"{{handler.name}}{{method.request_method}}_response_div")' class='test_link' test_data="{{test}}" 
+          anchor="{{handler.name}}{{method.request_method}}_anchor" handler="{{handler.name}}"
+      {%  if 'auth_test' in test %}
+          auth_test="True"
+      {%  endif %}
+      {%  if 'create_user_test' in test %}
+          create_user_test="True"
+       {%  endif %}
+       {%  if method.auth_required %}
+         auth_required="True"
+       {%  endif %}>
+            Run Test
+        </button>
+        {% endfor %}
+        {% endif %}
+        <form class="newTestForm" id="{{handler.name}}{{method.request_method}}_form" style="display:none;">
+            <div class='param_label'> Url:</div> <input type="text" id="{{handler.name}}{{method.request_method}}_url" size=30 value="/{{servername}}{{method.url}}"><br/>
+            {% for param in method.params %}
+            <div class='param_label'> {{param.name}}:</div> <input type='text' name="{{param.name}}" size=30></input><br/>
+            {% endfor %}
+            Save As Test: <input type='checkbox' id="{{handler.name}}{{method.request_method}}_save">
+            <button type="button" onclick="create_test('{{handler.name}}','{{method.request_method}}')">Send</button>
+            
+        </form>
+        <div id='{{handler.name}}{{method.request_method}}_response_div' class='response_divs' style="display:none;">
+        </div>
+        
+        
+        </ul>
+        {% endfor %} <a href='#top' style='margin-top:20px;display:block;'>Return to top</a>
+    </div>
+    {%endfor %}
+    <div id='dataformats' style='display:none;'>
+     <a name='dataformat'><h2>Notes on data format and return values.</h2></a>
+    <p>
+    The format of return values default to JSON. In order to switch to another format, you can:
+    <ul>
+        <li>
+            Specify 'text/xml' or 'application/json' in the 'Accept' header of your request
+        </li>
+        <li>
+            provide a format in the url, such as GET /user?format=xml
+        </li>
+    </ul>
+    All responses contain 3 values:
+    <ul>
+        <li>
+            <i>success</i>
+            This is a boolean value indicating the success/failure of the request
+        </li>
+        <li>
+            <i>data</i>
+            Here you will find the actual data (if any) of the response
+            The data  section will always contain a 'messages' list.
+            The 'messages' list will contain any necessary messages and alerts needed to send to the client.
+        </li>
+        <li>
+            <i>errors</i>
+            A list of errors that occured during the request.
+        </li>
+    </ul>
+    For example, creating a new user, with JSON, might return:<pre class='example'>
+{
+    "success": true,
+    "errors": [],
+    "data": {
+        "user": {
+            "username": "foo@bar.com",
+            "id": 3
+        },
+     "messages": []
+    }, 
+}
+            </pre>
+    or, if there was an error:<pre class='example'>
+{
+    "errors": [
+        "Email already in use"
+    ], 
+    
+    "data": {
+      "messages": [],
+    }, 
+    "success": false
+}
+            </pre>
+    in XML:<pre class='example'>
+&lt;?xml version='1.0' encoding='utf-8'?&gt;
+  &lt;response&gt;
+    &lt;errors/&gt;
+    &lt;data&gt;
+      &lt;user&gt;
+        &lt;username&gt;baz@bar.com&lt;/username&gt;
+        &lt;id&gt;4&lt;/id&gt;
+      &lt;/user&gt;
+      &lt;messages/&gt;
+    &lt;/data&gt;
+    &lt;success&gt;True&lt;/success&gt;
+  &lt;/response&gt;
+&lt;/pre&gt;
+            
+        </pre>
+    or:<pre class='example'>
+<?xml version='1.0' encoding='utf-8'?>
+&lt;response&gt;
+  &lt;errors&gt;
+    &lt;resource&gt;Email already in use&lt;/resource&gt;
+  &lt;/errors&gt;
+  &lt;data&gt;
+    &lt;messages/&gt;
+  &lt;/data&gt; 
+  &lt;success&gt;False&lt;/success&gt;
+&lt;/response&gt;   
+    
+    
+</pre>
+</div>
+<div id='status_codes' style='display:none;'>
+    <a name='statuscodes'><h2>HTTP Status Codes</h2></a>
+    <pre>
+HTTP Status codes are defined <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">here:</a> 
+We try to follow this specification as closely as possible. Please make us aware if you find a case where we fail to do so.
+
+The main ones we make use of:
+
+200 -- OK
+201 -- Resource Created
+301 -- Resourced Moved Permanently
+302 -- Resource Moved Temporarily
+304 -- Not Modified
+400 -- Invalid Input
+401 -- Unauthorized
+404 -- Resource Not Found
+500 -- Internal Server Error
+</pre>
+    </body>
+</html>
+</div>
+
+
