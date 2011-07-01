@@ -1,11 +1,14 @@
 # Django settings for templateproject project.
 import os
 import sys
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+SERVER_NAME = '{{servername}}'
+
 ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
+    ('Adminstrator', 'Admin@YourAppDomain.com'), ('Developer', 'joel.semar@appiction.com')
 )
 
 MANAGERS = ADMINS
@@ -13,9 +16,9 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '{{servername}}',                      # Or path to database file if using sqlite3.
-        'USER': '{{servername}}',                      # Not used with sqlite3.
-        'PASSWORD': '{{servername}}',                  # Not used with sqlite3.
+        'NAME': SERVER_NAME,                      # Or path to database file if using sqlite3.
+        'USER': SERVER_NAME,                      # Not used with sqlite3.
+        'PASSWORD': SERVER_NAME,                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
@@ -47,15 +50,15 @@ USE_L10N = True
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/"
 MEDIA_ROOT = os.path.join(sys.path[0], 'static')
-MEDIA_URL = '/{{servername}}/static/'
+MEDIA_URL = '/%s/static/' % SERVER_NAME
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/{{servername}}/static/admin-media/'
+ADMIN_MEDIA_PREFIX = '/%s/static/admin-media/' % SERVER_NAME
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '5-dmf5f@r%&luj__s%!vf&umd6ndtc&^^1_ep5^$h*=v)%uzm)'
+SECRET_KEY = '{{secretkey}}'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -76,6 +79,8 @@ MIDDLEWARE_CLASSES = (
     
 )
 AUTH_PROFILE_MODULE = 'mainapp.UserProfile'
+SITE_SETTINGS_MODEL = 'mainapp.SiteSettings'
+
 ROOT_URLCONF = 'urls'
 
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
@@ -98,17 +103,40 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.gis'
+    'django.contrib.admin',    
+    'piston',
     'mainapp',
     'south',
     'webservice_tools',
     'webservice_tools.logging',
-    # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
 )
 
-import logging.handlers
-LOG_FILE = '%s/logs/log' % PROJECT_PATH
-GLOBAL_LOG_LEVEL = logging.DEBUG
-GLOBAL_LOG_HANDLERS = [logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=200000, backupCount=2)]
+LOGGING = {
+           'disable_existing_loggers': True,
+           'handlers': {
+                        'mail_admins': {
+                                        'class': 'django.utils.log.AdminEmailHandler',
+                                        'level': 'ERROR'
+                                        },
+                        'file_log': {
+                                       'class': 'logging.handlers.RotatingFileHandler',
+                                       'level': 'DEBUG',
+                                       'filename': '%s/logs/log' % PROJECT_PATH,
+                                       'maxBytes': 200000, 
+                                       'backupCount':2
+                                       }
+                        },
+           'loggers': {
+                       'django.request': {
+                                          'handlers': ['mail_admins'],
+                                          'level': 'ERROR',
+                                          'propagate': True
+                                          },
+                       'webservice':{
+                                     'handlers': ['file_log'],
+                                     'level': 'DEBUG',
+                                     'propagate': True
+                                     }
+                       },
+            'version': 1
+            }
