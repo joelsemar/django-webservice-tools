@@ -51,6 +51,20 @@
                 padding: 10px;
                 width: 150px;
 			}
+		    #dynamic_docs{
+		    	float: right;
+				width: 75%;
+				height: auto;
+				height:1200px;
+                overflow: auto;
+                overflow-x: hidden;
+		    }
+			#main{
+				width: 100%;
+			}
+			#nav_menu{
+				width: 25%;
+			}
         </style>
         <script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js'>
         </script>
@@ -170,6 +184,7 @@
                 CURRENT_TEST_LINK = 0;
                 var first_test = TEST_LINKS[CURRENT_TEST_LINK];
                 window.location.hash = $(first_test).attr('anchor');
+				$("#"+$(first_test).attr('handler')+'_link').onclick()
                 first_test.onclick();
             }
             
@@ -191,9 +206,7 @@
             }
             
             function login(callback){
-                var callback = callback ||
-                function(){
-                };
+                var callback = callback ||function(){};
                 var params;
                 var test;
                 var links = $(".test_link");
@@ -253,6 +266,11 @@
 					}
 				})
 			}
+			
+			function load_handler(div_id){
+				$("#dynamic_docs").html($(div_id).html())
+				$('#dynamic_docs .handler_name').css('margin-top', '5px')
+			}
         </script>
     </head>
     <body>
@@ -269,22 +287,12 @@
         Feel free to email the developer with questions, or hop into #appiction-dev on freenode 
         (If you don't have an IRC client installed, you can just go <a href='staging.appiction.com/irc'>here</a>
         <br />
-		Check <a href='#changelog'>here</a> for recent API changes.
-		<br/>
         <button onclick="run_all_tests()">
             Run Available Tests
         </button>
-        <h2>Resources</h2>
-        <ul>
-            {% for handler in handlers %}
-            <li>
-                <a href='#{{handler.name}}'>{{handler.name}}</a>
-            </li>
-            {% endfor %}
-        </ul>
-        {% if changelog_entries %}
-		<h2><a name='changelog'>Recent API Changes:</a></h2>
-		<div id='table_outer'>
+		{% if changelog_entries %}
+        <h2><a name='changelog'>Recent API Changes:</a></h2>
+        <div id='table_outer'>
         <table width='100%'>
             <tr>
                 <td height="20px">
@@ -300,7 +308,7 @@
             {% for entry in changelog_entries %}
             <tr>
                 <td height="20px">
-                	{{entry.description}}
+                    {{entry.description}}
                     
                 </td>
                 <td height="20px">
@@ -312,10 +320,34 @@
             </tr>
             {% endfor %}
         </table>
-		</div>
+        </div>
         {% endif %}
+		<div id="main">
+		<div id="dynamic_docs">
+          </div>	
+		  <div id="nav_menu">
+        <a name='resourcetable'><h2>Resources</h2></a>
+        <ul>
+            {% for handler in handlers %}
+            <li>
+                <a href='#resourcetable' onclick='load_handler("#{{handler.name}}");' id="{{handler.name}}_link">{{handler.name}}</a>
+            </li>
+            {% endfor %}
+        </ul>
+        <h2>General Info</h2>
+        <ul>
+            <li><a href="#resourcetable" onclick ="$('#dynamic_docs').html($('#dataformats').html())">Data formats and return values</li>
+            <li><a href="#resourcetable" onclick ="$('#dynamic_docs').html($('#status_codes').html())">HTTP Status Codes</li>
+        </ul>   
+        </div>	
+		</div>
+		
+		
+        
+		
+        
         {% for handler in handlers %}
-        <div class='handlerdiv'>
+        <div class='handlerdiv' id="{{handler.name}}" style="display:none">
         <a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
         {%for method in handler.methods %}<a name='{{handler.name}}{{method.request_method}}_anchor'>
             <div style='margin-top:25px;'>
@@ -367,7 +399,8 @@
         {% endif %}
         {% if method.tests %}
         {% for test in method.tests %}
-        <button type="button" onclick='run_test(this,"{{handler.name}}{{method.request_method}}_response_div")' class='test_link' test_data="{{test}}" anchor="{{handler.name}}{{method.request_method}}_anchor"
+        <button type="button" onclick='run_test(this,"{{handler.name}}{{method.request_method}}_response_div")' class='test_link' test_data="{{test}}" 
+		  anchor="{{handler.name}}{{method.request_method}}_anchor" handler="{{handler.name}}"
       {%  if 'auth_test' in test %}
           auth_test="True"
       {%  endif %}
@@ -397,7 +430,9 @@
         </ul>
         {% endfor %} <a href='#top' style='margin-top:20px;display:block;'>Return to top</a>
     </div>
-    {%endfor %} <a name='dataformat'><h2>Notes on data format and return values.</h2></a>
+    {%endfor %}
+	<div id='dataformats' style='display:none;'>
+	 <a name='dataformat'><h2>Notes on data format and return values.</h2></a>
     <p>
     The format of return values default to JSON. In order to switch to another format, you can:
     <ul>
@@ -480,6 +515,8 @@
 	
 	
 </pre>
+</div>
+<div id='status_codes' style='display:none;'>
     <a name='statuscodes'><h2>HTTP Status Codes</h2></a>
     <pre>
 HTTP Status codes are defined <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">here:</a> 
@@ -499,3 +536,4 @@ The main ones we make use of:
 </pre>
     </body>
 </html>
+</div>
