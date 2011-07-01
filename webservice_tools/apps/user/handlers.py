@@ -52,7 +52,7 @@ class GenericUserHandler(utils.BaseHandler):
         Params:
             {{ params }}
         """
-        profile_form = self.profile_form(request.POST)
+        profile_form = self.profile_form(request.POST, request.FILES)
         user_form = self.user_form(request.POST)
         if user_form.is_valid():
             user = user_form.save(commit=False)
@@ -94,7 +94,7 @@ class GenericUserHandler(utils.BaseHandler):
         API handler: PUT /user
         """
         profile = request.user.get_profile()
-        profile_form = self.profile_form(request.PUT, instance=profile)
+        profile_form = self.profile_form(request.PUT, request.FILES, instance=profile)
         user_form = self.user_form(request.PUT, instance=request.user)
         
         
