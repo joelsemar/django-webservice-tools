@@ -85,7 +85,7 @@
                             ret[key] = params[key]
                         }
                     }
-                }
+                }</a>
                 return ret;
             }
             
@@ -268,7 +268,9 @@
         <br>
         Feel free to email the developer with questions, or hop into #appiction-dev on freenode 
         (If you don't have an IRC client installed, you can just go <a href='staging.appiction.com/irc'>here</a>
-        <br>
+        <br />
+		Check <a href='#changelog'>here</a> for recent API changes.
+		<br/>
         <button onclick="run_all_tests()">
             Run Available Tests
         </button>
@@ -280,7 +282,7 @@
             </li>
             {% endfor %}
         </ul>
-        {% if changelog_entries %}<h2>Recent API Changes:</h2>
+        {% if changelog_entries %}<h2><a name='changelog'>Recent API Changes:</a></h2>
 		<div id='table_outer'>
         <table width='100%'>
             <tr>
