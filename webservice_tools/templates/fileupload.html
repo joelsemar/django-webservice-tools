@@ -1,8 +1,12 @@
 <!doctype html>
 <html>
     <head>
+        <script type="text/javascript" src= "http://extjs.cachefly.net/ext-3.1.1/adapter/ext/ext-base.js">
+        </script>
+        <script type="text/javascript" src= "http://extjs.cachefly.net/ext-3.1.1/ext-all.js">
+        </script>
         <script type="text/javascript">
-            
+            var paramTemplate = new Ext.Template("Name: <input type='text' class='paramName spaced' id='paramName_{paramID}'><\/input>", " Value:<input type='text' class='paramVal spaced' size='75' id='paramVal_{paramID}'><\/input><br/>");
             function fileTest(){
                 var input = document.getElementById('url');
                 var form = document.getElementById('fileForm');
@@ -10,17 +14,59 @@
                 form.submit();
                 return false;
             }
-        
             
+            Ext.onReady(function(){
+                paramTemplate.append('params', {
+                    paramID: '1'
+                });
+                paramTemplate.append('params', {
+                    paramID: '2'
+                });
+            });
+            
+            function sendCall(){
+                var url = Ext.get('url').getValue();
+                var paramObject = {};
+                var paramNames = Ext.select('.paramName');
+                
+                var form = document.getElementById('fileForm')
+                form.method = 'POST'
+                form.action = url
+                form.setAttribute('Name', 'image_form')
+                form.id = 'image_form'
+				
+				for (var i = 0; i < paramNames.getCount(); i++) {
+                    var p = paramNames.elements[i];
+                    var id = p.id.split('_')[1];
+                    var v = Ext.get('paramVal_' + id);
+                    if (p.value) {
+						var field = document.createElement('INPUT');
+						field.type = 'text';
+						field.setAttribute('value', v.getValue());
+						field.setAttribute('Name', p.value);
+                        paramObject[p.value] = v.getValue();
+						form.appendChild(field);
+                    }
+                }
+				form.submit();
+				
+            }
         </script>
     </head>
-    <h3>Network Name:</h3>
-	
+    <h3>File Upload test:</h3>
     <form id="fileForm" action='' method='POST' enctype='multipart/form-data'>
-    	<input type='file' name='file'></file>
-        POST to {{baseURL}}<input id='url' type='text' value='test '></input>
-        <button type='button' onclick='return fileTest()'>
+        <input type='file' name='image'>
+        </input>POST to <input id='url' type='text' value='{{baseURL}}'>
+        </input>
+        <br/>
+        Additional Parameters:
+        <div id='params'>
+        </div>
+        <button type='button' onclick="paramTemplate.append('params', {paramID: Ext.select('.paramName').getCount()+1})">
+            add param
+        </button>
+        <button type='button' onclick='return sendCall()'>
             Submit
         </button>
-    </form>
-</html>
+        </form>
+    </html>

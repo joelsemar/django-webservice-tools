@@ -28,11 +28,12 @@ class GenericUserHandler(utils.BaseHandler):
                 self.profile_form = forms.UserProfileForm
     
     @login_required
-    def read(self, request, response):
+    def read(self, request, response=None):
         """
         Return the details of the User's profile and preferences
         API Handler: GET /user
         """
+        
         profile = request.user.get_profile()
         response.set(profile=profile)
         return response.send()
