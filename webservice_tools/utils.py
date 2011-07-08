@@ -342,7 +342,6 @@ class GeoCodeError(Exception):
 class GeoCode():
     
     def __init__(self, address):
-        self.apiKey = apiKey
         self.query = friendlyURLEncode({'q': address})
     
     def _make_call(self):
