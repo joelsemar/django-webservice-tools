@@ -17,13 +17,15 @@ class ExtModelForm(ModelForm):
     
     
     def save(self, *args, **kwargs):
-        if self.editing:
+        if True:#self.editing:
             instance = self.temp_instance
             for k, v in self.cleaned_data.items():
                 if v is not None and self.data.get(k):
                     setattr(instance, k, v)
             instance.save()
+            super(ExtModelForm, self).save(*args, **kwargs)
         else:
+            import pydevd;pydevd.settrace('127.0.0.1')
             return super(ExtModelForm, self).save(*args, **kwargs)
 
 
