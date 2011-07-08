@@ -33,7 +33,7 @@ class GeoHandler(BaseHandler):
         if address:
             get_coords = strToBool(request.GET.get('get_coords', 'True'))
             if hasattr(settings, 'GOOGLE_API_KEY'):
-                geo_code = GeoCode(address, apiKey=settings.GOOGLE_API_KEY)
+                geo_code = GeoCode(address)
             else:
                 #just use the api key in the utils module
                 geo_code = GeoCode(address)
@@ -200,7 +200,7 @@ def google_places_search_view(request, response):
 def google_places_search(lat='', lng='', location='', radius=5000, query='', name=''):
     query = re.sub(',', '|', query)
     if location:
-        lng, lat = GeoCode(address=location, apiKey=settings.GOOGLE_API_KEY).getCoords()
+        lng, lat = GeoCode(address=location).getCoords()
     
     if not (lat and lng):
         return None, "Please provide lat and lng or location."

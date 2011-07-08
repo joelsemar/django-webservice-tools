@@ -341,7 +341,7 @@ class GeoCodeError(Exception):
 
 class GeoCode():
     
-    def __init__(self, address, apiKey=GOOGLE_API_KEY):
+    def __init__(self, address):
         self.apiKey = apiKey
         self.query = friendlyURLEncode({'q': address})
     
@@ -361,8 +361,7 @@ class GeoCode():
         
 class ReverseGeoCode():      
 
-    def __init__(self, latlng, apiKey=GOOGLE_API_KEY):
-        self.apiKey = apiKey
+    def __init__(self, latlng):
         self.query = friendlyURLEncode({'latlng': latlng})
     
     @retry(exception_raise=GeoCodeError("Invalid Coordinates"))
