@@ -58,7 +58,7 @@ class Resource(PistonResource):
 
         return em
     def error_handler(self, e, request, meth, em_format):
-        raise e
+        return generic_exception_handler(request, e)
         
     
 class BaseHandler(PistonBaseHandler):
@@ -717,3 +717,42 @@ def get_user_from_session(session_key):
 
 def location_from_coords(lat, lng):
     return fromstr("POINT(%.5f %5f)" % (float(lat), float(lng)))
+
+def generic_exception_handler(request, exception):
+    response = ResponseObject()
+    _, _, tb = sys.exc_info()
+    # we just want the last frame, (the one the exception was thrown from)
+    lastframe = self.get_traceback_frames(tb)[-1]
+    location = "%s in %s, line: %s" %(lastframe['filename'], lastframe['function'], lastframe['lineno'])
+    response.addErrors([exception.message, location])
+    logger = logging.getLogger('webservice')
+    return HttpResponse(dumps(response.send()._container), status=500)
+
+
+def get_traceback_frames(self, tb):
+    """
+    Coax the line number, function data out of the traceback we got from the exc_info() call
+    """
+    frames = []
+    while tb is not None:
+        # support for __traceback_hide__ which is used by a few libraries
+        # to hide internal frames.
+        if tb.tb_frame.f_locals.get('__traceback_hide__'):
+            tb = tb.tb_next
+            continue
+        frames.append({
+            'filename': tb.tb_frame.f_code.co_filename,
+            'function': tb.tb_frame.f_code.co_name,
+            'lineno': tb.tb_lineno,
+        })
+        tb = tb.tb_next
+
+    if not frames:
+        frames = [{
+            'filename': '&lt;unknown&gt;',
+            'function': '?',
+            'lineno': '?',
+            'context_line': '???',
+        }]
+
+    return frames
