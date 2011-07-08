@@ -22,7 +22,7 @@ class ProvideResponse(object):
         data_format = data_format or request.GET.get('format') or request.POST.get('format') 
         
         if ('html' in accept_header or
-            '*/*' in accept_header or 
+            #'*/*' in accept_header or 
             'admin' in request.path or 
             'static' in request.path) and not data_format:
             return None
