@@ -30,8 +30,8 @@ from django.contrib.gis.geos import fromstr
 from django.http import HttpResponse
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
-GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false&key=%s" 
-GOOGLE_REVERSE_URL = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&key=%s'
+GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false" 
+GOOGLE_REVERSE_URL = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false'
 EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$"
 ZIP_CODE_REGEX = '^[\d]{5}$|^[\d]{5}\-[\d]{4}$'
 YAHOO_APPID = "0NYrSEfV34E53zulq2mSDNG2tj6cR5IUlpDpguxqUx6mBs_GDVjIf5OguewjmQ--"
@@ -346,7 +346,7 @@ class GeoCode():
         self.query = friendlyURLEncode({'q': address})
     
     def _make_call(self):
-        return simplejson.loads(urllib2.urlopen(GOOGLE_API_URL % self.apiKey + '&' + self.query).read())
+        return simplejson.loads(urllib2.urlopen(GOOGLE_API_URL + '&' + self.query).read())
     
     @retry(exception_raise=GeoCodeError("Invalid Address"))
     def getResponse(self):
@@ -367,7 +367,7 @@ class ReverseGeoCode():
     
     @retry(exception_raise=GeoCodeError("Invalid Coordinates"))
     def getAddress(self):
-        response = simplejson.loads(urllib2.urlopen(GOOGLE_REVERSE_URL % self.apiKey + '&' + self.query).read())
+        response = simplejson.loads(urllib2.urlopen(GOOGLE_REVERSE_URL + '&' + self.query).read())
         ret = response['results']
         if not ret:
             raise GeoCodeError('Invalid coordinates')
