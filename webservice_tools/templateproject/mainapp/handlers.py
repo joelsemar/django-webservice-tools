@@ -36,6 +36,6 @@ module_name = globals().get('__name__')
 handlers = sys.modules[module_name]
 handlers._all_ = []
 for handler_name in dir():
-   m = getattr(handlers, handler_name)
-   if type(m) == type(BaseHandler):
-       handlers._all_.append(handler_name)
+    m = getattr(handlers, handler_name)
+    if type(m) == type(BaseHandler):
+        handlers._all_.append(handler_name)

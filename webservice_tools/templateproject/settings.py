@@ -8,7 +8,7 @@ TEMPLATE_DEBUG = DEBUG
 SERVER_NAME = '{{servername}}'
 
 ADMINS = (
-    ('Adminstrator', 'Admin@YourAppDomain.com'), ('Developer', 'joel.semar@appiction.com')
+    ('Adminstrator', 'Admin@YourAppDomain.com'), ('Developer', 'developer@company.com')
 )
 
 MANAGERS = ADMINS
@@ -102,11 +102,12 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    'django.contrib.gis'
+    'django.contrib.gis',
     'django.contrib.admin',    
     'piston',
     'mainapp',
     'south',
+    '{{installed_apps}}'
     'webservice_tools',
     'webservice_tools.logging',
 )
