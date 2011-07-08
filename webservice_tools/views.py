@@ -86,7 +86,7 @@ class DocHandler(BaseHandler):
         context['developer_email'] = getattr(settings, 'ADMINS')[1][1]
         context['changelog_entries'] = APIChangeLogEntry.objects.all()
         
-        return direct_to_template(request, 'project.html', extra_context=context)
+        return direct_to_template(request, 'apidocs.html', extra_context=context)
 
 
 class PlacesHandler(BaseHandler):

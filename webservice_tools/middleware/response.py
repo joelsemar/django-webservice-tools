@@ -19,7 +19,7 @@ class ProvideResponse(object):
         elif 'application/json' in accept_header:
             data_format = 'json'
         
-        data_format = data_format or request.GET.get('format')
+        data_format = data_format or request.GET.get('format') or request.POST.get('format') 
         
         if ('html' in accept_header or
             '*/*' in accept_header or 
@@ -39,7 +39,7 @@ class ProvideResponse(object):
             if data_format == 'json' and doc:
                 doc = doc.replace('\n', '<br/>')
             kwargs['response'].doc = doc
-        if hasattr(view, 'handler'):
+        if hasattr(view, 'callmap'):
             request.handler_id = str(view.handler.__class__)
         
         return None
@@ -47,7 +47,7 @@ class ProvideResponse(object):
 
 
 
-class StoreResponse(object):
+class DocBuilder(object):
     @transaction.commit_on_success
     def process_view(self, request, view, args, kwargs):
         if request.META.get('HTTP_STORE_AS_TEST') and \
