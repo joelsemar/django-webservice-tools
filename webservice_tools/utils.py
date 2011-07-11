@@ -1,6 +1,7 @@
 """
 General utils
 """
+import sys
 import datetime
 import math
 import types
@@ -13,6 +14,7 @@ import urllib2
 import simplejson
 import passwordpieces
 import base64
+import logging
 from xml.dom import minidom
 from django.utils import encoding
 from PIL import Image
@@ -722,14 +724,15 @@ def generic_exception_handler(request, exception):
     response = ResponseObject()
     _, _, tb = sys.exc_info()
     # we just want the last frame, (the one the exception was thrown from)
-    lastframe = self.get_traceback_frames(tb)[-1]
+    lastframe =get_traceback_frames(tb)[-1]
     location = "%s in %s, line: %s" %(lastframe['filename'], lastframe['function'], lastframe['lineno'])
     response.addErrors([exception.message, location])
     logger = logging.getLogger('webservice')
-    return HttpResponse(dumps(response.send()._container), status=500)
+    logger.debug([exception.message, location])
+    return HttpResponse(simplejson.dumps(response.send()._container), status=500)
 
 
-def get_traceback_frames(self, tb):
+def get_traceback_frames(tb):
     """
     Coax the line number, function data out of the traceback we got from the exc_info() call
     """
