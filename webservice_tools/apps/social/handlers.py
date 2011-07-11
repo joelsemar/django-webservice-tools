@@ -201,7 +201,7 @@ class SocialRegisterHandler(BaseHandler):
             None
         """
         profile = request.user.get_profile()
-        if request.META.get('HTTP_REFERER'):
+        if request.META.get('HTTP_REFERER') and not 'social/test' in request.META.get('HTTP_REFERER'):
             request.session['last_url'] = request.META['HTTP_REFERER']
         if not response:
             response = ResponseObject()
