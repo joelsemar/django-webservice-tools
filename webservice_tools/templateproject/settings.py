@@ -113,31 +113,31 @@ INSTALLED_APPS = (
 )
 
 LOGGING = {
-           'disable_existing_loggers': True,
-           'handlers': {
-                        'mail_admins': {
-                                        'class': 'django.utils.log.AdminEmailHandler',
-                                        'level': 'ERROR'
-                                        },
-                        'file_log': {
-                                       'class': 'logging.handlers.RotatingFileHandler',
-                                       'level': 'DEBUG',
-                                       'filename': '%s/logs/log' % PROJECT_PATH,
-                                       'maxBytes': 200000, 
-                                       'backupCount':2
-                                       }
-                        },
-           'loggers': {
-                       'django.request': {
-                                          'handlers': ['mail_admins'],
-                                          'level': 'ERROR',
-                                          'propagate': True
-                                          },
-                       'webservice':{
-                                     'handlers': ['file_log'],
-                                     'level': 'DEBUG',
-                                     'propagate': True
-                                     }
-                       },
-            'version': 1
-            }
+  'version': 1,
+  'disable_existing_loggers': True,
+  'handlers': {
+       'mail_admins':{
+          'class': 'django.utils.log.AdminEmailHandler',
+          'level': 'ERROR'
+       },
+       'file_log': {
+           'class': 'logging.handlers.RotatingFileHandler',
+           'level': 'DEBUG',
+           'filename': '%s/logs/log' % PROJECT_PATH,
+           'maxBytes': 200000, 
+           'backupCount':2
+       }
+   },
+  'loggers': {
+      'django.request': {
+          'handlers': ['mail_admins'],
+          'level': 'ERROR',
+          'propagate': True
+       },
+      'webservice':{
+          'handlers': ['file_log'],
+          'level': 'DEBUG',
+          'propagate': True
+      }
+  },
+}

@@ -1,6 +1,7 @@
 """
 General utils
 """
+import sys
 import datetime
 import math
 import types
@@ -13,6 +14,7 @@ import urllib2
 import simplejson
 import passwordpieces
 import base64
+import logging
 from xml.dom import minidom
 from django.utils import encoding
 from PIL import Image
@@ -58,7 +60,7 @@ class Resource(PistonResource):
 
         return em
     def error_handler(self, e, request, meth, em_format):
-        raise e
+        return generic_exception_handler(request, e)
         
     
 class BaseHandler(PistonBaseHandler):
@@ -342,7 +344,6 @@ class GeoCodeError(Exception):
 class GeoCode():
     
     def __init__(self, address):
-        self.apiKey = apiKey
         self.query = friendlyURLEncode({'q': address})
     
     def _make_call(self):
@@ -717,3 +718,44 @@ def get_user_from_session(session_key):
 
 def location_from_coords(lat, lng):
     return fromstr("POINT(%.5f %5f)" % (float(lat), float(lng)))
+
+def generic_exception_handler(request, exception):
+    from webservice_tools.response_util import ResponseObject
+    response = ResponseObject()
+    _, _, tb = sys.exc_info()
+    # we just want the last frame, (the one the exception was thrown from)
+    lastframe =get_traceback_frames(tb)[-1]
+    location = "%s in %s, line: %s" %(lastframe['filename'], lastframe['function'], lastframe['lineno'])
+    response.addErrors([exception.message, location])
+    logger = logging.getLogger('webservice')
+    logger.debug([exception.message, location])
+    return HttpResponse(simplejson.dumps(response.send()._container), status=500)
+
+
+def get_traceback_frames(tb):
+    """
+    Coax the line number, function data out of the traceback we got from the exc_info() call
+    """
+    frames = []
+    while tb is not None:
+        # support for __traceback_hide__ which is used by a few libraries
+        # to hide internal frames.
+        if tb.tb_frame.f_locals.get('__traceback_hide__'):
+            tb = tb.tb_next
+            continue
+        frames.append({
+            'filename': tb.tb_frame.f_code.co_filename,
+            'function': tb.tb_frame.f_code.co_name,
+            'lineno': tb.tb_lineno,
+        })
+        tb = tb.tb_next
+
+    if not frames:
+        frames = [{
+            'filename': '&lt;unknown&gt;',
+            'function': '?',
+            'lineno': '?',
+            'context_line': '???',
+        }]
+
+    return frames
