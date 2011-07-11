@@ -30,7 +30,6 @@ from django.db import  models
 from django.core.paginator import EmptyPage, Paginator
 from django.contrib.gis.geos import fromstr
 from django.http import HttpResponse
-from webservice_tools.response_util import ResponseObject
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false" 
@@ -721,13 +720,15 @@ def location_from_coords(lat, lng):
     return fromstr("POINT(%.5f %5f)" % (float(lat), float(lng)))
 
 def generic_exception_handler(request, exception):
+    from webservice_tools.response_util import ResponseObject
     response = ResponseObject()
     _, _, tb = sys.exc_info()
     # we just want the last frame, (the one the exception was thrown from)
-    lastframe = get_traceback_frames(tb)[-1]
+    lastframe =get_traceback_frames(tb)[-1]
     location = "%s in %s, line: %s" %(lastframe['filename'], lastframe['function'], lastframe['lineno'])
     response.addErrors([exception.message, location])
     logger = logging.getLogger('webservice')
+    logger.debug([exception.message, location])
     return HttpResponse(simplejson.dumps(response.send()._container), status=500)
 
 
