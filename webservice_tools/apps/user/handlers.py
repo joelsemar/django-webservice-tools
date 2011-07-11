@@ -144,7 +144,7 @@ class LoginHandler(utils.BaseHandler):
         
         #logout before logging in to prevent multiple sessions
         logout(request)
-        username = request.POST.get('username') or request.POST.get('email')
+        username = request.POST.get('username', '').lower() or request.POST.get('email', '').lower()
         password = request.POST.get('password')
         
         if not all([username, password]):
