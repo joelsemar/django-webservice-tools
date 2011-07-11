@@ -4,8 +4,8 @@ from webservice_tools.models import StoredHandlerResponse, StoredHandlerRequest,
 from webservice_tools.doc_generator.server_declaration import ServerDeclaration
 from django.conf import settings
 from django.db import transaction
+
 class ProvideResponse(object):
-    
     
     def process_view(self, request, view, args, kwargs):
         """
@@ -48,6 +48,7 @@ class ProvideResponse(object):
 
 
 class DocBuilder(object):
+    
     @transaction.commit_on_success
     def process_view(self, request, view, args, kwargs):
         if request.META.get('HTTP_STORE_AS_TEST') and \

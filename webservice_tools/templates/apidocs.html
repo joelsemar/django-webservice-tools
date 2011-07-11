@@ -12,8 +12,8 @@
         Try calls in the <a href='/{{servername}}/services/apiconsole'>API Console</a>
         <br/>
         Appiction strives to develop webservices in a RESTful style, if you are not familiar 
-        with our API's, please check out the notes on data formats and return values <a href='#dataformat'>here.</a>
-        Read <a href="#statuscodes">here</a>
+        with our API's, please check out the notes on data formats and return values <a href="#dataformats" onclick ='load_handler("#dataformats");'>here.</a>
+        Read <a href="#status_codes" onclick ='load_handler("#status_codes");'>here</a>
         to see a list of the HTTP Status codes you may encounter.
         <br>
         Feel free to email the developer with questions, or hop into #appiction-dev on freenode 
@@ -62,16 +62,16 @@
               <ul >
                   {% for handler in handlers %}
                     <li >
-                      <a href='#resourcetable' onclick='load_handler("#{{handler.name}}");' id="{{handler.name}}_link">
+                      <a href='#{{handler.name}}' onclick='load_handler("#{{handler.name}}");' id="{{handler.name}}_link">
                 	    <div class="menuitem">{{handler.name}}</div></a>
                      </li>
                   {% endfor %}
                </ul>
              <h2>General Info</h2>
               <ul>
-               <li><a href="#resourcetable" onclick ="$('#dynamic_docs').html($('#dataformats').html())">
+               <li><a href="#dataformats" onclick ='load_handler("#dataformats");'>
             	 <div class="menuitem">Data formats and return values</div></a></li>
-               <li><a href="#resourcetable" onclick ="$('#dynamic_docs').html($('#status_codes').html())">
+               <li><a href="#status_codes" onclick ='load_handler("#status_codes");'>
             	 <div class="menuitem">HTTP Status Codes</div></a></li>
               </ul>   
           </div> 

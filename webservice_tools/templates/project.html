@@ -69,6 +69,7 @@
         <script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js'>
         </script>
         <script type="application/javascript">
+            var current_viewed = '';
             var value_factory = {
             
                 random_email: function(){
@@ -268,8 +269,14 @@
 			}
 			
 			function load_handler(div_id){
+                if (current_viewed != ''){
+                    $(current_viewed).html($('#dynamic_docs').html());
+                    current_viewed = '';
+                }
 				$("#dynamic_docs").html($(div_id).html())
 				$('#dynamic_docs .handler_name').css('margin-top', '5px')
+                current_viewed = div_id;
+                
 			}
         </script>
     </head>
@@ -280,12 +287,12 @@
         Try calls in the <a href='/{{servername}}/services/apiconsole'>API Console</a>
         <br/>
         Appiction strives to develop webservices in a RESTful style, if you are not familiar 
-        with our API's, please check out the notes on data formats and return values <a href='#dataformat'>here.</a>
-        Read <a href="#statuscodes">here</a>
+        with our API's, please check out the notes on data formats and return values <a href="#resourcetable" onclick ='load_handler("#dataformats");'>Data formats and return values</a>
+        Read <a href="#resourcetable" onclick ='load_handler("#status_codes");'>HTTP Status Codes</a>here</a>
         to see a list of the HTTP Status codes you may encounter.
         <br>
         Feel free to email the developer with questions, or hop into #appiction-dev on freenode 
-        (If you don't have an IRC client installed, you can just go <a href='staging.appiction.com/irc'>here</a>
+        (If you don't have an IRC client installed, you can just go <a href='http://staging.appiction.com/irc'>here</a>
         <br />
         <button onclick="run_all_tests()">
             Run Available Tests
@@ -336,8 +343,8 @@
         </ul>
         <h2>General Info</h2>
         <ul>
-            <li><a href="#resourcetable" onclick ="$('#dynamic_docs').html($('#dataformats').html())">Data formats and return values</li>
-            <li><a href="#resourcetable" onclick ="$('#dynamic_docs').html($('#status_codes').html())">HTTP Status Codes</li>
+            <li><a href="#resourcetable" onclick ='load_handler("#dataformats");'>Data formats and return values</a></li>
+            <li><a href="#resourcetable" onclick ='load_handler("#status_codes");'>HTTP Status Codes</a></li>
         </ul>   
         </div>	
 		</div>

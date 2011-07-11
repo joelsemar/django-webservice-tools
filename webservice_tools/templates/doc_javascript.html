@@ -1,4 +1,10 @@
 <script type="application/javascript">
+    $(function(){
+        if(window.location.hash){
+            load_handler(window.location.hash);
+        }        
+    });
+    var current_viewed = '';
     var value_factory = {
     
         random_email: function(){
@@ -200,7 +206,13 @@
     }
     
     function load_handler(div_id){
+        if (current_viewed != ''){
+            $(current_viewed).html($('#dynamic_docs').html());
+            current_viewed = '';
+        }
         $("#dynamic_docs").html($(div_id).html())
         $('#dynamic_docs .handler_name').css('margin-top', '5px')
+        current_viewed = div_id;
+        
     }
 </script>
