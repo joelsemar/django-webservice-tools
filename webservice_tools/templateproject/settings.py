@@ -73,7 +73,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'webservice_tools.middleware.response.ProvideResponse',
-    'webservice_tools.logging.middleware.LoggingMiddleware',
+    'webservice_tools.middleware.logger.LoggingMiddleware',
     'webservice_tools.middleware.exception.WebServiceException',
     'django.middleware.transaction.TransactionMiddleware',
     
