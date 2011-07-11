@@ -1,0 +1,107 @@
+        <div id='dataformats' style='display:none;' class='handlerdiv'>
+            <a name='dataformat'><h2>Notes on data format and return values.</h2></a>
+            <p>
+            The format of return values default to JSON. In order to switch to another format, you can:
+            </p>
+            <ul>
+                <li>
+                    Specify 'text/xml' or 'application/json' in the 'Accept' header of your request
+                </li>
+                <li>
+                    provide a format in the url, such as GET /user?format=xml
+                </li>
+            </ul>
+            All responses contain 3 values:
+            <ul>
+                <li>
+                    <i>success</i>
+                    This is a boolean value indicating the success/failure of the request
+                </li>
+                <li>
+                    <i>data</i>
+                    Here you will find the actual data (if any) of the response
+                    The data  section will always contain a 'messages' list.
+                    The 'messages' list will contain any necessary messages and alerts needed to send to the client.
+                </li>
+                <li>
+                    <i>errors</i>
+                    A list of errors that occured during the request.
+                </li>
+            </ul>
+
+            For example, creating a new user, with JSON, might return:<pre class='example'>
+        {
+            "success": true,
+            "errors": [],
+            "data": {
+                "user": {
+                    "username": "foo@bar.com",
+                    "id": 3
+                },
+             "messages": []
+            }, 
+        }
+                    </pre>
+            or, if there was an error:<pre class='example'>
+        {
+            "errors": [
+                "Email already in use"
+            ], 
+            
+            "data": {
+              "messages": [],
+            }, 
+            "success": false
+        }
+                    </pre>
+            in XML:<pre class='example'>
+        &lt;?xml version='1.0' encoding='utf-8'?&gt;
+          &lt;response&gt;
+            &lt;errors/&gt;
+            &lt;data&gt;
+              &lt;user&gt;
+                &lt;username&gt;baz@bar.com&lt;/username&gt;
+                &lt;id&gt;4&lt;/id&gt;
+              &lt;/user&gt;
+              &lt;messages/&gt;
+            &lt;/data&gt;
+            &lt;success&gt;True&lt;/success&gt;
+          &lt;/response&gt;
+        &lt;/pre&gt;
+                    
+                </pre>
+            or:<pre class='example'>
+        <?xml version='1.0' encoding='utf-8'?>
+        &lt;response&gt;
+          &lt;errors&gt;
+            &lt;resource&gt;Email already in use&lt;/resource&gt;
+          &lt;/errors&gt;
+          &lt;data&gt;
+            &lt;messages/&gt;
+          &lt;/data&gt; 
+          &lt;success&gt;False&lt;/success&gt;
+        &lt;/response&gt;   
+            
+            
+        </pre>
+        </div>
+        
+        <div id='status_codes' style='display:none;' class='handlerdiv'>
+        <a name='statuscodes'><h2>HTTP Status Codes</h2></a>
+        <pre>
+        HTTP Status codes are defined <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">here:</a> 
+        We try to follow this specification as closely as possible. Please make us aware if you find a case where we fail to do so.
+        
+        The main ones we make use of:
+        
+        200 -- OK
+        201 -- Resource Created
+        301 -- Resourced Moved Permanently
+        302 -- Resource Moved Temporarily
+        304 -- Not Modified
+        400 -- Invalid Input
+        401 -- Unauthorized
+        404 -- Resource Not Found
+        500 -- Internal Server Error
+        </pre>
+        </div>    

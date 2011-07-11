@@ -207,11 +207,10 @@
     
     function load_handler(div_id){
         if (current_viewed != ''){
-            $(current_viewed).html($('#dynamic_docs').html());
+            $(current_viewed).hide();
             current_viewed = '';
         }
-        $("#dynamic_docs").html($(div_id).html())
-        $('#dynamic_docs .handler_name').css('margin-top', '5px')
+        $(div_id).show();
         current_viewed = div_id;
         
     }

@@ -109,8 +109,7 @@ INSTALLED_APPS = (
     'south',
     '{{installed_apps}}'
     'webservice_tools',
-    'webservice_tools.logging',
-)
+ )
 
 LOGGING = {
   'version': 1,

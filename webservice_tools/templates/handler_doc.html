@@ -1,0 +1,83 @@
+
+        <div class='handlerdiv' id="{{handler.name}}" style="display:none">
+        <a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
+        {%for method in handler.methods %}<a name='{{handler.name}}{{method.request_method}}_anchor'>
+            <div style='margin-top:25px;'>
+                <b style='color:red;'>{{method.request_method}}</b>
+                /{{servername}}{{method.url}}
+            </div>
+        </a>
+        <div style='margin-left: 30px;'>
+            {% autoescape off %}
+            {{method.comment}}
+            {% endautoescape %}
+        </div>
+        {% if method.auth_required %} <i style='margin-left:30px'>Requires Authentication</i>{% endif %}
+        <p style='margin-left:30px'>
+            <strong>Parameters</strong>
+        </p>
+        <ul class='paramlist'>
+            {% if method.params %} 
+            {% for param in method.params %}
+            <li>
+                <b>{{param.name}}</b>
+                -- <i>{{param.type}}</i>
+                {%ifequal param.required '0' %}(optional){%endifequal%} {% autoescape off %}{{param.comment}}{% endautoescape %}
+            </li>
+            {% endfor %}
+            {%else %}
+            None
+            {% endif %}
+        </ul>
+        {% if method.return_vals %}
+        <p style='margin-left:30px'>
+            <strong>Return Values</strong>
+        </p>
+        <ul class='paramlist'>
+            {% for param in method.return_vals %}
+            <li>
+                <b>{{param.name}}</b>
+                -- <i>{{param.type}}</i>
+                {% autoescape off %}{{param.comment}}{% endautoescape %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <button type="button"  onclick="$('#{{handler.name}}{{method.request_method}}_form').toggle()">Try Call</button>
+        {% if method.example_response %}<button type="button"" onclick="$('#{{handler.name}}{{method.request_method}}').toggle()">See Example</button>
+        <div id='{{handler.name}}{{method.request_method}}' style='display:none'>
+            <pre>{{method.example_response}}</pre>
+        </div>
+        {% endif %}
+        {% if method.tests %}
+        {% for test in method.tests %}
+        <button type="button" onclick='run_test(this,"{{handler.name}}{{method.request_method}}_response_div")' class='test_link' test_data="{{test}}" 
+          anchor="{{handler.name}}{{method.request_method}}_anchor" handler="{{handler.name}}"
+      {%  if 'auth_test' in test %}
+          auth_test="True"
+      {%  endif %}
+      {%  if 'create_user_test' in test %}
+          create_user_test="True"
+       {%  endif %}
+       {%  if method.auth_required %}
+         auth_required="True"
+       {%  endif %}>
+            Run Test
+        </button>
+        {% endfor %}
+        {% endif %}
+        <form class="newTestForm" id="{{handler.name}}{{method.request_method}}_form" style="display:none;">
+            <div class='param_label'> Url:</div> <input type="text" id="{{handler.name}}{{method.request_method}}_url" size=30 value="/{{servername}}{{method.url}}"><br/>
+            {% for param in method.params %}
+            <div class='param_label'> {{param.name}}:</div> <input type='text' name="{{param.name}}" size=30></input><br/>
+            {% endfor %}
+            Save As Test: <input type='checkbox' id="{{handler.name}}{{method.request_method}}_save">
+            <button type="button" onclick="create_test('{{handler.name}}','{{method.request_method}}')">Send</button>
+            
+        </form>
+        <div id='{{handler.name}}{{method.request_method}}_response_div' class='response_divs' style="display:none;">
+        </div>
+        </ul>
+
+        {% endfor %}        
+        </div>
