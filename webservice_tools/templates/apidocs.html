@@ -61,10 +61,17 @@
                 <hr/>
                 <ul>
                     {% for handler in handlers %}
-                    <li>
-                        <a href='#{{handler.name}}' onclick='load_handler("#{{handler.name}}");' id="{{handler.name}}_link">
+                    <li href='#{{handler.name}}' onclick='expand_methods("#{{handler.name}}");'>
+                        <a href='#{{handler.name}}' onclick='expand_methods("#{{handler.name}}");' id="{{handler.name}}_link">
                             <div class="menuitem">
                                 {{handler.name}}
+                                <div class='methodlist' id='{{handler.name}}_methods' style='display:none'>
+                                    {% for method in handler.methods %}
+                                    <div class="methoditem">
+                                        <a href='#{{handler.name}}_{{method.request_method}}' onclick='load_handler("#{{handler.name}}_{{method.request_method}}");'>{{method.request_method}}</a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
                             </div>
                         </a>
                     </li>

@@ -1,7 +1,7 @@
-
-        <div class='handlerdiv' id="{{handler.name}}" style="display:none">
+    {% for method in handler.methods %}
+        <div class='handlerdiv' id="{{handler.name}}_{{method.request_method}}" style="display:none">
         <a name='{{handler.name}}'><h2 class='handler_name'>{{handler.name}}</h2></a>
-        {%for method in handler.methods %}<a name='{{handler.name}}{{method.request_method}}_anchor'>
+        <a name='{{handler.name}}{{method.request_method}}_anchor'>
             <div style='margin-top:25px;'>
                 <b style='color:red;'>{{method.request_method}}</b>
                 /{{servername}}{{method.url}}
@@ -77,7 +77,6 @@
         </form>
         <div id='{{handler.name}}{{method.request_method}}_response_div' class='response_divs' style="display:none;">
         </div>
-        </ul>
-
-        {% endfor %}        
+        </ul>      
         </div>
+    {% endfor %}
