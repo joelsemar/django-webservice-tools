@@ -1,6 +1,6 @@
 <script type="application/javascript">
     $(function(){
-        if(window.location.hash){
+        if (window.location.hash) {
             hash = window.location.hash;
             hashlist = hash.split('_', 2);
             expand_methods(hashlist[0]);
@@ -10,16 +10,15 @@
             }
             else {
                 divlist = $(".handlerdiv")
-                for (var i = 0;i < divlist.length; i++)
-                {
+                for (var i = 0; i < divlist.length; i++) {
                     tempvar = '#' + divlist[i].id;
-                    if (tempvar.indexOf(hashlist[0]) === 0){
+                    if (tempvar.indexOf(hashlist[0]) === 0) {
                         load_handler(tempvar);
                         i = divlist.length;
                     }
                 }
             }
-        }        
+        }
     });
     var current_viewed = '';
     var current_expanded = '';
@@ -86,10 +85,16 @@
                         
                     }
                     parameters += "<br/>"
+                    if (responseObject.getResponseHeader('content-type').indexOf('xml') != -1) {
+                        var data = formatXML(response.responseText);
+                    }
+                    else {
+                        var data = response.responseText;
+                    }
                     var html = "<span class='closing_x' id='" + close_control_id + "';'>Hide X</span>";
                     html += "URL:" + test.path + "<br />";
                     html += "Parameters:<span class='test_request_params'>" + parameters || "None" + "</span><br />"
-                    html += "Result: <br /><pre>" + response.responseText + "</pre>";
+                    html += "Result: <br /><pre>" + data + "</pre>";
                     
                     $(result_div).html(html);
                     $(result_div).show();
@@ -212,8 +217,14 @@
             complete: function(response){
                 var result_div = '#' + handler + method + "_response_div";
                 var close_control_id = handler + method + "_X";
+                if (responseObject.getResponseHeader('content-type').indexOf('xml') != -1) {
+                    var data = formatXML(response.responseText);
+                }
+                else {
+                    var data = response.responseText;
+                }
                 var html = "<span class='closing_x' id='" + close_control_id + "';'>Hide X</span>";
-                html += "Result: <br /><pre>" + response.responseText + "</pre>";
+                html += "Result: <br /><pre>" + data + "</pre>";
                 $(result_div).show();
                 $(result_div).html(html);
                 $("#" + close_control_id).click(function(){
@@ -224,19 +235,20 @@
     }
     
     function load_handler(div_id){
-        if (current_viewed != ''){
+        if (current_viewed != '') {
             $(current_viewed).hide();
             current_viewed = '';
         }
         $(div_id).show();
         current_viewed = div_id;
     }
+    
     function expand_methods(handler){
         var div_id = handler + "_methods";
-        if (div_id == current_expanded){
+        if (div_id == current_expanded) {
             return;
         }
-        if (current_expanded != ''){
+        if (current_expanded != '') {
             $(current_expanded).slideUp(100);
             current_expanded = '';
         }
@@ -244,14 +256,18 @@
         current_expanded = div_id;
         
         var divlist = $(".handlerdiv");
-        for (var i = 0;i < divlist.length; i++)
-        {
+        for (var i = 0; i < divlist.length; i++) {
             var tempvar = '#' + divlist[i].id;
-            if (tempvar.indexOf(handler) === 0){
+            if (tempvar.indexOf(handler) === 0) {
                 load_handler(tempvar);
                 i = divlist.length;
             }
         }
         window.location.hash = handler;
-    }    
+    }
+    
+    function formatXML(string){
+        return string.replace(/>/g, "&gt;").replace(/</g, "&lt;");
+        
+    }
 </script>
