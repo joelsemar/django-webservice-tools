@@ -85,7 +85,7 @@
                         
                     }
                     parameters += "<br/>"
-                    if (responseObject.getResponseHeader('content-type').indexOf('xml') != -1) {
+                    if (response.getResponseHeader('content-type').indexOf('xml') != -1) {
                         var data = formatXML(response.responseText);
                     }
                     else {
@@ -217,7 +217,7 @@
             complete: function(response){
                 var result_div = '#' + handler + method + "_response_div";
                 var close_control_id = handler + method + "_X";
-                if (responseObject.getResponseHeader('content-type').indexOf('xml') != -1) {
+                if (response.getResponseHeader('content-type').indexOf('xml') != -1) {
                     var data = formatXML(response.responseText);
                 }
                 else {
