@@ -5,7 +5,7 @@ from webservice_tools import utils
 from django.contrib.auth import authenticate, login, logout
 from webservice_tools.decorators import login_required
 from django.contrib.auth.models import User
-
+from django.contrib.sessions.models import Session
 NETWORK_HTTP_ERROR = "There was a problem reaching %s, please try again."
 
 
@@ -142,8 +142,6 @@ class LoginHandler(utils.BaseHandler):
         if request.path.startswith('/logout'):
             return self.read(request)
         
-        #logout before logging in to prevent multiple sessions
-        logout(request)
         username = request.POST.get('username', '').lower() or request.POST.get('email', '').lower()
         password = request.POST.get('password')
         
@@ -152,6 +150,9 @@ class LoginHandler(utils.BaseHandler):
         
         user = authenticate(username=username, password=password)
         if user:
+            single_session = getattr(settings, "MAX_SESSIONS", False)
+            if single_session:
+                [s.delete() for s in Session.objects.all() if s.get_decoded().get('_auth_user_id') == user.id]
             profile = user.get_profile()
             login(request, user)
             response.set(user={'username':username, 'id':profile.id, 'email': user.email})
