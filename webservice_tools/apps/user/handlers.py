@@ -150,7 +150,7 @@ class LoginHandler(utils.BaseHandler):
         
         user = authenticate(username=username, password=password)
         if user:
-            single_session = getattr(settings, "MAX_SESSIONS", False)
+            single_session = getattr(settings, "SINGLE_SESSION", False)
             if single_session:
                 [s.delete() for s in Session.objects.all() if s.get_decoded().get('_auth_user_id') == user.id]
             profile = user.get_profile()
