@@ -603,13 +603,21 @@ def default_time_parse(time_string):
     try:
         return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M:%S")
     except ValueError:
-        try:
-            return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M")
-        except ValueError:
-            try:
-                return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M:%S.%f")
-            except ValueError:
-                return None
+        pass
+    try:
+        return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M")
+    except ValueError:
+        pass
+    try:
+        return datetime.datetime.strptime(time_string, "%Y-%m-%d %H:%M:%S.%f")
+    except ValueError:
+        pass
+    try:
+        return datetime.datetime.strptime(time_string, "%Y-%m-%d") 
+    except ValueError:
+        pass
+    
+    return None
 
 def simpleReadConfigFile(filename):
     """Reads in config file 
