@@ -1,6 +1,6 @@
 import re
 from webservice_tools.utils import Resource
-from webservice_tools.models import StoredHandlerResponse, StoredHandlerRequest
+from webservice_tools.models import StoredHandlerResponse, StoredHandlerRequest, StoredHttpParam
 call_map = {'GET': 'read', 'POST': 'create',
             'PUT': 'update', 'DELETE': 'delete'}
 #VAR_REGEX = r'^[@][\w]+\ \[[\w\[\]]+\]\ .+' # @parameter [type] some comment
@@ -14,6 +14,10 @@ class ServerDeclaration():
     def __init__(self):
         self.handlers = self.crawl_urls()
         self.handler_list = []
+        
+        self.all_responses = list(StoredHandlerResponse.objects.all())
+        self.all_requests = list(StoredHandlerRequest.objects.all())
+        self.all_params = list(StoredHttpParam.objects.all())
         for handler in self.handlers:
             self.handler_list.append({'name': re.sub('Handler$', '', handler.__class__.__name__),
                                       'methods': self.get_methods(handler)})  
@@ -23,11 +27,11 @@ class ServerDeclaration():
     def get_methods(self, handler):
         ret = []
         id = str(handler.__class__)
-        stored_responses = StoredHandlerResponse.objects.filter(handler_id=id)
-        all_tests = StoredHandlerRequest.objects.filter(handler_id=id, test=True)
+        stored_responses = [s for s in self.all_responses if s.handler_id == id]
+        all_tests = [t for t in self.all_requests if t.handler_id == id]
         for request_method in handler.allowed_methods:
             stored_response = [s for s in stored_responses if s.method == request_method]
-            tests = [t.serialize() for t in all_tests if t.method == request_method]
+            tests = [t.serialize([s.dict() for s in self.all_params if s.request_id==t.id]) for t in all_tests if t.method == request_method]
             example_response = ''
             if stored_response:
                 example_response = stored_response[0].response
@@ -43,7 +47,7 @@ class ServerDeclaration():
             ret.append({'name': method_name, 'request_method': request_method,
                         'url': api_handler.get('url'), 'comment': api_handler.get('comment'),
                         'params': self._get_method_params(docstring), 'auth_required': auth_required,
-                        'return_vals': self._get_return_vals(docstring),'example_response': example_response, "tests": tests})
+                        'return_vals': self._get_return_vals(docstring), 'example_response': example_response, "tests": tests})
         return ret
             
     def _get_method_api_handler(self, docstring):
