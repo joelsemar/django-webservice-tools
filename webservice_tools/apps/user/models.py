@@ -2,6 +2,8 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 
+User._meta.get_field_by_name('username')[0].max_length = 75
+
 class BaseProfile(models.Model):
     user = models.OneToOneField(User)
     if 'webservice_tools.apps.friends' in settings.INSTALLED_APPS:
