@@ -79,3 +79,12 @@ class BadgesWonCountHandler(BaseHandler):
         count = BadgeToUser.objects.filter(winner=profile, when_created__gte=since).count()
         response.set(count=count, timestamp=now.strftime("%Y-%m-%d %H:%M:%S.%f"))
         return response.send()
+    
+#ALL DEFINITION EOF
+module_name = globals().get('__name__')
+handlers = sys.modules[module_name]
+handlers._all_ = []
+for handler_name in dir():
+    m = getattr(handlers, handler_name)
+    if type(m) == type(BaseHandler):
+        handlers._all_.append(handler_name)

@@ -22,3 +22,13 @@ class FriendGroup(models.Model):
                "name":self.name,
                "members": [member.dict() for member in self.members.all()]}
         return ret
+    
+    
+#ALL DEFINITION EOF
+module_name = globals().get('__name__')
+models = sys.modules[module_name]
+models._all_ = []
+for model_name in dir():
+    m = getattr(models, model_name)
+    if isinstance(m, ModelBase) and not m._meta.abstract:
+        models._all_.append(model_name)
