@@ -27,6 +27,7 @@ from webservice_tools.decorators import retry
 from django.conf import settings as django_settings
 from django.core.cache import cache
 from django.db import  models
+from django.contrib.gis.measure import D
 from django.core.paginator import EmptyPage, Paginator
 from django.contrib.gis.geos import fromstr
 from django.http import HttpResponse
@@ -43,12 +44,16 @@ SITE_SETTINGS_KEY = '%s_site_settings' % django_settings.SERVER_NAME
 GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?sensor=false&"
 GOOGLE_PLACES_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json?sensor=false&"
 class Resource(PistonResource):
+    
+    def __init__(self, *args, **kwargs):
+        super(Resource, self).__init__(*args, **kwargs)
+        self.__name__ = 'foo'
+         
     def determine_emitter(self, request, *args, **kwargs):
         """
         Subclass piston's resource to enable format detection from header
         """
         em = kwargs.pop('emitter_format', None)
-        
         accept_header = request.META.get('HTTP_ACCEPT', '')
         if 'text/xml' in accept_header:
             em = 'xml'
@@ -68,6 +73,14 @@ class BaseHandler(PistonBaseHandler):
     def format_errors(self, form):
         return [v[0].replace('This field', k.title()) for k, v in form.errors.items()]
     
+    def read(self, request, id, response):
+        try:
+            instance = self.model.objects.get(id=id)
+        except self.model.DoesNotExist:
+            return response.send(errors="Not Found", status=404)
+        response.set(**{self.model.__name__.lower(): instance})
+        return response.send()
+    
     def create(self, request, response):
         form = self.form(request.POST)
         if form.is_valid():
@@ -80,6 +93,56 @@ class BaseHandler(PistonBaseHandler):
         pass
     
 
+
+class ListHandler(BaseHandler):
+
+    def read(self, request, response):
+        since = request.GET.get('since')
+        order_by = request.GET.get('order_by')
+        lat = request.GET.get('lat')
+        lng = request.GET.get('lng')
+        radius = request.GET.get('radius', getattr(self, 'default_radius', None))
+        fields = [field for field in self.model._meta.fields]
+        kwargs = {}
+        for field in fields:
+            if field.name in request.GET:
+                if field.__class__.__name__ in ['CharField', 'TextField']: 
+                    kwargs[field.name + '__icontains'] = request.GET.get(field.name)
+                else:
+                    kwargs[field.name] = request.GET.get(field.name)
+        
+        if since:
+            kwargs['when_created__gte'] = default_time_parse(since)
+        
+        if all([lat, lng, radius]):
+            point = location_from_coords(lat, lng)
+            kwargs['geolocation__distance_lte'] = (point, D(mi=radius))
+        
+        
+        queryset = self.model.objects.filter(**kwargs)
+        if order_by:
+            queryset = queryset.order_by(order_by)
+        return queryset
+        
+
+class AutoListHandler(ListHandler):
+    
+    def read(self, request, response):
+        page_number = request.GET.get('page_number', 1)
+        limit = request.GET.get('limit', 10)
+        results = super(AutoListHandler, self).read(request, response)
+        if isinstance(self.model._meta.verbose_name_plural, basestring):
+            name = re.sub(' ', '_', self.model._meta.verbose_name_plural).lower() 
+        
+        else:
+            name = self.model.__name__.lower() + 's'
+        
+        results, paging_dict = auto_page(results, page_number=page_number, limit=limit)
+        response.set(**{name: results, 'paging': paging_dict})
+        return response.send()
+    
+    
+            
 class XMLEmitter(PistonXMLEmitter):
     def render(self, request):
         result = super(XMLEmitter, self).render(request)
@@ -711,7 +774,7 @@ def HTMLEscape(html):
                          "<": "&lt;",
                          }
     
-    return "".join(html_escape_table.get(c,c) for c in html)
+    return "".join(html_escape_table.get(c, c) for c in html)
 
 def get_user_from_session(session_key):
     """
@@ -732,13 +795,17 @@ def generic_exception_handler(request, exception):
     response = ResponseObject()
     _, _, tb = sys.exc_info()
     # we just want the last frame, (the one the exception was thrown from)
-    lastframe =get_traceback_frames(tb)[-1]
-    location = "%s in %s, line: %s" %(lastframe['filename'], lastframe['function'], lastframe['lineno'])
+    lastframe = get_traceback_frames(tb)[-1]
+    location = "%s in %s, line: %s" % (lastframe['filename'], lastframe['function'], lastframe['lineno'])
     response.addErrors([exception.message, location])
     logger = logging.getLogger('webservice')
     logger.debug([exception.message, location])
     return HttpResponse(simplejson.dumps(response.send()._container), status=500)
 
+
+def gen_key(size):
+    L = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-'
+    return reduce(lambda a, b:a + b, [random.choice(L) for _ in range(size)])
 
 def get_traceback_frames(tb):
     """

@@ -18,12 +18,12 @@ class ExtModelForm(ModelForm):
     
     def save(self, *args, **kwargs):
         if self.editing:
-            instance = self.temp_instance
             for k, v in self.cleaned_data.items():
-                if v is not None and self.data.get(k):
-                    setattr(instance, k, v)
-            instance.save()
-
+                if getattr(self.instance, k) and v:
+                    setattr(self.temp_instance, k, getattr(self.instance, k))
+            self.instance = self.temp_instance
+            return super(ExtModelForm, self).save(*args, **kwargs)
+        
         else:
             return super(ExtModelForm, self).save(*args, **kwargs)
 

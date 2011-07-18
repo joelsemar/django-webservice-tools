@@ -21,8 +21,7 @@ class StoredHandlerRequest(models.Model):
     def __unicode__(self):
         return "%s %s" % (self.method, self.path)
     
-    def serialize(self):
-        stored_params = [p.dict() for p in self.storedhttpparam_set.all()]
+    def serialize(self, stored_params):
         ret = {'method': self.method, 'path': self.path, 'priority': self.priority,
                'params': dict((k['name'], k['value']) for k in stored_params)}
         if self.auth_test:
@@ -31,13 +30,6 @@ class StoredHandlerRequest(models.Model):
             ret['create_user_test'] =  self.create_user_test
         return simplejson.dumps(ret)
     
-    
-    def save(self, *args, **kwargs):
-        super(StoredHandlerRequest, self).save(*args, **kwargs)
-        all_requests = StoredHandlerRequest.objects.filter(handler_id=self.handler_id, method=self.method, test=False)
-        if len(all_requests) > 50:
-            all_requests[0].delete()
-            
     
     class Meta:
         ordering = ('when_created',)
