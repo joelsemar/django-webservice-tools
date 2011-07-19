@@ -5,7 +5,8 @@ from django.db import models
 from django.db.models import Q
 from django.conf import settings
 from django.utils.importlib import import_module
-
+import sys
+from django.db.models.base import ModelBase
 from webservice_tools import  utils
 from webservice_tools.response_util import message_sent
 

@@ -1,6 +1,8 @@
 from django.db import models
 from webservice_tools import db_utils, encryption
 from django.conf import settings
+import sys
+from django.db.models.base import ModelBase
 
 class SocialNetwork(models.Model):
     id = models.AutoField(primary_key=True)

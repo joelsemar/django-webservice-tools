@@ -2,6 +2,7 @@ import datetime
 import urlparse
 import urllib
 import simplejson
+import sys
 from urllib2 import HTTPError
 from django.db import transaction, models
 from django.conf import settings
@@ -271,9 +272,7 @@ class SocialCallbackHandler(BaseHandler):
     def read(self, request, network, response=None):
         """
         This is the entrypoint for social network's callbacks
-        API Handler: GET DONOTUSE
-        Params:
-            None
+
         """
         profile = request.user.get_profile()        
 

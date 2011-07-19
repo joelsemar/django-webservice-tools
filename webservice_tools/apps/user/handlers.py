@@ -1,3 +1,5 @@
+import sys
+from webservice_tools.utils import BaseHandler
 from django.db import transaction
 from django.conf import settings
 from django.utils.importlib import import_module

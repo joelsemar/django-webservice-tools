@@ -1,6 +1,8 @@
 import datetime
 from django.db import models
 from django.conf import settings
+import sys
+from django.db.models.base import ModelBase
 
 class FriendRequest(models.Model):
     request_from = models.ForeignKey(settings.AUTH_PROFILE_MODULE)

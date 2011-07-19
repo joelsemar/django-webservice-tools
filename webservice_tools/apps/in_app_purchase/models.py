@@ -1,6 +1,8 @@
 import datetime
 from django.conf import settings
 from django.db import models
+import sys
+from django.db.models.base import ModelBase
 
 class AppleReceipt(models.Model):
     """
