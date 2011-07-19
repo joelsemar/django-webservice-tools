@@ -31,6 +31,8 @@ from django.contrib.gis.measure import D
 from django.core.paginator import EmptyPage, Paginator
 from django.contrib.gis.geos import fromstr
 from django.http import HttpResponse
+from django.forms.models import fields_for_model
+
 JSON_INDENT = 4
 GOOGLE_API_KEY = "ABQIAAAAfoFQ0utZ24CUH1Mu2CNwjRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSbhhdGY56wVeZKZ-crGIkLMPghOA"
 GOOGLE_API_URL = "http://maps.google.com/maps/geo?output=json&sensor=false" 
@@ -97,29 +99,37 @@ class BaseHandler(PistonBaseHandler):
 class ListHandler(BaseHandler):
 
     def read(self, request, response):
-        since = request.GET.get('since')
+        since = request.GET.get('since', '')
         order_by = request.GET.get('order_by')
         lat = request.GET.get('lat')
         lng = request.GET.get('lng')
+        location = request.GET.get('location')
         radius = request.GET.get('radius', getattr(self, 'default_radius', None))
-        fields = [field for field in self.model._meta.fields]
         kwargs = {}
-        for field in fields:
-            if field.name in request.GET:
+        for field_name, field in fields_for_model(self.model).iteritems():
+            if field_name in request.GET:
                 if field.__class__.__name__ in ['CharField', 'TextField']: 
-                    kwargs[field.name + '__icontains'] = request.GET.get(field.name)
+                    kwargs[field_name + '__icontains'] = request.GET.get(field_name)
                 else:
-                    kwargs[field.name] = request.GET.get(field.name)
+                    kwargs[field_name] = request.GET.get(field_name)
         
         if since:
             kwargs['when_created__gte'] = default_time_parse(since)
         
+        if location:
+            try:
+                lng, lat = GeoCode(address=location).getCoords()
+            except utils.GeoCodeError:
+                return response.send(errors="Invalid address.")
+        
         if all([lat, lng, radius]):
             point = location_from_coords(lat, lng)
-            kwargs['geolocation__distance_lte'] = (point, D(mi=radius))
+            kwargs['geolocation__distance_lte'] = (point, D(m=radius))
+            queryset = self.model.objects.filter(**kwargs).distance(point)
+            
+        else:
+            queryset = self.model.objects.filter(**kwargs)
         
-        
-        queryset = self.model.objects.filter(**kwargs)
         if order_by:
             queryset = queryset.order_by(order_by)
         return queryset

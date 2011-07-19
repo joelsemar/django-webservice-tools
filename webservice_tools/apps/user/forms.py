@@ -12,14 +12,14 @@ class BaseUserForm(ExtModelForm):
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if email:
-            if User.objects.filter(~Q(id=self.instance.id), email=email):
+            if User.objects.filter(~Q(id=self.instance.id), email__iexact=email):
                 raise ValidationError('Email already in use')
         return email
     
     def clean_username(self):
         username = self.cleaned_data.get('username')
         if username:
-            if User.objects.filter(~Q(id=self.instance.id), username=username):
+            if User.objects.filter(~Q(id=self.instance.id), username__iexact=username):
                 raise ValidationError('That username is  already in use')
             
         return username
