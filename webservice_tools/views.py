@@ -69,6 +69,9 @@ class ResetPassHandler(BaseHandler):
           
            @email [email] the email address of the user whose password you are trying to reset
            @username [string] username for the user whose password you are trying to reset.
+        
+        Returns:
+           @errors [list] user_not_found, no_email_for_user
         """
         return newResetPass(request, response)
 
@@ -121,12 +124,12 @@ def newResetPass(request, response):
             try:
                 user = User.objects.get(email=username)
             except User.DoesNotExist:
-                return response.send(errors='That user does not appear to exist.', status=404)
+                return response.send(errors='user_not_found', status=404)
         else:
-            return response.send(errors='That user does not appear to exist.', status=404)
+            return response.send(errors='user_not_found', status=404)
     
     if not user.email:
-        return response.send(errors="That user has not provided an email address.")
+        return response.send(errors="no_email_for_user")
     
     newPassword = generateNewPassword()
     user.set_password(newPassword)
