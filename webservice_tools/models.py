@@ -1,6 +1,8 @@
 import simplejson
 import datetime
-from django.db import models
+from webservice_tools import consts, utils
+from django.contrib.gis.db import models
+
 
 class StoredHandlerResponse(models.Model):
     handler_id = models.CharField(max_length=128, db_index=True)
@@ -57,3 +59,54 @@ class APIChangeLogEntry(models.Model):
         verbose_name = "API ChangeLog Entry"
         verbose_name_plural = "API ChangeLog Entries"
         ordering = ('-when_created',)
+        
+
+
+class BaseGeoModel(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=512)
+    street = models.CharField(max_length=256, default='', blank=True)
+    cross_street = models.CharField(max_length=256, default=' ', blank=True)
+    city = models.CharField(max_length=256, default='', blank=True)
+    state = models.CharField(max_length=32, default='', blank=True,choices = consts.SUPPORTED_STATES_CHOICES)
+    country = models.CharField(max_length=256, default='', blank=True)
+    zip = models.CharField(max_length=10, default='', blank=True)
+    geolocation = models.PointField(unique=True, null=True, blank=True)
+    objects = models.GeoManager()
+    
+    class Meta:
+        abstract = True
+    
+    def dict(self):
+        ret = utils.toDict(self)
+        del ret['geolocation']
+        del ret['street']
+        del ret['city']
+        del ret['zip']
+        del ret['country']
+        del ret['cross_street']
+        del ret['state']
+        ret['address'] = self.address
+        return ret
+    
+    
+    @property
+    def address(self):
+        return "%(street)s\n%(city)s, %(state)s %(zip)s, %(country)s" % {'street': self.street,
+                                                                         'city' : self.city,
+                                                                         'state': self.state,
+                                                                         'zip': self.zip, 'country': self.country}
+        
+    def __unicode__(self):
+        return self.name
+    
+    def save(self, *args, **kwargs):
+        """
+        Overload save function to grab the geo location for this address
+        so it is readily available later
+        """
+        geo_code = list(utils.GeoCode(self.address).getCoords())
+        geo_code.reverse()
+        if geo_code:
+            self.geolocation = utils.location_from_coords(*geo_code)
+        super(BaseGeoModel, self).save(*args, **kwargs) #IGNORE:E1002 -- parent is not an old-style class
