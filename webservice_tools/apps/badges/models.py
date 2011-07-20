@@ -14,19 +14,6 @@ if not hasattr(settings, 'BADGE_CONSTS'):
     raise Exception("Please provide settings.BADGE_CONSTS to use the badge module.")
 consts = import_module(settings.BADGE_CONSTS)
 
-def thumb_path(instance, filename):
-    return os.path.join('images/thumbs', '%s.png' % instance.name)
-
-def image_path(instance, filename):
-    return os.path.join('images/full', '%s.png' % instance.name)
-
-def hi_res_thumb_path(instance, filename):
-    return os.path.join('images/hi-res-thumb', '%s@2x.png' % instance.name)
-
-def hi_res_image_path(instance, filename):
-    return os.path.join('images/hi-res-full', '%s@2x.png' % instance.name)
-
-
 class BadgeModel(models.Model):
     id = models.AutoField(primary_key=True)
     winners = models.ManyToManyField(settings.AUTH_PROFILE_MODULE, related_name="badges", through='BadgeToUser')
@@ -34,10 +21,6 @@ class BadgeModel(models.Model):
     description = models.CharField(max_length=128, blank=True)
     won_description = models.CharField(max_length=128, blank=True)
     one_time_only = models.BooleanField(default=False)
-    thumb = models.ImageField(upload_to=thumb_path, blank=True, null=True)
-    image = models.ImageField(upload_to=image_path, blank=True, null=True)
-    hi_res_thumb = models.ImageField(upload_to=hi_res_thumb_path, blank=True, null=True)
-    hi_res_image = models.ImageField(upload_to=hi_res_image_path, blank=True, null=True)
     badge_action = models.CharField(choices=consts.BADGE_ACTION_CHOICES, max_length=32)
     badge_type = models.CharField(choices=consts.BADGE_TYPE_CHOICES, default='', max_length=32)
     required_number = models.PositiveIntegerField(default=0)
@@ -50,6 +33,22 @@ class BadgeModel(models.Model):
     
     def __unicode__(self):
         return u"%s" % self.title
+    
+    @property
+    def images(self):
+        images = BadgeImage.objects.filter(badge=self)
+        ret = {}
+        for image in images:
+            ret[image.image_type] = image.image.url
+        return ret
+
+def badge_upload_to(instance, filename):
+    return os.path.join('images/badges', '%s-%s.png' % (datetime.datetime.utcnow().strftime('%M%S%f'),filename.split('.')[0]))
+
+class BadgeImage(models.Model):
+    badge = models.ForeignKey(BadgeModel)
+    image_type = models.CharField(max_length=128)
+    image = models.ImageField(upload_to=badge_upload_to)
 
     
 class BadgeToUser(models.Model):

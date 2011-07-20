@@ -13,7 +13,6 @@ PROFILE_MODEL = models.get_model(app_label, model_name)
 
 class BadgeHandler(BaseHandler):
     allowed_methods = ('GET',)
-    
     @login_required
     def read(self, request, id, response):
         """
@@ -46,10 +45,7 @@ class BadgeHandler(BaseHandler):
                             'id': badge.id,
                             'description': badge.description,
                             'won_description': badge.won_description,
-                            'thumb_url': badge.thumb and badge.thumb.url or '',
-                            'image_url': badge.image and badge.image.url or '',
-                            'hi_res_thumb_url': badge.hi_res_thumb and badge.hi_res_thumb.url or '',
-                            'hi_res_image_url': badge.hi_res_image and badge.hi_res_image.url or '',
+                            'images': badge.images,
                             'order': badge.badge_order,
                             'won_count': len([b for b in users_badges if b == badge]),
                             'won': badge in users_badges})
