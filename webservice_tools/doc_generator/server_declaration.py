@@ -67,7 +67,7 @@ class ServerDeclaration():
         return self._parse_params(docstring, VAR_REGEX, VAR_SPLIT_REGEX, 0)
             
     def _get_return_vals(self, docstring):
-       if 'Returns:' in docstring:
+       if docstring and 'Returns:' in docstring:
            return self._parse_params(docstring, VAR_REGEX, VAR_SPLIT_REGEX, 1)
        return []
        
