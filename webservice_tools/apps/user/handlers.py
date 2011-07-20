@@ -71,7 +71,6 @@ class GenericUserHandler(utils.BaseHandler):
         profile.user = user
         profile.save()
         profile.create_callback()
-        
         user = authenticate(username=user_form.cleaned_data['username'], password=user_form.cleaned_data['password'])
         
         if user:
@@ -132,6 +131,7 @@ class LoginHandler(utils.BaseHandler):
             @username [string] users username
             @id [id] id of the user
             @email [email] user's email address
+            @errors [list] insufficient_credentials, invalid_credentials
         """
         #all calls to this handler via '/logout should..
         if request.path.startswith('/logout'):
@@ -141,7 +141,7 @@ class LoginHandler(utils.BaseHandler):
         password = request.POST.get('password')
         
         if not all([username, password]):
-            return response.send(errors='Username and password are required', status=401)
+            return response.send(errors='insufficient_credentials', status=401)
         
         user = authenticate(username=username, password=password)
         if user:
@@ -155,7 +155,7 @@ class LoginHandler(utils.BaseHandler):
             return response.send()
         
         else:
-            return response.send(errors='Invalid password/username', status=401)
+            return response.send(errors='invalid_credentials', status=401)
     
     def read(self, request, response):
         """
