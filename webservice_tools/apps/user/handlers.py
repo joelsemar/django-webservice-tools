@@ -71,7 +71,6 @@ class GenericUserHandler(utils.BaseHandler):
         profile.user = user
         profile.save()
         profile.create_callback()
-        
         user = authenticate(username=user_form.cleaned_data['username'], password=user_form.cleaned_data['password'])
         
         if user:
