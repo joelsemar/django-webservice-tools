@@ -834,3 +834,7 @@ def get_traceback_frames(tb):
         }]
 
     return frames
+
+def comma_string_split(list_of_strings):
+    """ Return list of strings separated by commas"""
+    return [i.strip() for i in list_of_strings.split(',') if i.strip()]
