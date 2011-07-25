@@ -43,7 +43,6 @@ class BadgeModel(models.Model):
         return ret
     
     
-    def info(self, profile):
     
     
 def badge_upload_to(instance, filename):
