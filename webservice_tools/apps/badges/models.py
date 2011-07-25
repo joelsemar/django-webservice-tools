@@ -41,7 +41,11 @@ class BadgeModel(models.Model):
         for image in images:
             ret[image.image_type] = image.image.url
         return ret
-
+    
+    
+    def info(self, profile):
+    
+    
 def badge_upload_to(instance, filename):
     return os.path.join('images/badges', '%s-%s.png' % (datetime.datetime.utcnow().strftime('%M%S%f'),filename.split('.')[0]))
 

@@ -104,4 +104,30 @@
         404 -- Resource Not Found
         500 -- Internal Server Error
         </pre>
-        </div>    
+        </div> 
+		
+		<div id='paging' style='display:none;' class='handlerdiv'>
+		<a name='paging_div'><h2>Paging</h2></a>
+		<p>Paged items return a value similar to this (in the data of the response):</p>
+		<pre>
+			"paging": {
+	            "next_page": 11, 
+	            "total_pages": 1100, 
+	            "page": 1, 
+	            "previous_page": "NO"
+            }, 
+		</pre>
+		<p>"previous_page" and "next_page", will return the page number or the obj-c boolean 'NO' if it is not valid</p>
+		<p>In order to traverse the list, supply a 'page_number' and an optional 'limit'</p>
+		<p>For example: GET /items?page_number=4&limit=10 </p>
+		<p>Should return</p>
+		
+		<pre>
+            "paging": {
+	            "next_page": 5, 
+	            "total_pages": 1100, 
+	            "page": 4, 
+	            "previous_page": "3"
+            }, 
+        </pre>
+		   
