@@ -6,9 +6,13 @@ from webservice_tools.apps.friends.models import FriendRequest, FriendGroup
 from django.db import models
 from django.db.models import Q
 from django.conf import settings
+from django import dispatch
 app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
 PROFILE_MODEL = models.get_model(app_label, model_name)
 
+
+friend_request_accepted = dispatch.Signal(providing_args=['user_a', 'user_b'])
+friend_request_ignored = dispatch.Signal(providing_args=['profile', 'from'])
 
 class FriendsHandler(BaseHandler):
     allowed_methods = ('GET', 'DELETE')
@@ -140,7 +144,9 @@ class FriendRequestHandler(BaseHandler):
         
         if accept:
             profile.friends.add(friend_request.request_from)
-        
+            friend_request_accepted.send(sender=friend_request, profile=profile, profile_from=friend_request.request_from)
+        else:
+            friend_request_ignored.send(sender=friend_request, profile=profile, profile_from=friend_request.request_from)
         friend_request.delete()
         return response.send()
     
