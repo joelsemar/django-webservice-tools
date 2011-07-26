@@ -100,6 +100,7 @@ class ListHandler(BaseHandler):
 
     def read(self, request, response):
         since = request.GET.get('since', '')
+        until = request.GET.get('until', '')
         order_by = request.GET.get('order_by')
         lat = request.GET.get('lat')
         lng = request.GET.get('lng')
@@ -115,6 +116,9 @@ class ListHandler(BaseHandler):
         
         if since:
             kwargs['when_created__gte'] = default_time_parse(since)
+        
+        if until:
+            kwargs['when_created__lte'] = default_time_parse(since)
         
         if location:
             try:
