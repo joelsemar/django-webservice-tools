@@ -136,6 +136,7 @@ class ListHandler(BaseHandler):
         
 
 class AutoListHandler(ListHandler):
+    paging = True
     
     def read(self, request, response):
         page_number = request.GET.get('page_number', 1)
@@ -146,9 +147,11 @@ class AutoListHandler(ListHandler):
         
         else:
             name = self.model.__name__.lower() + 's'
-        
-        results, paging_dict = auto_page(results, page_number=page_number, limit=limit)
-        response.set(**{name: results, 'paging': paging_dict})
+        if self.paging:
+            results, paging_dict = auto_page(results, page_number=page_number, limit=limit)
+            response.set(**{name: results, 'paging': paging_dict})
+        else:
+            response.set(**{name: results})
         return response.send()
     
     
@@ -802,6 +805,7 @@ def location_from_coords(lat, lng):
 
 def generic_exception_handler(request, exception):
     from webservice_tools.response_util import ResponseObject
+    from django.db import transaction
     response = ResponseObject()
     _, _, tb = sys.exc_info()
     # we just want the last frame, (the one the exception was thrown from)
@@ -810,6 +814,7 @@ def generic_exception_handler(request, exception):
     response.addErrors([exception.message, location])
     logger = logging.getLogger('webservice')
     logger.debug([exception.message, location])
+    transaction.rollback()
     return HttpResponse(simplejson.dumps(response.send()._container), status=500)
 
 
