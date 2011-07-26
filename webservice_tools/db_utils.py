@@ -12,7 +12,7 @@ try:
 except:
     pass
 
-class SoftDeleteManager(models.Manager):
+class SoftDeleteManager(models.GeoManager):
     """
     Model manager that auto filters out instances with <field>=False
     """

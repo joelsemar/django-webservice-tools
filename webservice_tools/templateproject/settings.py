@@ -76,6 +76,7 @@ MIDDLEWARE_CLASSES = (
     'webservice_tools.middleware.logger.LoggingMiddleware',
     'webservice_tools.middleware.exception.WebServiceException',
     'django.middleware.transaction.TransactionMiddleware',
+    'webservice_tools.middleware.response.DocBuilder',
     
 )
 AUTH_PROFILE_MODULE = 'mainapp.UserProfile'
