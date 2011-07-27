@@ -16,9 +16,10 @@ static PyObject *ILBCError;
 static PyObject *decode(PyObject *self, PyObject *args) {
 	short mode = 20;
 	char *data;
-	short decoded_datum[BLOCKL_MAX];
+	const int size;
+	short decoded_data[BLOCKL_MAX];
 
-	if (!PyArg_ParseTuple(args, "is", &mode, &data))
+	if (!PyArg_ParseTuple(args, "is#", &mode, &data, &size))
 		return NULL;
 
 	iLBC_Dec_Inst_t Dec_Inst;
@@ -28,17 +29,32 @@ static PyObject *decode(PyObject *self, PyObject *args) {
 	int len = 0;
 	int inpos = 0;
 	int outpos = 0;
-	int inlen = sizeof(data);
-	short decoded_buffer[BLOCKL_MAX*(inlen % Dec_Inst.no_of_bytes)];
+	int count = 0; //temp variable for writing the buffer to file
+	int max_data = BLOCKL_MAX*size/Dec_Inst.no_of_bytes*2;
+	int arrayCopyNdx = 0;
+	char *decoded_buffer = malloc(max_data);
+	FILE *outcfile;
+	outcfile = fopen("whole_c_out.pcm", "wb");
 
-	while(inpos < inlen) {
-		len = _decode(&Dec_Inst, decoded_datum, &data[inpos]);
+	while(inpos < size) {
+		len = _decode(&Dec_Inst, decoded_data, &data[inpos]);
+		fwrite(decoded_data, sizeof(short), len, outcfile);
 		inpos += Dec_Inst.no_of_bytes;
-		decoded_buffer[outpos] = decoded_datum;
-		outpos += len;
+		arrayCopyNdx = 0;
+		while(arrayCopyNdx*sizeof(short) < len){
+			decoded_buffer[outpos+arrayCopyNdx] = decoded_data[arrayCopyNdx];
+			arrayCopyNdx++;
+		}
+		outpos += len*sizeof(short);
+		count ++;
 	}
 
-	return Py_BuildValue("s", *decoded_buffer);
+	fwrite(decoded_buffer, sizeof(short), 0, outcfile);
+	printf("%i\n", outpos);
+	PyObject *result = Py_BuildValue("s#", decoded_buffer, outpos*2);
+	free(decoded_buffer);
+	fclose(outcfile);
+	return result;
 }
 
 static PyMethodDef methods[] = {
@@ -47,9 +63,9 @@ static PyMethodDef methods[] = {
 
 };
 
-PyMODINIT_FUNC initilbc_decode(void) {
+PyMODINIT_FUNC initpy_ilbc_decode(void) {
 	PyObject *m;
-	m = Py_InitModule("ilbc_decode", methods);
+	m = Py_InitModule("py_ilbc_decode", methods);
 	if (m == NULL)
 		return;
 
