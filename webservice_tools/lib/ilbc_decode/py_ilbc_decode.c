@@ -59,6 +59,7 @@ static PyObject *decode(PyObject *self, PyObject *args) {
 
 static PyMethodDef methods[] = {
 		{ "decode", decode, METH_VARARGS, "Decode a binary stream from ilbc to PCM" },
+		{ "test", test, METH_NOARGS, "Test method"},
 		{ NULL, NULL },
 
 };
