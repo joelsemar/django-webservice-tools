@@ -109,7 +109,7 @@ class SegmentHandler(object):
     
 class Indexer(Element):
     _segment_handler = None
-    _index_file_url = ''
+    _index_file_path = ''
     name_string = 'segment_num%s'
     out_callback_required = False
     target_duration = 10
@@ -121,7 +121,7 @@ class Indexer(Element):
     EXT_TAG = '#EXTM3U'
     END_TAG = '#EXT-X-ENDLIST'
     
-    def __init__(self, index_file_url, host_with_root, active_limit=3, delete_inactive_segments=True, target_duration=10):
+    def __init__(self, index_file_path, host_with_root, active_limit=3, delete_inactive_segments=True, target_duration=10):
         """
         Arguments:
         index_file_url - required - something like /var/www/test_server/static/stream5/index_
@@ -131,22 +131,22 @@ class Indexer(Element):
                                     are removed fromt he indexer
         """
         super(Element, self).__init__(callback)
-        if not index_file_url:
+        if not index_file_path:
             raise ApMediaError("index_file_url must be provided")
         if not host_with_root:
             raise ApMediaError("host_with_root (ie www.example.com/segments/event35/) is required")
         #This section is to validate that we can create the index file, and then deletes the test file
         try:
-            testfile = open(index_file_url, 'wb')
+            testfile = open(index_file_path, 'wb')
             testfile.write("Validating Index File")
             testfile.close()
-            os.remove(os.path.abspath(testfile.name))
-            self._index_file_url = index_file_url
+            self._index_file_path = index_file_path
         except Exception as (e, str):
-            raise e("File Creation test failed at: %s" % index_file_url)
+            raise e("File Creation test failed at: %s" % index_file_path)
 
-        segments_path = os.path.abspath(os.path.dirname(_index_file.name))
-        
+        segments_path = os.path.abspath(os.path.dirname(testfile.name))
+        os.remove(os.path.abspath(testfile.name))
+                
         self._segment_handler = SegmentHandler(self, segments_path, self.target_duration, name_string=self.name_string,  
                                                active_limit=active_limit, delete_inactive_segments=delete_inactive_segments)
         
@@ -166,7 +166,7 @@ class Indexer(Element):
         self._write_header(index_file, sequence)
         for segment in segments:
             index_file.writeline(self.URI_TAG % (self.target_duration, ''))
-            index_file.writeline('%s%s' % (self.host_with_root, segment.name))
+            index_file.writeline(segment.name)
         
     def _write_header(self, index_file, seq):
         index_file.writeline(EXT_TAG)
