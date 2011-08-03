@@ -66,12 +66,14 @@ class BadgeToUser(models.Model):
                 message_template = consts.BADGE_AWARDED_TEMPLATE
             else:
                 message_template =  "You've earned the %(name)s badge!"
-            message_text = message_template % {'name': self.badge.name}
+            badge = self.badge
+            message_text = message_template % {'name': badge.name}
             message_data = utils.toDict(self.badge)
+            message_data['images'] = badge.images
             message_data['message'] = message_text
             message_data['type'] = 'badge_event'
             message_sent.send(sender=self.winner.user, message=message_data)
-            badge = self.badge
+            
         super(BadgeToUser, self).save(*args, **kwargs)
 
 
