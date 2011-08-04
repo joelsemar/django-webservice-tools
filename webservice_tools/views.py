@@ -96,7 +96,7 @@ class PlacesHandler(BaseHandler):
     internal = True
     allowed_methods = ('GET',)
     def read(self, request, response):
-        return google_places_search(request, response)
+        return google_places_search_view(request, response)
     
 
 def newResetPass(request, response):
@@ -194,11 +194,12 @@ def google_places_search_view(request, response):
     radius = request.GET.get('radius', 5000)
     location = request.GET.get('location', '')
     query = request.GET.get('query', '')
-    
-    result, errors = google_places_search_view(lat=lat, lng=lng, location=location, radius=radius, query=query)
+    name = request.GET.get('name', '')
+    result, errors = google_places_search(lat=lat, lng=lng, location=location, radius=radius, query=query, name=name)
     if errors:
         response.addErrors(errors)
-    return result, response
+    response.set(results=result)
+    return response.send()
 
 def google_places_search(lat='', lng='', location='', radius=5000, query='', name=''):
     query = re.sub(',', '|', query)

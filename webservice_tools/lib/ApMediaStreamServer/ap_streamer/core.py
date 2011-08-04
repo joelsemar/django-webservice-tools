@@ -12,12 +12,7 @@ class Element(object):
     Implements data_received, and init method that sets _callback
     """
     
-    class Meta:
-        abstract = True
-        
-       
-    out_callback = None
-    
+    out_callback = lambda : True
     out_callback_required = True
         
     def __init__(self, callback=None):
@@ -27,7 +22,7 @@ class Element(object):
         
     
     def data_received(self, data):
-        pass
+        self.out_callback()
     
 
 class Segmenter(Element):
@@ -37,21 +32,21 @@ class Segmenter(Element):
     
     
     def __init__(self, bytes_per_segment, callback=None):
-        super(Element, self).__init__(callback)
+        super(Segmenter, self).__init__(callback=callback)
         if bytes_per_segment:
-            _buffer_limit = bytes_per_segment
+            self._buffer_limit = bytes_per_segment
         else:
             raise ApMediaError("Bytes per segment must be provided")
     
     def data_received(self, data):
-        _buffer.append(data)
+        self._buffer += data
         self.check_buffer_size()
     
     
     def check_buffer_size(self):
-        if len(_buffer) >= _buffer_limit:
-            self.out_callback(_buffer[0:_buffer_limit])
-            self._buffer = _buffer[_buffer_limit:]
+        if len(self._buffer) >= self._buffer_limit:
+            self.out_callback(self._buffer[0:self._buffer_limit])
+            self._buffer = self._buffer[self._buffer_limit:]
 
 
 class Segment(object):
@@ -62,7 +57,7 @@ class Segment(object):
     
     def __init__(self, handler, data, seq):
         self.handler = handler
-        self.file_path = os.join(handler._path, handler._name_string % seq)
+        self.file_path = os.path.join(handler._path, handler._name_string % seq)
         file = open(self.file_path, 'wb')
         file.write(data)
         file.close()
@@ -94,8 +89,8 @@ class SegmentHandler(object):
         
     def add_segment(self, data):
         self._segments.append(Segment(self, data, len(self._segments)+1))
-        if len(self._segments) > self._active_limit and self._delete_inactive_segments:
-            self._segments[-self._active_limit+self.STALE_TO_KEEP].delete()
+        if len(self._segments) > (self._active_limit + self.STALE_TO_KEEP) and self._delete_inactive_segments:
+            self._segments[-(self._active_limit+self.STALE_TO_KEEP+1)].delete()
     
     def get_active_segments(self):
         if len(self._segments) > self._active_limit:
@@ -110,18 +105,18 @@ class SegmentHandler(object):
 class Indexer(Element):
     _segment_handler = None
     _index_file_path = ''
-    name_string = 'segment_num%s'
+    name_string = 'segment_num%s.ts'
     out_callback_required = False
     target_duration = 10
     host_with_root = ''
     
-    URI_TAG = '#EXTINF:%i,%s' #Should be something like {URI_TAG % (target_duration, '')} usually
-    MEDIA_SEQ_TAG = '#EXT-X-MEDIA-SEQUENCE:%i'
-    TARGET_DURATION_TAG = '#EXT-X-TARGETDURATION:%i'
-    EXT_TAG = '#EXTM3U'
-    END_TAG = '#EXT-X-ENDLIST'
+    URI_TAG = '#EXTINF:%i,%s\n' #Should be something like {URI_TAG % (target_duration, '')} usually
+    MEDIA_SEQ_TAG = '#EXT-X-MEDIA-SEQUENCE:%i\n'
+    TARGET_DURATION_TAG = '#EXT-X-TARGETDURATION:%i\n'
+    EXT_TAG = '#EXTM3U\n'
+    END_TAG = '#EXT-X-ENDLIST\n'
     
-    def __init__(self, index_file_path, host_with_root, active_limit=3, delete_inactive_segments=True, target_duration=10):
+    def __init__(self, index_file_path, active_limit=3, delete_inactive_segments=True, target_duration=10):
         """
         Arguments:
         index_file_url - required - something like /var/www/test_server/static/stream5/index_
@@ -130,11 +125,9 @@ class Indexer(Element):
         delete_after_use - optional, default to True, sets the files to be deleted from the system after they
                                     are removed fromt he indexer
         """
-        super(Element, self).__init__(callback)
+        super(Indexer, self).__init__()
         if not index_file_path:
             raise ApMediaError("index_file_url must be provided")
-        if not host_with_root:
-            raise ApMediaError("host_with_root (ie www.example.com/segments/event35/) is required")
         #This section is to validate that we can create the index file, and then deletes the test file
         try:
             testfile = open(index_file_path, 'wb')
@@ -142,7 +135,7 @@ class Indexer(Element):
             testfile.close()
             self._index_file_path = index_file_path
         except Exception as (e, str):
-            raise e("File Creation test failed at: %s" % index_file_path)
+            raise Exception("File Creation test failed at: %s" % index_file_path)
 
         segments_path = os.path.abspath(os.path.dirname(testfile.name))
         os.remove(os.path.abspath(testfile.name))
@@ -151,7 +144,6 @@ class Indexer(Element):
                                                active_limit=active_limit, delete_inactive_segments=delete_inactive_segments)
         
         self.target_duration = target_duration
-        self.host_with_root = host_with_root
         
     def data_received(self, data):
         self._segment_handler.add_segment(data)
@@ -162,15 +154,23 @@ class Indexer(Element):
         if not segments:
             return
         sequence = self._segment_handler.get_current_sequence()
-        index_file = open(self._index_file_url, 'wb')
+        index_file = open(self._index_file_path, 'wb')
         self._write_header(index_file, sequence)
         for segment in segments:
-            index_file.writeline(self.URI_TAG % (self.target_duration, ''))
-            index_file.writeline(segment.name)
+            index_file.write(self.URI_TAG % (self.target_duration, ''))
+            index_file.write(segment.filename + '\n')
         
     def _write_header(self, index_file, seq):
-        index_file.writeline(EXT_TAG)
-        index_file.writeline(self.TARGET_DURATION_TAG % self.target_duration)
-        index_file.writeline(self.MEDIA_SEQ_TAG % seq)
-        
+        index_file.write(self.EXT_TAG)
+        index_file.write(self.TARGET_DURATION_TAG % self.target_duration)
+        index_file.write(self.MEDIA_SEQ_TAG % seq)
+     
+
+class Decoder(Element):
+    
+    def __init__(self, decoder, callback):
+        self._decoder = decoder
+        super(Decoder, self).__init__(callback=callback)
+    def data_received(self, data):
+        super(Decoder, self).data_received(self._decoder(data))
         
