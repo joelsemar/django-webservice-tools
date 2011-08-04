@@ -61,7 +61,7 @@ class Segment(object):
         file = open(self.file_path, 'wb')
         file.write(data)
         file.close()
-        self.filename = file.name
+        self.filename = handler._name_string % seq
     
     def delete(self):
         os.remove(self.file_path)
@@ -100,6 +100,8 @@ class SegmentHandler(object):
     
     def get_current_sequence(self):
         if len(self._segments) < self._active_limit:
+            return 1
+        elif not self._active_limit:
             return 1
         else:
             return len(self._segments) - self._active_limit + 1

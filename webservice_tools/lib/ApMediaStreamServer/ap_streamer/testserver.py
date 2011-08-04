@@ -10,8 +10,8 @@ ONE_MB = 1024 * 1000
 class ByteReceiver(Protocol):
         
     def __init__(self):
-        self._indexer = core.Indexer('/var/www/web/audio_test/index.m3u', active_limit=0)
-        self._segmenter = core.Segmenter(50 * 38, self._indexer.data_received, target_duration=1, delete_inactive_segments=False)
+        self._indexer = core.Indexer('/var/www/web/audio_test/index.m3u', active_limit=0, target_duration=1, delete_inactive_segments=False)
+        self._segmenter = core.Segmenter(50 * 38, self._indexer.data_received)
         self.file_index = 1
     
     def connectionMade(self):
