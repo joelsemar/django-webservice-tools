@@ -12,6 +12,12 @@
 #       eg: 'cbserver' in SportsClubFanatics/cbserver or 'BotannicalEdition/wdykbserver' on WhatDoYouKnow/BotannicalEdition/wdykbsever" 
 #      default="lnserver">
 
+source ssinclude-1 #StackScript Bash Library
+source ssinclude-125 #lib-postgres
+source ssinclude-124 #lib-system
+source ssinclude-123 #lib-system-ubuntu
+source ssinclude-127 #lib-django
+
 USER_NAME=appiction
 read -s -p "User password:" USER_PASSWORD
 echo ""
@@ -25,6 +31,7 @@ echo ""
 read -e -p "Repo name (Would be LadiesNight for the above):" REPO_NAME
 #application code
 echo "Checking github repo login etc - don't go away"
+system_install_git
 mkdir /var/git && cd /var/git
 git clone https://$GITHUB_LOGIN:$GITHUB_PASSWORD@github.com/appiction/$REPO_NAME.git /var/git/$REPO_NAME
 
@@ -32,20 +39,11 @@ read -e -p "Django version (1.3 as of May 3, 2011):" DJANGO_VER
 read -e -p "Server git path (lnserver in 'LadiesNight/lnserver' or 'BotannicalEdition/wdykbserver' in 'WhatDoYouKnow/BotannicalEdition/wdykbserver'):" SERVER_GIT_PATH
 read -e -p "Hostname (something like ws.ladiesnightserver.com):" HOSTNAME
 
-
-source ssinclude-1 #StackScript Bash Library
-source ssinclude-125 #lib-postgres
-source ssinclude-124 #lib-system
-source ssinclude-123 #lib-system-ubuntu
-source ssinclude-127 #lib-django
-
-
 PROJECT_PATH="/var/www/$SERVER_NAME"
 
 #utils, apache, postgres, add user
 system_update
 goodstuff
-system_install_git
 apt-get -y install wget less vim
 apache_install
 apache_tune
