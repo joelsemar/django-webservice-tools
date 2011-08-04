@@ -217,7 +217,7 @@ cat > "/etc/apache2/sites-available/$HOSTNAME" << EOF
     LogLevel warn
     WSGIDaemonProcess www-data processes=5 threads=15 maximum-requests=10000
     WSGIProcessGroup www-data
-    WSGIScriptAlias / $PROJECT_PATH/apache/django.wsgi
+    WSGIScriptAlias /$SERVER_NAME $PROJECT_PATH/wsgi/django.wsgi
     Alias /static $PROJECT_PATH/static/
 </VirtualHost>
 EOF

@@ -19,13 +19,7 @@ class ByteReceiver(Protocol):
     
     def connectionLost(self, reason):
         print "Connection Lost"
-            
-    def write_to_file(self, data):
-        
-        with open('/tmp/audio_test/temp%s.mp3' % self.file_index, 'w') as f:
-            f.write(data)
-        self.file_index += 1
-
+    
     def dataReceived(self, data):
         """
          Protocol.dataReceived.

@@ -47,7 +47,7 @@ class Segmenter(Element):
         if len(self._buffer) >= self._buffer_limit:
             self.out_callback(self._buffer[0:self._buffer_limit])
             self._buffer = self._buffer[self._buffer_limit:]
-
+            self.check_buffer_size()
 
 class Segment(object):
     handler = None
