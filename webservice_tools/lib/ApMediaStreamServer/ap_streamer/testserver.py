@@ -11,7 +11,7 @@ class ByteReceiver(Protocol):
         
     def __init__(self):
         self._indexer = core.Indexer('/tmp/audio_test/index.m3u')
-        self._segmenter = core.Segmenter(5*ONE_MB, self._indexer.data_received)
+        self._segmenter = core.Segmenter(50*38, self._indexer.data_received)
         self.file_index = 1
     
     def connectionMade(self):

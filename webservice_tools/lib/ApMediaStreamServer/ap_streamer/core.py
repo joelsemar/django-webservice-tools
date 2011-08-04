@@ -93,6 +93,8 @@ class SegmentHandler(object):
             self._segments[-(self._active_limit+self.STALE_TO_KEEP+1)].delete()
     
     def get_active_segments(self):
+        if not self._active_limit:
+            return self._segments
         if len(self._segments) > self._active_limit:
             return self._segments[-self._active_limit:]
     
