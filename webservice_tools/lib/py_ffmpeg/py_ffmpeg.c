@@ -21,9 +21,10 @@ static PyObject *mp3_encode(PyObject *self, PyObject *args) {
 
 	AVCodec *codec;
 
-    codec = avcodec_find_encoder(CODEC_ID_MP2);
+    codec = avcodec_find_encoder(CODEC_ID_MP3);
     if (!codec) {
-    	return NULL;
+    	printf("%s", "No encoder\n");
+    	return Py_BuildValue("s", "No encoder");
     }
 
     c = avcodec_alloc_context();
@@ -34,11 +35,14 @@ static PyObject *mp3_encode(PyObject *self, PyObject *args) {
     c->channels = 1;
 
     if (avcodec_open(c, codec) < 0) {
-    	return NULL;
+    	printf("%s", "No codec init\n");
+    	return Py_BuildValue("s", "No codec init");
     }
 
-	if (!PyArg_ParseTuple(args, "is#", &data, &size))
-		return NULL;
+	if (!PyArg_ParseTuple(args, "is#", &data, &size)){
+		printf("%s", "No data in\n");
+		return Py_BuildValue("s", "No Data In");
+	}
 
 	framesize = c->frame_size;
 	sample_size = framesize * sizeof(short) * c->channels;

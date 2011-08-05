@@ -20,7 +20,7 @@ from sys import platform
 #   #                     headers = headers,
 #                   include_dirs = ['./include/'],) 
 #                ]
-#
+# 
 #
 #setup(
 #    name = 'test',
@@ -32,12 +32,13 @@ setup(
         name="py_ffmpeg",
         ext_modules=[ 
           Extension("py_ffmpeg", ["py_ffmpeg.c"],
-              include_dirs=["include/libavcodec/", "include/libavformat", "include/libavutil", "include/libswscale"],
-              libraries=["z", "bz2", "avformat", "avcodec", "swscale", "avutil"])
+              include_dirs=["/usr/include/libavcodec/", "/usr/include/libavformat", "/usr/include/libavutil", "/usr/include/libswscale"],
+              library_dirs=["/usr/include"],
+              libraries=["avformat", "avcodec", "swscale", "avutil"])
           ],
         #cmdclass={'build_ext': build_ext},
         version="0.2.2",
-        author="James Evans",
-        author_email="jaevans@users.sf.net",
-        url="http://www.clark-evans.com/~milamber/pyffmpeg",
+        author="Joshua Semar",
+        author_email="semarj@gmail.com",
+        url="",
       )
