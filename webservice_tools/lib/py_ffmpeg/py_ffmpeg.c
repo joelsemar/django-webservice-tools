@@ -14,6 +14,9 @@
 static PyObject *PyFFmpegError;
 
 static PyObject *mp3_encode(PyObject *self, PyObject *args) {
+	avcodec_init();
+	avcodec_register_all();
+
 	char *data;
 	AVCodecContext *c= NULL;
 	int size, framesize;
@@ -30,7 +33,7 @@ static PyObject *mp3_encode(PyObject *self, PyObject *args) {
     c = avcodec_alloc_context();
 
     /* put sample parameters */
-    c->bit_rate = 128000;
+    //c->bit_rate = 128000;
     c->sample_rate = 8000;
     c->channels = 1;
 
@@ -39,7 +42,7 @@ static PyObject *mp3_encode(PyObject *self, PyObject *args) {
     	return Py_BuildValue("s", "No codec init");
     }
 
-	if (!PyArg_ParseTuple(args, "is#", &data, &size)){
+	if (!PyArg_ParseTuple(args, "s#", &data, &size)){
 		printf("%s", "No data in\n");
 		return Py_BuildValue("s", "No Data In");
 	}
@@ -54,7 +57,7 @@ static PyObject *mp3_encode(PyObject *self, PyObject *args) {
 	int outpos = 0;
 	while (cur_sample < size){
 		out_size = avcodec_encode_audio(c, decoded_data, max_data, (short *) &data[cur_sample]);
-		memcpy(&decoded_buffer[outpos], decoded_data, out_size);
+		memcpy(&decoded_buffer[outpos], decoded_data, out_size*sizeof(short));
 		outpos += out_size;
 		cur_sample += sample_size;
 	}
@@ -76,7 +79,7 @@ PyMODINIT_FUNC initpy_ffmpeg(void) {
 	if (m == NULL)
 		return;
 
-	PyFFmpegError = PyErr_NewException("decode.error", NULL, NULL);
+	PyFFmpegError = PyErr_NewException("mp3_encode.error", NULL, NULL);
 	Py_INCREF(PyFFmpegError);
 	PyModule_AddObject(m, "error", PyFFmpegError);
 

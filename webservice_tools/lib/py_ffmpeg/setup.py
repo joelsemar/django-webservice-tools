@@ -33,7 +33,7 @@ setup(
         ext_modules=[ 
           Extension("py_ffmpeg", ["py_ffmpeg.c"],
               include_dirs=["/usr/include/libavcodec/", "/usr/include/libavformat", "/usr/include/libavutil", "/usr/include/libswscale"],
-              library_dirs=["/usr/include"],
+              library_dirs=["/usr/include/"],
               libraries=["avformat", "avcodec", "swscale", "avutil"])
           ],
         #cmdclass={'build_ext': build_ext},
