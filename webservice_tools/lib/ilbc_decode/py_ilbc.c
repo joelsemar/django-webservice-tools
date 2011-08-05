@@ -39,6 +39,7 @@ static PyObject *decode(PyObject *self, PyObject *args) {
 	while(inpos < size) {
 		len = decode_prep(&Dec_Inst, decoded_data, (short *) &data[inpos]);  //decode the first chunk
 		inpos += Dec_Inst.no_of_bytes;  //increment index by size of current decoder's blocks
+
 		arrayCopyNdx = 0;
 		while(arrayCopyNdx < len*sizeof(short)){
 			decoded_buffer[outpos+arrayCopyNdx] = decoded_data[arrayCopyNdx];

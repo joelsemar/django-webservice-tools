@@ -7,7 +7,7 @@
 #   make install
 #   ilbc-decode
 
-SOURCES = -lm FrameClassify.c LPCdecode.c LPCencode.c StateConstructW.c StateSearchW.c anaFilter.c constants.c createCB.c doCPLC.c enhancer.c filter.c gainquant.c getCBvec.c helpfun.c hpInput.c hpOutput.c iCBConstruct.c iCBSearch.c iLBC_decode.c iLBC_encode.c new_ilbc_test.c lsf.c packing.c syntFilter.c 
+SOURCES = -lm FrameClassify.c LPCdecode.c LPCencode.c StateConstructW.c StateSearchW.c anaFilter.c constants.c createCB.c doCPLC.c enhancer.c filter.c gainquant.c getCBvec.c helpfun.c hpInput.c hpOutput.c iCBConstruct.c iCBSearch.c iLBC_decode.c iLBC_encode.c iLBC_test.c lsf.c packing.c syntFilter.c 
 
 HEADERS = FrameClassify.h LPCdecode.h LPCencode.h StateConstructW.h StateSearchW.h anaFilter.h constants.h createCB.h doCPLC.h enhancer.h filter.h gainquant.h getCBvec.h helpfun.h hpInput.h hpOutput.h iCBConstruct.h iCBSearch.h iLBC_decode.h iLBC_define.h iLBC_encode.h lsf.h packing.h syntFilter.h
 
