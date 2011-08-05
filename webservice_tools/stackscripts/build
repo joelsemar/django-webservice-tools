@@ -33,6 +33,7 @@ read -e -p "Repo name (Would be LadiesNight for the above):" REPO_NAME
 echo "Checking github repo login etc - don't go away"
 system_install_git
 mkdir /var/git && cd /var/git
+system_install_git
 git clone https://$GITHUB_LOGIN:$GITHUB_PASSWORD@github.com/appiction/$REPO_NAME.git /var/git/$REPO_NAME
 
 read -e -p "Django version (1.3 as of May 3, 2011):" DJANGO_VER
@@ -44,6 +45,7 @@ PROJECT_PATH="/var/www/$SERVER_NAME"
 #utils, apache, postgres, add user
 system_update
 goodstuff
+
 apt-get -y install wget less vim
 apache_install
 apache_tune
