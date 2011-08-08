@@ -17,7 +17,7 @@ class SoftDeleteManager(models.GeoManager):
     Model manager that auto filters out instances with <field>=False
     """
     def __init__(self):
-        self.queryKwargs  = {'deleted': False}
+        self.queryKwargs  = {'disabled': False}
         super(SoftDeleteManager, self).__init__()
         
     
