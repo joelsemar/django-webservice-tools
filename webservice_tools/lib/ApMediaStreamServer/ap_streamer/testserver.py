@@ -9,7 +9,7 @@ import py_ffmpeg
 ONE_MB = 1024 * 1000
 
 def ilbc_decoder(data):
-    return py_ilbc.decode(20,data)
+    return py_ilbc.decode(20, data)
 
 
     
@@ -20,7 +20,7 @@ class ByteReceiver(Protocol):
         self._indexer = Indexer('/var/www/web/audio_test/index.m3u', active_limit=0, target_duration=5, delete_inactive_segments=False)
         self._encoder = Decoder(decoder=py_ffmpeg.mp3_encode, callback=self._indexer.data_received)
         self._decoder = Decoder(decoder=ilbc_decoder, callback=self._encoder.data_received)
-        self._segmenter = Segmenter(5*50*38, self._decoder.data_received)
+        self._segmenter = Segmenter(5 * 50 * 38, self._decoder.data_received)
         self.file_index = 1
     
     def connectionMade(self):

@@ -22,7 +22,7 @@ class Element(object):
         
     
     def data_received(self, data):
-        self.out_callback()
+        self.out_callback(data)
     
 
 class Segmenter(Element):
