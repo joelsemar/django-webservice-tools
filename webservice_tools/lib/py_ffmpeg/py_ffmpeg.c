@@ -49,17 +49,17 @@ static PyObject *mp3_encode(PyObject *self, PyObject *args) {
 	}
 
 	framesize = c->frame_size;
-	sample_size = framesize * c->channels;
-	int max_data = size; //calculate max_data here
+	sample_size = framesize * 2 * c->channels;
+	int max_data = size*2; //calculate max_data here
 	char *decoded_buffer = PyMem_Malloc(max_data);
-	uint8_t *decoded_data = PyMem_Malloc(sample_size);
+	uint8_t *decoded_data = PyMem_Malloc(sample_size*2);
 
 	int cur_sample = 0;
 	int outpos = 0;
 	while (cur_sample < size){
 		out_size = avcodec_encode_audio(c, decoded_data, max_data, (short *) &data[cur_sample]);
 		memcpy(&decoded_buffer[outpos], decoded_data, out_size);
-		outpos += out_size/2;
+		outpos += out_size;
 		cur_sample += sample_size;
 	}
 
