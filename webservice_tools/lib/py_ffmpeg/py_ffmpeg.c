@@ -30,14 +30,15 @@ static PyObject *mp3_encode(PyObject *self, PyObject *args) {
     	return Py_BuildValue("s", "No encoder");
     }
 
-    c = avcodec_alloc_context();
+
+    c = avcodec_alloc_context3(codec);
 
     /* put sample parameters */
-    //c->bit_rate = 128000;
     c->sample_rate = 8000;
     c->channels = 1;
+    c->sample_fmt = AV_SAMPLE_FMT_S16;
 
-    if (avcodec_open(c, codec) < 0) {
+    if (avcodec_open2(c, codec, NULL) < 0) {
     	printf("%s", "No codec init\n");
     	return Py_BuildValue("s", "No codec init");
     }
@@ -48,17 +49,17 @@ static PyObject *mp3_encode(PyObject *self, PyObject *args) {
 	}
 
 	framesize = c->frame_size;
-	sample_size = framesize * 2 * c->channels;
+	sample_size = framesize * c->channels;
 	int max_data = size; //calculate max_data here
 	char *decoded_buffer = PyMem_Malloc(max_data);
-	uint8_t *decoded_data = PyMem_Malloc(sample_size*sizeof(short));
+	uint8_t *decoded_data = PyMem_Malloc(sample_size);
 
 	int cur_sample = 0;
 	int outpos = 0;
 	while (cur_sample < size){
 		out_size = avcodec_encode_audio(c, decoded_data, max_data, (short *) &data[cur_sample]);
 		memcpy(&decoded_buffer[outpos], decoded_data, out_size);
-		outpos += out_size;
+		outpos += out_size/2;
 		cur_sample += sample_size;
 	}
 

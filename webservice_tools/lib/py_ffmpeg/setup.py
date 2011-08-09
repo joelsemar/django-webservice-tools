@@ -10,8 +10,8 @@ setup(
         ext_modules=[ 
           Extension("py_ffmpeg", ["py_ffmpeg.c"],
               include_dirs=["/usr/local/include/libavcodec/", "/usr/local/include/libavformat", "/usr/local/include/libavutil", "/usr/local/include/libswscale"],
-              library_dirs=["/usr/local/lib/", "/usr/lib"],
-              libraries=["avformat", "avcodec", "swscale", "avutil"])
+              library_dirs=["/usr/local/lib/"],
+              libraries=["avformat", "avcodec", "swscale", "avutil", "mp3lame"])
           ],
         #cmdclass={'build_ext': build_ext},
         version="0.2.2",
