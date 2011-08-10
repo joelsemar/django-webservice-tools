@@ -82,7 +82,7 @@ class SegmentHandler(object):
     STALE_TO_KEEP = 4 #According to the IETF you are supposed to keep the files on the system even if it is
                     #live for a length of time after it is "deleted" from the index file
     
-    def __init__(self, indexer, segments_path, duration, name_string='segment_num%s.ts', active_limit=3, delete_inactive_segments=True):
+    def __init__(self, indexer, duration, name_string='segment_num%s.ts', active_limit=3, delete_inactive_segments=True):
         self._indexer = indexer
         self._path = segments_path
         self._name_string = name_string
@@ -92,6 +92,8 @@ class SegmentHandler(object):
         self._segments= []
         
     def add_segment(self, data):
+        if not self._path:
+            self._path = self._indexer._index_file_path
         self._segments.append(Segment(self, data, len(self._segments)+1))
         if len(self._segments) > (self._active_limit + self.STALE_TO_KEEP) and self._delete_inactive_segments:
             self._segments[-(self._active_limit+self.STALE_TO_KEEP+1)].delete()
@@ -149,7 +151,7 @@ class Indexer(Element):
         else:
             self._index_file_path = None
                 
-        self._segment_handler = SegmentHandler(self, segments_path, self.target_duration, name_string=self.name_string,  
+        self._segment_handler = SegmentHandler(self, self.target_duration, name_string=self.name_string,  
                                                active_limit=active_limit, delete_inactive_segments=delete_inactive_segments)
         
         self.target_duration = target_duration
