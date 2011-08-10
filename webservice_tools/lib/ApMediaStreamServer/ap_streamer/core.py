@@ -9,20 +9,24 @@ class ApMediaError(Exception):
 
 class Element(object):
     """
-    Implements data_received, and init method that sets _callback
+    Implements data_received, and init method that sets function and callback
     """
     
-    out_callback = lambda : True
-    out_callback_required = True
+    _callback = lambda : True
+    _function = lambda x : x
+    callback_required = True
         
-    def __init__(self, callback=None):
+    def __init__(self, function=None, callback=None):
         if (self.out_callback_required and not callback):
             raise ApMediaError("Callback is required")
-        self.out_callback = callback
+        if function:
+            self._function = function
+        if callback:
+            self._callback = callback
         
     
     def data_received(self, data):
-        self.out_callback(data)
+        self._callback(self._function(self, data))
     
 
 class Segmenter(Element):
@@ -108,7 +112,7 @@ class SegmentHandler(object):
     
 class Indexer(Element):
     _segment_handler = None
-    _index_file_path = ''
+    _index_file_path = None
     name_string = 'segment_num%s.ts'
     out_callback_required = False
     target_duration = 10
@@ -120,7 +124,7 @@ class Indexer(Element):
     EXT_TAG = '#EXTM3U\n'
     END_TAG = '#EXT-X-ENDLIST\n'
     
-    def __init__(self, index_file_path, active_limit=3, delete_inactive_segments=True, target_duration=10):
+    def __init__(self, index_file_path=None, active_limit=3, delete_inactive_segments=True, target_duration=10):
         """
         Arguments:
         index_file_url - required - something like /var/www/test_server/static/stream5/index_
@@ -130,19 +134,20 @@ class Indexer(Element):
                                     are removed fromt he indexer
         """
         super(Indexer, self).__init__()
-        if not index_file_path:
-            raise ApMediaError("index_file_url must be provided")
         #This section is to validate that we can create the index file, and then deletes the test file
-        try:
-            testfile = open(index_file_path, 'wb')
-            testfile.write("Validating Index File")
-            testfile.close()
-            self._index_file_path = index_file_path
-        except Exception as (e, str):
-            raise Exception("File Creation test failed at: %s" % index_file_path)
-
-        segments_path = os.path.abspath(os.path.dirname(testfile.name))
-        os.remove(os.path.abspath(testfile.name))
+        if index_file_path:
+            try:
+                testfile = open(index_file_path, 'wb')
+                testfile.write("Validating Index File")
+                testfile.close()
+                self._index_file_path = index_file_path
+            except Exception as (e, str):
+                raise Exception("File Creation test failed at: %s" % index_file_path)
+    
+            segments_path = os.path.abspath(os.path.dirname(testfile.name))
+            os.remove(os.path.abspath(testfile.name))
+        else:
+            self._index_file_path = None
                 
         self._segment_handler = SegmentHandler(self, segments_path, self.target_duration, name_string=self.name_string,  
                                                active_limit=active_limit, delete_inactive_segments=delete_inactive_segments)
@@ -150,10 +155,24 @@ class Indexer(Element):
         self.target_duration = target_duration
         
     def data_received(self, data):
+        if not self._path:
+            raise ApMediaError("index_file_path is not set.  Use set_index_file_path(path) before sending data")
         self._segment_handler.add_segment(data)
-        self.update_index_file()
+        self._update_index_file()
+
+    def set_index_file_path(self, path):
+            try:
+                testfile = open(index_file_path, 'wb')
+                testfile.write("Validating Index File")
+                testfile.close()
+                self._index_file_path = index_file_path
+            except Exception as (e, str):
+                raise Exception("File Creation test failed at: %s" % index_file_path)
+    
+            segments_path = os.path.abspath(os.path.dirname(testfile.name))
+            os.remove(os.path.abspath(testfile.name))        
         
-    def update_index_file(self):
+    def _update_index_file(self):
         segments = self._segment_handler.get_active_segments()
         if not segments:
             return
@@ -163,18 +182,9 @@ class Indexer(Element):
         for segment in segments:
             index_file.write(self.URI_TAG % (self.target_duration, ''))
             index_file.write(segment.filename + '\n')
-        
+
     def _write_header(self, index_file, seq):
         index_file.write(self.EXT_TAG)
         index_file.write(self.TARGET_DURATION_TAG % self.target_duration)
         index_file.write(self.MEDIA_SEQ_TAG % seq)
      
-
-class Decoder(Element):
-    
-    def __init__(self, decoder, callback):
-        self._decoder = decoder
-        super(Decoder, self).__init__(callback=callback)
-    def data_received(self, data):
-        super(Decoder, self).data_received(self._decoder(data))
-        

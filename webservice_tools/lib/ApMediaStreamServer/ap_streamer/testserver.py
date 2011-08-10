@@ -3,6 +3,7 @@ print os.getcwd()
 from ap_streamer.core import Indexer, Decoder, Segmenter
 import py_ilbc
 from twisted.internet.protocol import Protocol, Factory
+from twisted.protocols.basic import LineReceiver
 from twisted.application import internet, service
 from twisted.internet import task
 import py_ffmpeg
@@ -13,7 +14,7 @@ def ilbc_decoder(data):
 
 
     
-class ByteReceiver(Protocol):
+class ByteReceiver(LineReceiver):
         
     def __init__(self):
         
@@ -21,20 +22,33 @@ class ByteReceiver(Protocol):
         self._encoder = Decoder(decoder=py_ffmpeg.mp3_encode, callback=self._indexer.data_received)
         self._decoder = Decoder(decoder=ilbc_decoder, callback=self._encoder.data_received)
         self._segmenter = Segmenter(5 * 50 * 38, self._decoder.data_received)
-        self.file_index = 1
+        self.program_id = 'TEST'
     
+    def lineLengthExceeded(self, line):
+        print "Line length exceeded"
+    
+    def lineReceived(self, data):
+        """
+        
+        """
+        if os.path.exists("/var/www/%s", data.strip()):
+            self.setRawMode()
+        
+        print "Got %s as a header\n" % data
+        
     def connectionMade(self):
         print 'Connected to client.'
     
     def connectionLost(self, reason):
         print "Connection Lost"
     
-    def dataReceived(self, data):
+    def rawDataReceived(self, data):
         """
          Protocol.dataReceived.
         Translates bytes into lines, and calls lineReceived (or
         rawDataReceived, depending on mode.)
         """
+        print 'Raw data received: %s' % data
         self._segmenter.data_received(data)
         
 class ClientFactory(Factory):
@@ -44,5 +58,4 @@ class ClientFactory(Factory):
 # application object
 application = service.Application("Demo application")
 internet.TCPServer(11921, ClientFactory()).setServiceParent(application)
-
 
