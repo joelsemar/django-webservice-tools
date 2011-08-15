@@ -17,7 +17,7 @@ class Element(object):
     callback_required = True
         
     def __init__(self, function=None, callback=None):
-        if (self.out_callback_required and not callback):
+        if (self.callback_required and not callback):
             raise ApMediaError("Callback is required")
         if function:
             self._function = function
@@ -26,7 +26,7 @@ class Element(object):
         
     
     def data_received(self, data):
-        self._callback(self._function(self, data))
+        self._callback(self._function(data))
     
 
 class Segmenter(Element):
@@ -49,7 +49,7 @@ class Segmenter(Element):
     
     def check_buffer_size(self):
         if len(self._buffer) >= self._buffer_limit:
-            self.out_callback(self._buffer[0:self._buffer_limit])
+            self._callback(self._buffer[0:self._buffer_limit])
             self._buffer = self._buffer[self._buffer_limit:]
             self.check_buffer_size()
 
@@ -84,7 +84,6 @@ class SegmentHandler(object):
     
     def __init__(self, indexer, duration, name_string='segment_num%s.ts', active_limit=3, delete_inactive_segments=True):
         self._indexer = indexer
-        self._path = segments_path
         self._name_string = name_string
         self._duration = duration
         self._active_limit = active_limit
@@ -116,11 +115,12 @@ class Indexer(Element):
     _segment_handler = None
     _index_file_path = None
     name_string = 'segment_num%s.ts'
-    out_callback_required = False
+    callback_required = False
     target_duration = 10
     host_with_root = ''
+    index_file = None
     
-    URI_TAG = '#EXTINF:%i,%s\n' #Should be something like {URI_TAG % (target_duration, '')} usually
+    URI_TAG = '#EXTINF:%i,%s\n' #Usage should be something like {URI_TAG % (target_duration, '')} usually
     MEDIA_SEQ_TAG = '#EXT-X-MEDIA-SEQUENCE:%i\n'
     TARGET_DURATION_TAG = '#EXT-X-TARGETDURATION:%i\n'
     EXT_TAG = '#EXTM3U\n'
@@ -129,7 +129,7 @@ class Indexer(Element):
     def __init__(self, index_file_path=None, active_limit=3, delete_inactive_segments=True, target_duration=10):
         """
         Arguments:
-        index_file_url - required - something like /var/www/test_server/static/stream5/index_
+        index_file_url - optional, something like /var/www/test_server/static/event_streams/asdflkj/index.m3u
         files_directory - optional, defaults to the same directory as the index_file
         number_of_files - optional, defaults to 3 - if you set it to 0, it will not limit them
         delete_after_use - optional, default to True, sets the files to be deleted from the system after they
@@ -138,16 +138,7 @@ class Indexer(Element):
         super(Indexer, self).__init__()
         #This section is to validate that we can create the index file, and then deletes the test file
         if index_file_path:
-            try:
-                testfile = open(index_file_path, 'wb')
-                testfile.write("Validating Index File")
-                testfile.close()
-                self._index_file_path = index_file_path
-            except Exception as (e, str):
-                raise Exception("File Creation test failed at: %s" % index_file_path)
-    
-            segments_path = os.path.abspath(os.path.dirname(testfile.name))
-            os.remove(os.path.abspath(testfile.name))
+            self.set_index_file_path(index_file_path)
         else:
             self._index_file_path = None
                 
@@ -157,21 +148,20 @@ class Indexer(Element):
         self.target_duration = target_duration
         
     def data_received(self, data):
-        if not self._path:
+        if not self._index_file_path:
             raise ApMediaError("index_file_path is not set.  Use set_index_file_path(path) before sending data")
         self._segment_handler.add_segment(data)
         self._update_index_file()
 
     def set_index_file_path(self, path):
             try:
-                testfile = open(index_file_path, 'wb')
+                testfile = open(path, 'wb')
                 testfile.write("Validating Index File")
                 testfile.close()
-                self._index_file_path = index_file_path
-            except Exception as (e, str):
-                raise Exception("File Creation test failed at: %s" % index_file_path)
+                self._index_file_path = path
+            except Exception:
+                raise Exception("File Creation test failed at: %s" % path)
     
-            segments_path = os.path.abspath(os.path.dirname(testfile.name))
             os.remove(os.path.abspath(testfile.name))        
         
     def _update_index_file(self):
@@ -184,9 +174,14 @@ class Indexer(Element):
         for segment in segments:
             index_file.write(self.URI_TAG % (self.target_duration, ''))
             index_file.write(segment.filename + '\n')
+        self.index_file = index_file
 
     def _write_header(self, index_file, seq):
         index_file.write(self.EXT_TAG)
         index_file.write(self.TARGET_DURATION_TAG % self.target_duration)
         index_file.write(self.MEDIA_SEQ_TAG % seq)
-     
+    
+    def close_indexer(self):
+        index_file.write(self.END_TAG)
+        index_file.close()
+        
