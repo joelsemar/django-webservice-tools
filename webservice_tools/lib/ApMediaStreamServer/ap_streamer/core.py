@@ -128,7 +128,7 @@ class Indexer(Element):
     EXT_TAG = '#EXTM3U\n'
     END_TAG = '#EXT-X-ENDLIST\n'
     
-    def __init__(self, index_file_path=None, active_limit=3, delete_inactive_segments=True, target_duration=10):
+    def __init__(self, index_file_path=None, segment_name = None, active_limit=3, delete_inactive_segments=True, target_duration=10):
         """
         Arguments:
         index_file_url - optional, something like /var/www/test_server/static/event_streams/asdflkj/index.m3u
@@ -143,7 +143,10 @@ class Indexer(Element):
             self.set_index_file_path(index_file_path)
         else:
             self._index_file_path = None
-                
+        
+        if segment_name:
+            self.name_string = segment_name
+        
         self._segment_handler = SegmentHandler(self, self.target_duration, name_string=self.name_string,  
                                                active_limit=active_limit, delete_inactive_segments=delete_inactive_segments)
         
@@ -160,7 +163,7 @@ class Indexer(Element):
                 testfile = open(path, 'wb')
                 testfile.write("Validating Index File")
                 testfile.close()
-                self._index_file_path = path
+                self._index_file_path = os.path.abspath(path)
             except Exception:
                 raise Exception("File Creation test failed at: %s" % path)
     
