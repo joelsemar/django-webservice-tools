@@ -94,7 +94,7 @@ class SegmentHandler(object):
         
     def add_segment(self, data):
         if not self._path:
-            self._path = self._indexer._index_file_path
+            self._path = os.path.dirname(self._indexer._index_file_path)
         self._segments.append(Segment(self, data, len(self._segments)+1))
         if len(self._segments) > (self._active_limit + self.STALE_TO_KEEP) and self._delete_inactive_segments:
             self._segments[-(self._active_limit+self.STALE_TO_KEEP+1)].delete()
