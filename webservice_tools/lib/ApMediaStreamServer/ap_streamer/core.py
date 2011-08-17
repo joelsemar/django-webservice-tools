@@ -120,7 +120,6 @@ class Indexer(Element):
     callback_required = False
     target_duration = 10
     host_with_root = ''
-    index_file = None
     
     URI_TAG = '#EXTINF:%i,%s\n' #Usage should be something like {URI_TAG % (target_duration, '')} usually
     MEDIA_SEQ_TAG = '#EXT-X-MEDIA-SEQUENCE:%i\n'
@@ -131,7 +130,7 @@ class Indexer(Element):
     def __init__(self, index_file_path=None, segment_name = None, active_limit=3, delete_inactive_segments=True, target_duration=10):
         """
         Arguments:
-        index_file_url - optional, something like /var/www/test_server/static/event_streams/asdflkj/index.m3u
+        index_file_url - optional, something like /var/www/test_server/static/event_streams/asdflkj/index (leave off extension)
         files_directory - optional, defaults to the same directory as the index_file
         number_of_files - optional, defaults to 3 - if you set it to 0, it will not limit them
         delete_after_use - optional, default to True, sets the files to be deleted from the system after they
@@ -169,24 +168,32 @@ class Indexer(Element):
     
             os.remove(os.path.abspath(testfile.name))        
         
-    def _update_index_file(self):
+    def _update_index_file(self, closed=False):
         segments = self._segment_handler.get_active_segments()
         if not segments:
             return
         sequence = self._segment_handler.get_current_sequence()
-        index_file = open(self._index_file_path, 'wb')
-        self._write_header(index_file, sequence)
+        lines = []
+        lines.append(self.EXT_TAG)
+        lines.append(self.TARGET_DURATION_TAG % self.target_duration)
+        lines.append(self.MEDIA_SEQ_TAG % seq)
+        
         for segment in segments:
-            index_file.write(self.URI_TAG % (self.target_duration, ''))
-            index_file.write(segment.filename + '\n')
-        self.index_file = index_file
+            lines.append(self.URI_TAG % (self.target_duration, ''))
+            lines.append(segment.filename + '\n')
+        if closed:
+            lines.append(self.END_TAG)
+            
+        index_file_m3u = open('%.m3u' % self._index_file_path, 'wb')
+        for line in lines:
+            index_file_m3u.write(line)
+        index_file_m3u.close()
+        index_file_m3u8 = open('%.m3u8' % self._index_file_path, 'wb')
+        for line in lines:
+            index_file_m3u8.write(line)
+        index_file_m3u8.close()
 
-    def _write_header(self, index_file, seq):
-        index_file.write(self.EXT_TAG)
-        index_file.write(self.TARGET_DURATION_TAG % self.target_duration)
-        index_file.write(self.MEDIA_SEQ_TAG % seq)
     
     def close_indexer(self):
-        index_file.write(self.END_TAG)
-        index_file.close()
+        self._update_index_file(closed=True)
         
