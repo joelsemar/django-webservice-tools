@@ -28,4 +28,4 @@ class BaseUserForm(ExtModelForm):
     def clean_password(self):
         password = self.cleaned_data.get('password')
         self.instance.set_password(password)
-        return password
+        return self.instance.password
