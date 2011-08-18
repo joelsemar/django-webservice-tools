@@ -33,29 +33,43 @@ class Segmenter(Element):
     
     _buffer = ''
     _buffer_limit = 0
+    _chunk_count = 0
+    _use_chunks = False
+    _max_chunks = 0
     
-    
-    def __init__(self, bytes_per_segment, callback=None):
+    def __init__(self, bytes=None, chunks=None, callback=None):
         super(Segmenter, self).__init__(callback=callback)
-        if bytes_per_segment:
-            self._buffer_limit = bytes_per_segment
+        if bytes:
+            self._buffer_limit = bytes
+        elif chunks:
+            self._max_chunks = chunks
+            self._use_chunks = True
         else:
-            raise ApMediaError("Bytes per segment must be provided")
+            raise ApMediaError("bytes or chunks must be provided")
     
     def data_received(self, data):
         self._buffer += data
-        self.check_buffer_size()
+        if self._use_chunks:
+            self._chunks += 1
+        self.check_buffer()
     
-    def check_buffer_size(self):
-        if len(self._buffer) >= self._buffer_limit:
+    def check_buffer(self):
+        if not self._use_chunks and len(self._buffer) >= self._buffer_limit:
             self._callback(self._buffer[0:self._buffer_limit])
             self._buffer = self._buffer[self._buffer_limit:]
             self.check_buffer_size()
+        elif self._use_chunks and self._chunk_count == self._max_chunks:
+            self._callback(self._buffer)
+            self._buffer = ''
+            self._chunk_count = 0
+        elif self._chunk_count > self._max_chunks:
+            raise ApMediaError("More chunks than possible in segmenter")
             
     def flush_buffer(self):
         self._callback(self._buffer)
 
-class Segment(object):
+
+class IndexerSegment(object):
     handler = None
     file_path = ''
     deleted = False
@@ -73,7 +87,7 @@ class Segment(object):
         os.remove(self.file_path)
         deleted=True
     
-class SegmentHandler(object):
+class IndexerSegmentHandler(object):
     _name_string = None
     _path = None
     _indexer = None
@@ -95,7 +109,7 @@ class SegmentHandler(object):
     def add_segment(self, data):
         if not self._path:
             self._path = os.path.dirname(self._indexer._index_file_path)
-        self._segments.append(Segment(self, data, len(self._segments)+1))
+        self._segments.append(IndexerSegment(self, data, len(self._segments)+1))
         if len(self._segments) > (self._active_limit + self.STALE_TO_KEEP) and self._delete_inactive_segments:
             self._segments[-(self._active_limit+self.STALE_TO_KEEP+1)].delete()
     
@@ -146,7 +160,7 @@ class Indexer(Element):
         if segment_name:
             self.name_string = segment_name
         
-        self._segment_handler = SegmentHandler(self, self.target_duration, name_string=self.name_string,  
+        self._segment_handler = IndexerSegmentHandler(self, self.target_duration, name_string=self.name_string,  
                                                active_limit=active_limit, delete_inactive_segments=delete_inactive_segments)
         
         self.target_duration = target_duration
@@ -176,7 +190,7 @@ class Indexer(Element):
         lines = []
         lines.append(self.EXT_TAG)
         lines.append(self.TARGET_DURATION_TAG % self.target_duration)
-        lines.append(self.MEDIA_SEQ_TAG % seq)
+        lines.append(self.MEDIA_SEQ_TAG % sequence)
         
         for segment in segments:
             lines.append(self.URI_TAG % (self.target_duration, ''))
@@ -184,11 +198,11 @@ class Indexer(Element):
         if closed:
             lines.append(self.END_TAG)
             
-        index_file_m3u = open('%.m3u' % self._index_file_path, 'wb')
+        index_file_m3u = open('%s.m3u' % self._index_file_path, 'wb')
         for line in lines:
             index_file_m3u.write(line)
         index_file_m3u.close()
-        index_file_m3u8 = open('%.m3u8' % self._index_file_path, 'wb')
+        index_file_m3u8 = open('%s.m3u8' % self._index_file_path, 'wb')
         for line in lines:
             index_file_m3u8.write(line)
         index_file_m3u8.close()
