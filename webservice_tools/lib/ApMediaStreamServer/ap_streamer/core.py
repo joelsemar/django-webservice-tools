@@ -12,11 +12,11 @@ class Element(object):
     Basic element that can be used for single-function elements, or subclassed and override data_received to 
     increase functionality
     """
-    
-    _connected_elements = []
     _function = lambda x : x
+    _connected_elements = []
         
     def __init__(self, function=None):
+        self._connected_elements = []
         if function:
             self._function = function
     
@@ -72,8 +72,8 @@ class Segmenter(Element):
         self.check_buffer()
     
     def check_buffer(self):
-        if not self._use_chunks and len(self._buffer) >= self._buffer_limit:
-            self.send(self._buffer[0:self._buffer_limit])
+        if not self._use_chunks and len(self._buffer) > self._buffer_limit:
+            self.send(self._buffer[:self._buffer_limit])
             self._buffer = self._buffer[self._buffer_limit:]
             self.check_buffer()
         elif self._use_chunks and self._chunk_count == self._max_chunks:
