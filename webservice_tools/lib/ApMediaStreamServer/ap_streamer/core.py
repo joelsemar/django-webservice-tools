@@ -31,7 +31,7 @@ class Element(object):
         self.send(self._function(data))
     
     def connect(self, element):
-        self._connected_elements.append(element)
+        self._connected_elements.insert(0,element)
 
     def disconnect(self, element):
         self._connected_elements.remove(element)
