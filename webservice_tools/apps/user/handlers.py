@@ -107,9 +107,6 @@ class GenericUserHandler(utils.BaseHandler):
             transaction.rollback()
             return response.send()
         
-        if user_form.cleaned_data.get('password'):
-            request.user.set_password(user_form.cleaned_data.get('password'))
-        
         profile.update_callback()
         return response.send()
 
