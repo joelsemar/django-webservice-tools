@@ -33,6 +33,10 @@ static PyObject *decode(PyObject *self, PyObject *args) {
 	//from the decode function.
 	int max_data = BLOCKL_MAX*size/Dec_Inst.no_of_bytes*sizeof(short);
 	short *decoded_buffer = PyMem_Malloc(max_data);
+	if (decoded_buffer==NULL){
+		PyErr_SetString(ILBCError, "Memory allocation failed for decoded_buffer");
+		return NULL;
+	}
 
 	int arrayCopyNdx;
 

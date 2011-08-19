@@ -43,16 +43,22 @@ static PyObject *mp3_encode(PyObject *self, PyObject *args) {
     	return Py_BuildValue("s", "No codec init");
     }
 
-	if (!PyArg_ParseTuple(args, "s#", &data, &size)){
-		printf("%s", "No data in\n");
-		return Py_BuildValue("s", "No Data In");
-	}
+	if (!PyArg_ParseTuple(args, "s#", &data, &size))
+		return NULL;
 
 	framesize = c->frame_size;
 	sample_size = framesize * 2 * c->channels;
 	int max_data = size*2; //calculate max_data here
 	char *decoded_buffer = PyMem_Malloc(max_data);
 	uint8_t *decoded_data = PyMem_Malloc(sample_size*2);
+	if (decoded_buffer == NULL){
+		PyErr_SetString(PyFFmpegError, "Memory not allocated - decoded_buffer");
+		return NULL;
+	}
+	if (decoded_data == NULL){
+		PyErr_SetString(PyFFmpegError, "Memory not allocated - decoded_data");
+		return NULL;
+	}
 
 	int cur_sample = 0;
 	int outpos = 0;

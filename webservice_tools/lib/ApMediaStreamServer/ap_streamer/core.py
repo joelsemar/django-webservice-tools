@@ -9,25 +9,42 @@ class ApMediaError(Exception):
 
 class Element(object):
     """
-    Implements data_received, and init method that sets function and callback
+    Basic element that can be used for single-function elements, or subclassed and override data_received to 
+    increase functionality
     """
     
-    _callback = lambda : True
+    _connected_elements = []
     _function = lambda x : x
-    callback_required = True
         
-    def __init__(self, function=None, callback=None):
-        if (self.callback_required and not callback):
-            raise ApMediaError("Callback is required")
+    def __init__(self, function=None):
         if function:
             self._function = function
-        if callback:
-            self._callback = callback
-        
+    
+    def send(self, data):
+        for element in self._connected_elements:
+            element.data_received(data)
     
     def data_received(self, data):
-        self._callback(self._function(data))
+        """
+        This should be overridden and end with a call to "self.send(your_modified_data)"
+        """
+        self.send(self._function(data))
     
+    def connect(self, element):
+        self._connected_elements.append(element)
+
+    def disconnect(self, element):
+        self._connected_elements.remove(element)
+        
+    def finish(self):
+        """
+        Override this and cleanup/close files/flush buffers, then call self.finish_connected()
+        """
+        self.finish_connected()
+        
+    def finish_connected(self):
+        for element in self._connected_elements:
+            element.finish()
 
 class Segmenter(Element):
     
@@ -37,8 +54,9 @@ class Segmenter(Element):
     _use_chunks = False
     _max_chunks = 0
     
-    def __init__(self, bytes=None, chunks=None, callback=None):
-        super(Segmenter, self).__init__(callback=callback)
+    def __init__(self, bytes=None, chunks=None, finish_passes_partials=True):
+        super(Segmenter, self).__init__()
+        self.finish_passes_partials = finish_passes_partials
         if bytes:
             self._buffer_limit = bytes
         elif chunks:
@@ -50,24 +68,25 @@ class Segmenter(Element):
     def data_received(self, data):
         self._buffer += data
         if self._use_chunks:
-            self._chunks += 1
+            self._chunk_count += 1
         self.check_buffer()
     
     def check_buffer(self):
         if not self._use_chunks and len(self._buffer) >= self._buffer_limit:
-            self._callback(self._buffer[0:self._buffer_limit])
+            self.send(self._buffer[0:self._buffer_limit])
             self._buffer = self._buffer[self._buffer_limit:]
-            self.check_buffer_size()
+            self.check_buffer()
         elif self._use_chunks and self._chunk_count == self._max_chunks:
-            self._callback(self._buffer)
+            self.send(self._buffer)
             self._buffer = ''
             self._chunk_count = 0
-        elif self._chunk_count > self._max_chunks:
+        elif self._use_chunks and self._chunk_count > self._max_chunks:
             raise ApMediaError("More chunks than possible in segmenter")
             
-    def flush_buffer(self):
-        self._callback(self._buffer)
-
+    def finish(self):
+        if self.finish_passes_partials:
+            self.send(self._buffer)
+        self.finish_connected()
 
 class IndexerSegment(object):
     handler = None
@@ -131,7 +150,6 @@ class Indexer(Element):
     _segment_handler = None
     _index_file_path = None
     name_string = 'segment_num%s.ts'
-    callback_required = False
     target_duration = 10
     host_with_root = ''
     
@@ -208,6 +226,8 @@ class Indexer(Element):
         index_file_m3u8.close()
 
     
-    def close_indexer(self):
+    def finish(self):
         self._update_index_file(closed=True)
-        
+        self.finish_connected()
+
+
