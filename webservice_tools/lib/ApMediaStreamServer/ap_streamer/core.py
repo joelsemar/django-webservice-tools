@@ -158,6 +158,7 @@ class Indexer(Element):
     TARGET_DURATION_TAG = '#EXT-X-TARGETDURATION:%i\n'
     EXT_TAG = '#EXTM3U\n'
     END_TAG = '#EXT-X-ENDLIST\n'
+    NO_CACHE_ALLOW = '#EXT-X-ALLOW-CACHE:NO\n'
     
     def __init__(self, index_file_path=None, segment_name = None, active_limit=3, delete_inactive_segments=True, target_duration=10):
         """
@@ -209,6 +210,7 @@ class Indexer(Element):
         lines.append(self.EXT_TAG)
         lines.append(self.TARGET_DURATION_TAG % self.target_duration)
         lines.append(self.MEDIA_SEQ_TAG % sequence)
+        lines.append(self.NO_CACHE_ALLOW)
         
         for segment in segments:
             lines.append(self.URI_TAG % (self.target_duration, ''))
