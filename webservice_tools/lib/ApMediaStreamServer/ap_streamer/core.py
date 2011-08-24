@@ -12,11 +12,14 @@ class Element(object):
     Basic element that can be used for single-function elements, or subclassed and override data_received to 
     increase functionality
     """
-    _function = lambda x : x
-    _connected_elements = []
-        
+    def noop(self, data):
+        return data
+    
+    _function = noop
+    
     def __init__(self, function=None):
         self._connected_elements = []
+        
         if function:
             self._function = function
     
@@ -56,7 +59,7 @@ class Segmenter(Element):
     _max_chunks = 0
     
     def __init__(self, bytes=None, chunks=None, finish_passes_partials=True):
-        super(Segmenter, self).__init__()
+        Element.__init__(self)
         self.finish_passes_partials = finish_passes_partials
         if bytes:
             self._buffer_limit = bytes
@@ -104,6 +107,7 @@ class FileWriter(Element):
         self.chunk_count = 0
         self.file = None 
         self.name = name
+        Element.__init__(self)
         
     def new_file(self):
         self.file_count +- 1

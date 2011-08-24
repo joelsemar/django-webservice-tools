@@ -12,7 +12,8 @@ class MP3Encoder(Element):
     def __init__(self, samples=10, finish_passes_partials=True):
         self.finish_passes_partials = finish_passes_partials
         self._buffer_limit = self._SAMPLE_SIZE * samples 
-        
+        Element.__init__(self)
+                
     def data_received(self, data):
         self._buffer += data
         self.check_buffer()
@@ -37,7 +38,8 @@ class ILBCDecoder(Element):
     def __init__(self, samples=50, finish_passes_partials=True, mode=20):
         self.finish_passes_partials = finish_passes_partials
         self.mode = mode
-        self._buffer_limit = self._SAMPLE_SIZE * samples 
+        self._buffer_limit = self._SAMPLE_SIZE * samples
+        Element.__init__(self) 
         
     def data_received(self, data):
         self._buffer += data

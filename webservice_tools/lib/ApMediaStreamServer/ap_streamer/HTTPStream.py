@@ -1,3 +1,6 @@
+from core import Element, ApMediaError
+import os
+
 class IndexerSegment(object):
     handler = None
     file_path = ''
@@ -79,7 +82,7 @@ class Indexer(Element):
         delete_after_use - optional, default to True, sets the files to be deleted from the system after they
                                     are removed fromt he indexer
         """
-        super(Indexer, self).__init__()
+        Element.__init__(self)
         #This section is to validate that we can create the index file, and then deletes the test file
         if index_file_path:
             self.set_index_file_path(index_file_path)
