@@ -104,14 +104,10 @@ class Indexer(Element):
         self._update_index_file()
 
     def set_index_file_path(self, path):
-            try:
-                testfile = open(path, 'wb')
-                testfile.write("Validating Index File")
-                testfile.close()
-                self._index_file_path = os.path.abspath(path)
-            except Exception:
-                raise Exception("File Creation test failed at: %s" % path)
-    
+            testfile = open(path, 'wb')
+            testfile.write("Validating Index File")
+            testfile.close()
+            self._index_file_path = os.path.abspath(path)
             os.remove(os.path.abspath(testfile.name))        
         
     def _update_index_file(self, closed=False):
