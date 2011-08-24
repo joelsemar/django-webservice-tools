@@ -13,42 +13,60 @@
 
 static PyObject *PyFFmpegError;
 
+static void generate_silence(uint8_t* buf, enum AVSampleFormat sample_fmt, size_t size)
+	{
+	int fill_char = 0x00;
+	if (sample_fmt == AV_SAMPLE_FMT_U8)
+		fill_char = 0x80;
+	memset(buf, fill_char, size);
+}
+
 static PyObject *mp3_encode(PyObject *self, PyObject *args) {
 	avcodec_init();
 	avcodec_register_all();
 
 	char *data;
 	AVCodecContext *c= NULL;
-	int size, framesize;
-	int out_size, sample_size;
+	int size, out_size, sample_size;
 
 	AVCodec *codec;
 
-    codec = avcodec_find_encoder(CODEC_ID_MP3);
-    if (!codec) {
-    	printf("%s", "No encoder\n");
-    	return Py_BuildValue("s", "No encoder");
-    }
+    	codec = avcodec_find_encoder(CODEC_ID_MP3);
+    	if (!codec) {
+    		printf("%s", "No encoder\n");
+    		return Py_BuildValue("s", "No encoder");
+    	}
 
+    	c = avcodec_alloc_context3(codec);
 
-    c = avcodec_alloc_context3(codec);
+    	/* put sample parameters */
+    	c->sample_rate = 8000;
+    	c->channels = 1;
+    	c->sample_fmt = AV_SAMPLE_FMT_S16;
 
-    /* put sample parameters */
-    c->sample_rate = 8000;
-    c->channels = 1;
-    c->sample_fmt = AV_SAMPLE_FMT_S16;
-
-    if (avcodec_open2(c, codec, NULL) < 0) {
-    	printf("%s", "No codec init\n");
-    	return Py_BuildValue("s", "No codec init");
-    }
+    	if (avcodec_open2(c, codec, NULL) < 0) {
+    		return Py_BuildValue("s", "No codec init");
+	}
 
 	if (!PyArg_ParseTuple(args, "s#", &data, &size))
 		return NULL;
 
-	framesize = c->frame_size;
-	sample_size = framesize * 2 * c->channels;
-	int max_data = size*2; //calculate max_data here
+
+	int osize = av_get_bytes_per_sample(c->sample_fmt);
+	sample_size = c->frame_size * osize * c->channels;
+
+
+        int extra_bytes = size % sample_size;
+        char *newdata;
+        if (extra_bytes != 0){
+        	int silence_len = sample_size - extra_bytes;
+		newdata = PyMem_Malloc(size+silence_len);
+		memcpy(newdata, data, size);
+		generate_silence(&newdata[size], c->sample_fmt, silence_len);
+		data = newdata;
+		size += silence_len;
+        }
+	int max_data = size*4; //calculate max_data here
 	char *decoded_buffer = PyMem_Malloc(max_data);
 	uint8_t *decoded_data = PyMem_Malloc(sample_size*2);
 	if (decoded_buffer == NULL){
@@ -65,12 +83,19 @@ static PyObject *mp3_encode(PyObject *self, PyObject *args) {
 	while (cur_sample < size){
 		out_size = avcodec_encode_audio(c, decoded_data, max_data, (short *) &data[cur_sample]);
 		memcpy(&decoded_buffer[outpos], decoded_data, out_size);
-		outpos += out_size;
+		if (out_size > 0)
+			outpos += out_size;
 		cur_sample += sample_size;
 	}
-
+        while(out_size > 0){
+		out_size = avcodec_encode_audio(c, decoded_data, max_data, NULL);
+        	memcpy(&decoded_buffer[outpos], decoded_data, out_size);
+        	if (out_size > 0)
+        		outpos += out_size;
+	}
 	PyObject *result = Py_BuildValue("s#", decoded_buffer, outpos);
-	PyMem_Free(decoded_buffer);  //Free the memory
+
+	PyMem_Free(decoded_buffer);
 	PyMem_Free(decoded_data);
 
 	avcodec_close(c);
@@ -96,4 +121,3 @@ PyMODINIT_FUNC initpy_ffmpeg(void) {
 	PyModule_AddObject(m, "error", PyFFmpegError);
 
 }
-
