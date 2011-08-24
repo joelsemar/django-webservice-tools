@@ -1,4 +1,5 @@
 import py_ffmpeg
+import py_ilbc
 from core import Element
 
 class MP3Encoder(Element):    
@@ -8,10 +9,8 @@ class MP3Encoder(Element):
     _buffer_limit = 0
     _SAMPLE_SIZE = 1152
     
-    def __init__(self, samples=None, finish_passes_partials=True):
+    def __init__(self, samples=10, finish_passes_partials=True):
         self.finish_passes_partials = finish_passes_partials
-        if not samples:
-            raise ApMediaError("Number of samples must be provided")
         self._buffer_limit = self._SAMPLE_SIZE * samples 
         
     def data_received(self, data):
@@ -31,17 +30,13 @@ class MP3Encoder(Element):
 
 
 class ILBCDecoder(Element):
-    """
-    """
     _buffer = ''
     _buffer_limit = 0
     _SAMPLE_SIZE = 38
     
-    def __init__(self, samples=None, finish_passes_partials=True, mode=20):
+    def __init__(self, samples=50, finish_passes_partials=True, mode=20):
         self.finish_passes_partials = finish_passes_partials
         self.mode = mode
-        if not samples:
-            raise ApMediaError("Number of samples must be provided")
         self._buffer_limit = self._SAMPLE_SIZE * samples 
         
     def data_received(self, data):

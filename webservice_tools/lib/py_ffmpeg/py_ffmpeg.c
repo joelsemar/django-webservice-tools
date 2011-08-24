@@ -1,3 +1,8 @@
+/*11111111 11100011 10001000 11000100 MP3 Header
+ * 1111 1111 111 sync word  00 means mpeg2.5  01 means layer III 1 no CRC 1000 (64000 bit rate indx)
+ * 10 (8000hz sample index) 0 no padding  0 non private 11 single channel 00 mode xtension 0=non copyright 1 original 00 no emphasis
+ * */
+
 #include <Python.h>
 #include <math.h>
 #include <stdlib.h>

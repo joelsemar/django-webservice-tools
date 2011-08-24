@@ -46,6 +46,7 @@ class Element(object):
         for element in self._connected_elements:
             element.finish()
 
+
 class Segmenter(Element):
     
     _buffer = ''
@@ -88,3 +89,43 @@ class Segmenter(Element):
             self.send(self._buffer)
         self.finish_connected()
 
+
+class FileWriter(Element):
+    """
+    Set chunks_per_file to 0 in order to keep file open and put all data_received into that one file
+    """
+    def __init__(self, label='default_label', stream_id='no_id', name='%s', chunks_per_file=1):
+        if not label or not stream_id:
+            raise Exception("Name and Stream_id are required")
+        self.label = label
+        self.file_count = 0
+        self.stream_id = stream_id
+        self.chunks_per_file = chunks_per_file
+        self.chunk_count = 0
+        self.file = None 
+        self.name = name
+        
+    def new_file(self):
+        self.file_count +- 1
+        name = self.name % self.file_count
+        file_path = 'debugging/%s/%s/%s' % (self.stream_id, self.label, name)
+        file_dir = os.path.dirname(file_path)
+        if not os.path.exists(file_dir):
+            os.makedirs(file_dir)
+        self.file = open(file_path, 'wb')
+        
+    def data_received(self, data=''):
+        if not self.file:
+            self.new_file()
+        if data:
+            self.file.write(data)
+        self.chunk_count += 1
+        if self.chunk_count == self.chunks_per_file:
+            self.file.close()
+            self.file = None
+            self.chunk_count = 0
+        
+    def finish(self):
+        if self.file:
+            self.file.close()
+        self.finish_connected()
