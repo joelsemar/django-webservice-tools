@@ -501,3 +501,24 @@ def _cbRunCmdInTwisted(cmdResult, cmdString, fullEnviron, printCommand, maskOutT
         % (maskedCmdString, fullEnviron and "yes" or "no", cmdResult[2], cmdResult[0], cmdResult[1]),
         lvl=printCommand and 'a' or 'd', ss='ss_cmds')
     return cmdResult
+
+def simpleReadConfigFile(filename):
+    """Reads in config file 
+    
+    @return: A dict containing the entries of the file read in. If the file could not be found or otherwise
+    parsed, an empty dict is returned.
+    """
+    import ConfigParser
+    loadedConfig = {}
+    cp = ConfigParser.SafeConfigParser()
+    filesParsed = cp.read(filename)
+    if len(filesParsed) == 0:
+        #could not parse out the file
+        return {}
+    
+    for sec in cp.sections():
+        name = str.lower(sec)
+        for opt in cp.options(sec):
+            loadedConfig[name + "." + opt.lower()] = cp.get(sec, opt).strip()
+    
+    return loadedConfig

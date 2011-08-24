@@ -207,7 +207,7 @@ rm -rf /etc/apache2/sites-available/default
 cat > "/etc/apache2/sites-available/$HOSTNAME" << EOF
 <VirtualHost *:80>
     ServerName $HOSTNAME
-    DocumentRoot $PROJECT_PATH
+    DocumentRoot /var/www/
     LogLevel warn
     WSGIDaemonProcess www-data processes=5 threads=15 maximum-requests=10000
     WSGIProcessGroup www-data

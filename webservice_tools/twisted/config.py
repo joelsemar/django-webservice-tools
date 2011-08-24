@@ -22,7 +22,7 @@ from twisted.python import log
 
 #Project specific deps
 from webservice_tools.twisted import consts
-from webservice_tools import utils
+from webservice_tools.twisted.twistedutil import simpleReadConfigFile
 
 
 #############################
@@ -95,7 +95,7 @@ def load(filename, defaultConfig={}, writeIfNonExistent=True, quitIfNonExistent=
             sys.exit(1)
 
     log.msg("Reading configuration from \"%s\"..." % filename, lvl='i', ss='ss_configfile')
-    _loaded = utils.simpleReadConfigFile(filename, useLogging=True,
+    _loaded = simpleReadConfigFile(filename, useLogging=True,
                                               level=consts.LOGLVL_DEBUG3)
             
     log.msg("ACTIVE CONFIGURATION: " + str(_loaded),
