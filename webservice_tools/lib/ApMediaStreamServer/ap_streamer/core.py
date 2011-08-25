@@ -110,7 +110,7 @@ class FileWriter(Element):
         Element.__init__(self)
         
     def new_file(self):
-        self.file_count +- 1
+        self.file_count += 1
         name = self.name % self.file_count
         file_path = 'debugging/%s/%s/%s' % (self.stream_id, self.label, name)
         file_dir = os.path.dirname(file_path)

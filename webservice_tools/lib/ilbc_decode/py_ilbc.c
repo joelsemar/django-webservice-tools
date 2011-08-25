@@ -22,8 +22,10 @@ static PyObject *decode(PyObject *self, PyObject *args) {
 	if (!PyArg_ParseTuple(args, "is#", &mode, &data, &size))
 		return NULL;
 
-	iLBC_Dec_Inst_t Dec_Inst;  //New Decoder Instance
-	initDecode(&Dec_Inst, mode, 1);  //Initialize it with the mode passed in (the last arg means to always
+	static iLBC_Dec_Inst_t Dec_Inst;  //New Decoder Instance
+	if (Dec_Inst.mode != mode){
+		initDecode(&Dec_Inst, mode, 1);  //Initialize it with the mode passed in (the last arg means to always
+	}
 	                                 // use the "enhancer")
 	int len = 0;
 	int inpos = 0;
@@ -31,7 +33,7 @@ static PyObject *decode(PyObject *self, PyObject *args) {
 
 	//create a new buffer to store the decoded data in.  BLOCKL_MAX is the maximum data that can be returned
 	//from the decode function.
-	int max_data = BLOCKL_MAX*size/Dec_Inst.no_of_bytes;
+	int max_data = BLOCKL_MAX*size/Dec_Inst.no_of_bytes*2;
 	short *decoded_buffer = PyMem_Malloc(max_data);
 	if (decoded_buffer==NULL){
 		PyErr_SetString(ILBCError, "Memory allocation failed for decoded_buffer");
