@@ -502,7 +502,7 @@ def get_site_settings():
     if not site_settings:
         try:
             site_settings = SITE_SETTINGS_MODEL.objects.all().order_by('-when_created')[0]
-        except SITE_SETTINGS_MODEL.DoesNotExist:
+        except IndexError:
             raise Exception('Please create a row for your site settings.')
         cache.set(SITE_SETTINGS_KEY, site_settings)
     return cache.get(SITE_SETTINGS_KEY)

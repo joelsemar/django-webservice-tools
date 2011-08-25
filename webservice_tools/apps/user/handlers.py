@@ -51,9 +51,8 @@ class GenericUserHandler(utils.BaseHandler):
         profile_form = self.profile_form(request.POST, request.FILES)
         user_form = self.user_form(request.POST)
         if user_form.is_valid():
-            user = user_form.save(commit=False)
-            user.set_password(user_form.cleaned_data['password'])
-            user.save()
+            user = user_form.save()
+            
         
         else:
             response.addErrors(self.format_errors(user_form))
@@ -71,7 +70,7 @@ class GenericUserHandler(utils.BaseHandler):
         profile.user = user
         profile.save()
         profile.create_callback()
-        user = authenticate(username=user_form.cleaned_data['username'], password=user_form.cleaned_data['password'])
+        user = authenticate(username=user_form.cleaned_data['username'], password=request.POST.get('password'))
         
         if user:
             login(request, user)
