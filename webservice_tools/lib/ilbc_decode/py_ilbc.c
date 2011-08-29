@@ -33,7 +33,8 @@ static PyObject *decode(PyObject *self, PyObject *args) {
 
 	//create a new buffer to store the decoded data in.  BLOCKL_MAX is the maximum data that can be returned
 	//from the decode function.
-	int max_data = BLOCKL_MAX*size/Dec_Inst.no_of_bytes*2;
+	int max_data = BLOCKL_MAX*size/Dec_Inst.no_of_bytes*sizeof(short);
+
 	short *decoded_buffer = PyMem_Malloc(max_data);
 	if (decoded_buffer==NULL){
 		PyErr_SetString(ILBCError, "Memory allocation failed for decoded_buffer");
@@ -45,9 +46,10 @@ static PyObject *decode(PyObject *self, PyObject *args) {
 	while(inpos < size) {
 		len = decode_prep(&Dec_Inst, decoded_data, (short *) &data[inpos]);  //decode the first chunk
 		inpos += Dec_Inst.no_of_bytes;  //increment index by size of current decoder's blocks
-
+                if (outpos > (max_data - len)){
+			printf("Error pos: %i maxdata: %i len: %i\n ", outpos, max_data, len);
+		}
 		memcpy(&decoded_buffer[outpos], decoded_data, len*sizeof(short));
-
 //		arrayCopyNdx = 0;
 //		while(arrayCopyNdx < len*sizeof(short)){
 //			decoded_buffer[outpos+arrayCopyNdx] = decoded_data[arrayCopyNdx];
