@@ -19,10 +19,10 @@
 
 static PyObject *PyFFmpegError;
 
-typdef struct{
+typedef struct{
     PyObject_HEAD
-    AVCodec codec,
-    AVCodecContext context,
+    AVCodec *codec;
+    AVCodecContext *context;
 } mp3_encoder;
 
 static void mp3enc_dealloc(mp3_encoder* self){
@@ -30,22 +30,13 @@ static void mp3enc_dealloc(mp3_encoder* self){
 	av_free(self->context);
 }
 
-
-static PyMethodDef mp3enc_methods[] = {
-		{ "mp3_encode", mp3_encode, METH_VARARGS, "Encode a chunk of PCM data into MP3 - buffer bytes to multiples of 1152 unless stream is closing" },
-                { "mp3_flush", mp3_flush, METH_NOARGS, "Flush the stream"},
-		{ NULL, NULL },
-
-};
-
-static void mp3enc_init(mp3_encoder* self, PyObject *args, Pyobject *kwds){
+static void mp3enc_init(mp3_encoder* self, PyObject *args, PyObject *kwds){
 	avcodec_init();
 	avcodec_register_all();
     	
         self->codec = avcodec_find_encoder(CODEC_ID_MP3);
-        if (self->codec){
+        if (!self->codec){
 		PyErr_SetString(PyFFmpegError, "No MP3 encoder found");
-		return NULL;
 	}
 
     	self->context = avcodec_alloc_context3(self->codec);
@@ -57,10 +48,111 @@ static void mp3enc_init(mp3_encoder* self, PyObject *args, Pyobject *kwds){
 
         if (avcodec_open2(self->context, self->codec, NULL) < 0){
 		PyErr_SetString(PyFFmpegError, "Error initiliazing codec");
-		return NULL;
 	}
 }
 
+static void generate_silence(char *buf, enum AVSampleFormat sample_fmt, size_t size)
+	{
+	int fill_char = 0x00;
+	if (sample_fmt == AV_SAMPLE_FMT_U8)
+		fill_char = 0x80;
+	memset(buf, fill_char, size);
+}
+
+
+static PyObject *mp3_flush(mp3_encoder *self, PyObject *args) {
+
+	int sample_size, outpos, osize;
+        sample_size = outpos = osize = 0;
+
+        osize = av_get_bytes_per_sample(self->context->sample_fmt);
+	sample_size = self->context->frame_size * osize * self->context->channels;
+
+        int max_data = sample_size * 5;
+	char *decoded_buffer = PyMem_Malloc(max_data);
+	uint8_t *decoded_data = PyMem_Malloc(max_data);
+	if (decoded_buffer == NULL){
+		PyErr_SetString(PyFFmpegError, "Memory not allocated - decoded_buffer");
+		return NULL;
+	}
+	if (decoded_data == NULL){
+		PyErr_SetString(PyFFmpegError, "Memory not allocated - decoded_data");
+		return NULL;
+	}
+        int out_size = 1;      //Initial out_size to some amount to start the loop
+        while(out_size > 0){
+		out_size = avcodec_encode_audio(self->context, decoded_data, max_data, NULL);
+        	memcpy(&decoded_buffer[outpos], decoded_data, out_size);
+        	if (out_size > 0)
+        		outpos += out_size;
+	}
+
+	PyObject *result = Py_BuildValue("s#", decoded_buffer, outpos);
+	PyMem_Free(decoded_buffer);
+	PyMem_Free(decoded_data);
+	return result;
+}
+
+static PyObject *mp3_encode(mp3_encoder *self, PyObject *args) {
+	char *data;
+	int size, out_size, sample_size;
+
+	if (!PyArg_ParseTuple(args, "s#", &data, &size))
+		return NULL;
+	
+        int osize = av_get_bytes_per_sample(self->context->sample_fmt);
+	sample_size = self->context->frame_size * osize * self->context->channels;
+
+
+        int extra_bytes = size % sample_size;
+        char *newdata;
+        if (extra_bytes != 0){
+        	int silence_len = sample_size - extra_bytes;
+		newdata = PyMem_Malloc(size+silence_len);
+		memcpy(newdata, data, size);
+		generate_silence(&newdata[size], self->context->sample_fmt, silence_len);
+		data = newdata;
+		size += silence_len;
+        }
+	int max_data = size*4; //calculate max_data here
+	char *decoded_buffer = PyMem_Malloc(max_data);
+	uint8_t *decoded_data = PyMem_Malloc(sample_size*2);
+	if (decoded_buffer == NULL){
+		PyErr_SetString(PyFFmpegError, "Insufficient memory");
+		return NULL;
+	}
+	if (decoded_data == NULL){
+		PyErr_SetString(PyFFmpegError, "Insufficient memory");
+		return NULL;
+	}
+
+	int cur_sample = 0;
+	int outpos = 0;
+	while (cur_sample < size){
+		out_size = avcodec_encode_audio(self->context, decoded_data, max_data, (short *) &data[cur_sample]);
+		memcpy(&decoded_buffer[outpos], decoded_data, out_size);
+		if (out_size > 0)
+			outpos += out_size;
+		cur_sample += sample_size;
+	}
+	PyObject *result = Py_BuildValue("s#", decoded_buffer, outpos);
+
+	PyMem_Free(decoded_buffer);
+	PyMem_Free(decoded_data);
+        if (extra_bytes != 0)
+            PyMem_Free(newdata);
+	return result;
+}
+
+static PyMethodDef module_methods[] = {
+    {NULL}
+};
+
+static PyMethodDef mp3enc_methods[] = {
+		{ "mp3_encode", (PyCFunction)mp3_encode, METH_VARARGS, "Encode a chunk of PCM data into MP3 - buffer bytes to multiples of 1152 unless stream is closing" },
+                { "mp3_flush", (PyCFunction)mp3_flush, METH_NOARGS, "Flush the stream"},
+		{ NULL, NULL },
+};
 
 static PyTypeObject mp3_encoderType={
     PyObject_HEAD_INIT(NULL)
@@ -101,107 +193,7 @@ static PyTypeObject mp3_encoderType={
     0,                         /* tp_dictoffset */
     (initproc)mp3enc_init,      /* tp_init */
     0,                         /* tp_alloc */
-    0,                         /* tp_new */
-};
-
-static void generate_silence(uint8_t* buf, enum AVSampleFormat sample_fmt, size_t size)
-	{
-	int fill_char = 0x00;
-	if (sample_fmt == AV_SAMPLE_FMT_U8)
-		fill_char = 0x80;
-	memset(buf, fill_char, size);
-}
-
-
-static PyObject *mp3_flush(PyObject *self, PyObject *args) {
-
-	int sample_size, outpos, osize;
-        sample_size = outpos = osize = 0;
-
-        osize = av_get_bytes_per_sample(self->context->sample_fmt);
-	sample_size = self->context->frame_size * osize * self->context->channels;
-
-	char *decoded_buffer = PyMem_Malloc(sample_size*5);
-	uint8_t *decoded_data = PyMem_Malloc(sample_size*2);
-	if (decoded_buffer == NULL){
-		PyErr_SetString(PyFFmpegError, "Memory not allocated - decoded_buffer");
-		return NULL;
-	}
-	if (decoded_data == NULL){
-		PyErr_SetString(PyFFmpegError, "Memory not allocated - decoded_data");
-		return NULL;
-	}
-        int out_size = 1;
-        while(out_size > 0){
-		out_size = avcodec_encode_audio(self->context, decoded_data, max_data, NULL);
-        	memcpy(&decoded_buffer[outpos], decoded_data, out_size);
-        	if (out_size > 0)
-        		outpos += out_size;
-	}
-	PyObject *result = Py_BuildValue("s#", decoded_buffer, outpos);
-	PyMem_Free(decoded_buffer);
-	PyMem_Free(decoded_data);
-	return result;
-}
-
-static PyObject *mp3_encode(PyObject *self, PyObject *args) {
-	char *data;
-	int size, out_size, sample_size;
-
-	if (!PyArg_ParseTuple(args, "s#", &data, &size))
-		return NULL;
-	
-        int osize = av_get_bytes_per_sample(self->context->sample_fmt);
-	sample_size = self->context->frame_size * osize * self->context->channels;
-
-
-        int extra_bytes = size % sample_size;
-        char *newdata;
-        if (extra_bytes != 0){
-        	int silence_len = sample_size - extra_bytes;
-		newdata = PyMem_Malloc(size+silence_len);
-		memcpy(newdata, data, size);
-		generate_silence(&newdata[size], self->context->sample_fmt, silence_len);
-		data = newdata;
-		size += silence_len;
-        }
-	int max_data = size*4; //calculate max_data here
-	char *decoded_buffer = PyMem_Malloc(max_data);
-	uint8_t *decoded_data = PyMem_Malloc(sample_size*2);
-	if (decoded_buffer == NULL){
-		PyErr_SetString(PyFFmpegError, "Memory not allocated - decoded_buffer");
-		return NULL;
-	}
-	if (decoded_data == NULL){
-		PyErr_SetString(PyFFmpegError, "Memory not allocated - decoded_data");
-		return NULL;
-	}
-
-	int cur_sample = 0;
-	int outpos = 0;
-	while (cur_sample < size){
-		out_size = avcodec_encode_audio(self->context, decoded_data, max_data, (short *) &data[cur_sample]);
-		memcpy(&decoded_buffer[outpos], decoded_data, out_size);
-		if (out_size > 0)
-			outpos += out_size;
-		cur_sample += sample_size;
-	}
-        while(out_size > 0){
-		out_size = avcodec_encode_audio(self->context, decoded_data, max_data, NULL);
-        	memcpy(&decoded_buffer[outpos], decoded_data, out_size);
-        	if (out_size > 0)
-        		outpos += out_size;
-	}
-	PyObject *result = Py_BuildValue("s#", decoded_buffer, outpos);
-
-	PyMem_Free(decoded_buffer);
-	PyMem_Free(decoded_data);
-
-	return result;
-}
-
-static PyMethodDef module_methods[] = {
-    {NULL}
+    PyType_GenericNew,        /* tp_new */
 };
 
 #ifndef PyMODINIT_FUNC
@@ -212,7 +204,7 @@ PyMODINIT_FUNC initpy_ffmpeg(void) {
         if (PyType_Ready(&mp3_encoderType) < 0)
             return;
 
-	m = Py_InitModule3("py_ffmpeg", module_methods);
+	m = Py_InitModule3("py_ffmpeg", module_methods, "Python FFmpeg module");
 	if (m == NULL)
 	    return;
 
