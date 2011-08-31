@@ -95,28 +95,38 @@ class Segmenter(Element):
 
 class FileWriter(Element):
     """
-    Set chunks_per_file to 0 in order to keep file open and put all data_received into that one file
+    Send append=True or replace=True will assume only one file.  If neither or
+    set and chunks_per_file is set it will increment the path given by the file
+    number
     """
-    def __init__(self, label='default_label', stream_id='no_id', name='%s', chunks_per_file=1):
-        if not label or not stream_id:
-            raise Exception("Name and Stream_id are required")
-        self.label = label
+    def __init__(self, path='fileout', append=False, replace=False, chunks_per_file=None):
+        if chunks_per_file and '%s' not in path:
+            result = path.rpartition('.')
+            if result[1] == '.':
+                path = '%s%s.%s' % (result[0], '%s', result[2])
+            else:
+                path += '%s'
+        if path.count('%s') > 1:
+            raise Exception('Invalid Path, limit string interpolation count to 1')
         self.file_count = 0
-        self.stream_id = stream_id
+        if chunks_per_file and not isinstance(chunks_per_file, int) or chunks_per_file < 0:
+            raise Exception('chunks_per_file should be an int greater than 0')
         self.chunks_per_file = chunks_per_file
         self.chunk_count = 0
         self.file = None 
-        self.name = name
+        self.path = path
         Element.__init__(self)
         
     def new_file(self):
         self.file_count += 1
-        name = self.name % self.file_count
-        file_path = 'debugging/%s/%s/%s' % (self.stream_id, self.label, name)
-        file_dir = os.path.dirname(file_path)
+        if self.chunks_per_file:
+            path = self.path % self.file_count
+        else:
+            path = self.path
+        file_dir = os.path.dirname(path)
         if not os.path.exists(file_dir):
             os.makedirs(file_dir)
-        self.file = open(file_path, 'wb')
+        self.file = open(path, 'wb')
         
     def data_received(self, data=''):
         if not self.file:
