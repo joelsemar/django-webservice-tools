@@ -143,3 +143,4 @@ class FileWriter(Element):
         if self.file:
             self.file.close()
         self.finish_connected()
+        
