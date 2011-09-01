@@ -36,8 +36,8 @@ static void mp3enc_init(mp3_encoder* self, PyObject *args, PyObject *kwds){
     	
         self->codec = avcodec_find_encoder(CODEC_ID_MP3);
         if (!self->codec){
-		PyErr_SetString(PyFFmpegError, "No MP3 encoder found");
-	}
+		    PyErr_SetString(PyFFmpegError, "No MP3 encoder found");
+	    }
 
     	self->context = avcodec_alloc_context3(self->codec);
 
@@ -47,7 +47,7 @@ static void mp3enc_init(mp3_encoder* self, PyObject *args, PyObject *kwds){
     	self->context->sample_fmt = AV_SAMPLE_FMT_S16;
 
         if (avcodec_open2(self->context, self->codec, NULL) < 0){
-		PyErr_SetString(PyFFmpegError, "Error initiliazing codec");
+		    PyErr_SetString(PyFFmpegError, "Error initiliazing codec");
 	}
 }
 
@@ -68,7 +68,7 @@ static PyObject *mp3_flush(mp3_encoder *self, PyObject *args) {
         osize = av_get_bytes_per_sample(self->context->sample_fmt);
 	sample_size = self->context->frame_size * osize * self->context->channels;
 
-        int max_data = sample_size * 5;
+    int max_data = sample_size * 5;
 	char *decoded_buffer = PyMem_Malloc(max_data);
 	uint8_t *decoded_data = PyMem_Malloc(max_data);
 	if (decoded_buffer == NULL){
@@ -100,20 +100,20 @@ static PyObject *mp3_encode(mp3_encoder *self, PyObject *args) {
 	if (!PyArg_ParseTuple(args, "s#", &data, &size))
 		return NULL;
 	
-        int osize = av_get_bytes_per_sample(self->context->sample_fmt);
-	sample_size = self->context->frame_size * osize * self->context->channels;
+    int osize = av_get_bytes_per_sample(self->context->sample_fmt);
+    sample_size = self->context->frame_size * osize * self->context->channels;
 
 
-        int extra_bytes = size % sample_size;
-        char *newdata;
-        if (extra_bytes != 0){
-        	int silence_len = sample_size - extra_bytes;
-		newdata = PyMem_Malloc(size+silence_len);
-		memcpy(newdata, data, size);
-		generate_silence(&newdata[size], self->context->sample_fmt, silence_len);
-		data = newdata;
-		size += silence_len;
-        }
+    int extra_bytes = size % sample_size;
+    char *newdata;
+    if (extra_bytes != 0){
+        int silence_len = sample_size - extra_bytes;
+        newdata = PyMem_Malloc(size+silence_len);
+        memcpy(newdata, data, size);
+        generate_silence(&newdata[size], self->context->sample_fmt, silence_len);
+        data = newdata;
+        size += silence_len;
+    }
 	int max_data = size*4; //calculate max_data here
 	char *decoded_buffer = PyMem_Malloc(max_data);
 	uint8_t *decoded_data = PyMem_Malloc(sample_size*2);
@@ -139,8 +139,8 @@ static PyObject *mp3_encode(mp3_encoder *self, PyObject *args) {
 
 	PyMem_Free(decoded_buffer);
 	PyMem_Free(decoded_data);
-        if (extra_bytes != 0)
-            PyMem_Free(newdata);
+    if (extra_bytes != 0)
+        PyMem_Free(newdata);
 	return result;
 }
 

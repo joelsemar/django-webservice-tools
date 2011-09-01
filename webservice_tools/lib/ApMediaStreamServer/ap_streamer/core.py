@@ -100,7 +100,18 @@ class FileWriter(Element):
     number
     """
     def __init__(self, path='fileout', append=False, replace=False, chunks_per_file=None):
-        if chunks_per_file and '%s' not in path:
+        self.file_count = 0
+        if chunks_per_file and not isinstance(chunks_per_file, int) or chunks_per_file and chunks_per_file < 0:
+            raise Exception('chunks_per_file should be an int greater than 0')
+        self.chunks_per_file = chunks_per_file
+        self.chunk_count = 0
+        self.file = None 
+        self.path = path
+        Element.__init__(self)
+        self.set_path(path)
+    
+    def set_path(self, path):
+        if self.chunks_per_file and '%s' not in path:
             result = path.rpartition('.')
             if result[1] == '.':
                 path = '%s%s.%s' % (result[0], '%s', result[2])
@@ -108,14 +119,7 @@ class FileWriter(Element):
                 path += '%s'
         if path.count('%s') > 1:
             raise Exception('Invalid Path, limit string interpolation count to 1')
-        self.file_count = 0
-        if chunks_per_file and not isinstance(chunks_per_file, int) or chunks_per_file < 0:
-            raise Exception('chunks_per_file should be an int greater than 0')
-        self.chunks_per_file = chunks_per_file
-        self.chunk_count = 0
-        self.file = None 
         self.path = path
-        Element.__init__(self)
         
     def new_file(self):
         self.file_count += 1
