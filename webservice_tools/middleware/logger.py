@@ -22,8 +22,8 @@ class LoggingMiddleware(object):
                 msg += "REQUEST POST: %s" % toDict(request.POST)
             if request.FILES:
                 msg += 'FILES: %s' % ','.join([f.name for f in request.FILES.itervalues()])
-        except:
-            pass
+        except Exception, e:
+            msg += "Error retreiving request data: %s" % e
         
         headers = ''
         for k, v in request.META.iteritems():
