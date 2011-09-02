@@ -818,7 +818,8 @@ def generic_exception_handler(request, exception):
     response.addErrors([exception.message, location])
     logger = logging.getLogger('webservice')
     logger.debug([exception.message, location])
-    transaction.rollback()
+    if transaction.connection._dirty is not None:
+        transaction.rollback()
     return HttpResponse(simplejson.dumps(response.send()._container), status=500)
 
 
