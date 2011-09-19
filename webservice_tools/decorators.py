@@ -15,9 +15,9 @@ def login_required(fn):
             return response.send(errors="Login required method called without request object", status=500)
         if request.user.is_authenticated():
             return fn(*args, **kwargs)
-        
+
         return response.send(errors='401 -- Unauthorized', status=401)
-    
+
     return inner
 
 def data_delete(fn):
@@ -32,7 +32,7 @@ def data_delete(fn):
             request = [a for a in args if hasattr(a, 'user')][0]
         except IndexError:
             return response.send(errors="Data delete decorated function called without request object", status=400)
-        
+
         if request.raw_post_data and request.method == 'DELETE':
             request.DELETE = QueryDict(request.raw_post_data)
             t_args = [a for a in args]
@@ -47,8 +47,8 @@ def data_delete(fn):
 def retry(tries=5, exceptions=None, delay=0.3, exception_raise=None):
     """
     Decorator for retrying a function if exception occurs
-        
-    tries -- num tries 
+
+    tries -- num tries
     exceptions -- exceptions to catch
     delay -- wait between retries
     taken from https://gist.github.com/728327
@@ -87,10 +87,10 @@ def profile(log_file):
     for later processing and examination.
 
     It takes one argument, the profile log name. If it's a relative path, it
-    places it under the PROFILE_LOG_BASE. It also inserts a time stamp into the 
-    file name, such that 'my_view.prof' become 'my_view-20100211T170321.prof', 
-    where the time stamp is in UTC. This makes it easy to run and compare 
-    multiple trials.     
+    places it under the PROFILE_LOG_BASE. It also inserts a time stamp into the
+    file name, such that 'my_view.prof' become 'my_view-20100211T170321.prof',
+    where the time stamp is in UTC. This makes it easy to run and compare
+    multiple trials.
     """
 
     if not os.path.isabs(log_file):
