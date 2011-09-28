@@ -46,7 +46,7 @@ class ApTaskManage(object):
             sys.stderr.write("Please provide a project name for this project (-p FooProject)\n")
             sys.exit(1)
         server_name = self.settings.SERVER_NAME
-        sys.stderr.write("Connecting to %s...\n" % domain)
+        sys.stdout.write("Connecting to %s...\n" % domain)
         p = pexpect.spawn('ssh -t %s@%s' % (username, domain))
         p.wait()
         p.sendline('cd /var/git')
