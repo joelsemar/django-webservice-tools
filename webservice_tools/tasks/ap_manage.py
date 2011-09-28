@@ -48,7 +48,7 @@ class ApTaskManage(object):
         server_name = self.settings.SERVER_NAME
         sys.stderr.write("Connecting to %s...\n" % domain)
         p = pexpect.spawn('ssh -t %s@%s' % (username, domain))
-        #p.logfile = sys.stdout
+        p.wait()
         p.sendline('cd /var/git')
         p.sendline('sudo -u www-data git clone git@github.com:appiction/%s.git' % project_name)
         p.sendline('sudo ln -s /var/git/%s/server/%s /var/www/%s' % (project_name, server_name, server_name))
