@@ -26,7 +26,7 @@ class ApTaskManage(object):
                 sys.stderr.write("Error: No username specified for login to remote server.")
                 sys.exit(1) 
             domain = options.domain or 'staging.appiction.com'
-            sys.stderr.write("Connecting to %s..." % domain)
+            sys.stderr.write("Connecting to %s...\n" % domain)
             command_string = "cd /var/www/%s && ./ap_manage.py %s" % (self.settings.SERVER_NAME, command)
             sys.argv.remove('-r')
             p = pexpect.spawn('ssh -t %s@%s %s %s' % (options.username, domain, command_string, ' '.join(sys.argv[2:])))
