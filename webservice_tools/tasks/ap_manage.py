@@ -24,16 +24,39 @@ class ApTaskManage(object):
         if options.remote:
             if not options.username:
                 sys.stderr.write("Error: No username specified for login to remote server.")
-                sys.exit(1) 
+                sys.exit(1)
+                
+                 
             domain = options.domain or 'staging.appiction.com'
-            sys.stderr.write("Connecting to %s...\n" % domain)
-            command_string = "cd /var/www/%s && ./ap_manage.py %s" % (self.settings.SERVER_NAME, command)
-            sys.argv.remove('-r')
-            p = pexpect.spawn('ssh -t %s@%s %s %s' % (options.username, domain, command_string, ' '.join(sys.argv[2:])))
-            p.interact()
+            if command == 'install_app':
+                self.install_app(options, domain, options.username) 
+            else:
+                sys.stderr.write("Connecting to %s...\n" % domain)
+                command_string = "cd /var/www/%s && ./ap_manage.py %s" % (self.settings.SERVER_NAME, command)
+                sys.argv.remove('-r')
+                p = pexpect.spawn('ssh -t %s@%s %s %s' % (options.username, domain, command_string, ' '.join(sys.argv[2:])))
+                p.interact()
         else:
             getattr(self, command)(options)       
     
+    
+    def install_app(self, options, domain, username):
+        project_name = options.project_name
+        if not project_name:
+            sys.stderr.write("Please provide a project name for this project (-p FooProject)\n")
+            sys.exit(1)
+        server_name = self.settings.SERVER_NAME
+        sys.stderr.write("Connecting to %s...\n" % domain)
+        p = pexpect.spawn('ssh -t %s@%s' % (username, domain))
+        #p.logfile = sys.stdout
+        p.sendline('cd /var/git')
+        p.sendline('sudo -u www-data git clone git@github.com:appiction/%s.git' % project_name)
+        p.sendline('sudo ln -s /var/git/%s/server/%s /var/www/%s' % (project_name, server_name, server_name))
+        p.sendline('sudo ln -s /usr/local/lib/python2.6/dist-packages/django/contrib/admin/media/ /var/www/%s/static/admin-media' % server_name)
+        p.sendline('cd -')
+        p.close()
+        self.createdb(options)
+        self.apache_install(options)
     
     def resetdb(self, options):
         db_settings = self.settings.DATABASES['default']
@@ -63,15 +86,6 @@ class ApTaskManage(object):
             os.system("./manage.py migrate")
     
     
-    def clone(self, options):
-        project_name = options.project_name
-        server_name = self.settings.SERVER_NAME
-        os.system('cd /var/git')
-        os.system('sudo -u www-data git clone git@github.com:appiction/%s.git' % project_name)
-        os.system('sudo ln -s /var/git/%s/server/%s /var/www/%s' % (project_name, server_name, server_name))
-        os.system('sudo ln -s /usr/local/lib/python2.6/dist-packages/django/contrib/admin/media/ /var/www/%s/static/admin-media' % server_name)
-        
-        
     def apache_install(self, options):
         server_name = self.settings.SERVER_NAME
         contents = "WSGIScriptAlias /%(server_name)s /var/www/%(server_name)s/wsgi/django.wsgi\nAlias /spserver/static /var/www/%(server_name)s/static/" \
