@@ -37,6 +37,10 @@ class ApTaskManage(object):
                 command_string = "cd /var/www/%s && ./ap_manage.py %s" % (self.settings.SERVER_NAME, command)
                 if '-r' in sys.argv:
                     sys.argv.remove('-r')
+                if '-d' in sys.argv:
+                    sys.argv.remove('-d')
+                if domain in sys.argv:
+                    sys.argv.remove(domain)
                 p = pexpect.spawn('ssh -t %s@%s %s %s' % (options.username, domain, command_string, ' '.join(sys.argv[2:])))
                 p.interact()
         else:
