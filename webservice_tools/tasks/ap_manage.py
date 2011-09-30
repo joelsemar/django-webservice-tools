@@ -1,6 +1,8 @@
 import os
 import sys
 import pexpect
+from subprocess import Popen
+import pxssh
 from optparse import OptionParser
 
 class ApTaskManage(object):
@@ -47,17 +49,21 @@ class ApTaskManage(object):
             sys.exit(1)
         server_name = self.settings.SERVER_NAME
         sys.stdout.write("Connecting to %s...\n" % domain)
-        p = pexpect.spawn('ssh -t %s@%s' % (username, domain))
-        p.wait()
-        #p.logfile = sys.stdout
-        p.sendline('cd /var/git')
+        p = pxssh.pxssh()
+        p.login(domain, username)
+        p.sendline('cd /var/git/')
+        p.prompt()
         p.sendline('sudo -u www-data git clone git@github.com:appiction/%s.git' % project_name)
+        p.prompt()
         p.sendline('sudo ln -s /var/git/%s/server/%s /var/www/%s' % (project_name, server_name, server_name))
+        p.prompt()
         p.sendline('sudo ln -s /usr/local/lib/python2.6/dist-packages/django/contrib/admin/media/ /var/www/%s/static/admin-media' % server_name)
-        p.sendline('cd -')
-        p.close()
-        self.createdb(options)
-        self.apache_install(options)
+        p.prompt()
+        print p.before
+        os.system('./ap_manage.py createdb -r -d %s -u %s' % (domain, username))
+        os.system('./ap_manage.py apache_install -r -d %s -u %s' % (domain, username))
+
+        
     
     def resetdb(self, options):
         db_settings = self.settings.DATABASES['default']
@@ -113,6 +119,9 @@ class ApTaskManage(object):
     
         
     def push(self, options):
+        if not options.commit_message:
+            sys.stderr.write("You must provide a commit message if you want to push")
+            sys.exit(1)
         os.system('git commit -a -m "%s" && git push' % options.commit_message)
     
     
