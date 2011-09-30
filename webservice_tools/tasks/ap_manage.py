@@ -23,7 +23,7 @@ class ApTaskManage(object):
 
         options, args = parser.parse_args()
         command = sys.argv[1]
-        if options.remote:
+        if options.remote or options.domain:
             if not options.username:
                 sys.stderr.write("Error: No username specified for login to remote server.")
                 sys.exit(1)

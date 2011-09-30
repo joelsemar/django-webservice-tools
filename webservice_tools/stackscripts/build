@@ -57,7 +57,7 @@ easy_install South
 apt-get -y install gcc
 
 #deps
-cd /opt
+cd /var/git
 yes | git clone https://$GITHUB_LOGIN:$GITHUB_PASSWORD@github.com/joelsemar/django-webservice-tools.git
 cd django-webservice-tools
 python setup.py install
