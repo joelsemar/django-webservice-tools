@@ -46,11 +46,11 @@ USE_I18N = True
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale
 USE_L10N = True
-
-MEDIA_ROOT = os.path.join(sys.path[0], 'media')
+PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
+MEDIA_ROOT = os.path.join(PROJECT_PATH, 'media')
 MEDIA_URL = '/%s/media/' % SERVER_NAME
 
-STATIC_ROOT = os.path.join(sys.path[0], 'static')
+STATIC_ROOT = os.path.join(PROJECT_PATH, 'static')
 STATIC_URL = '/%s/static/' % SERVER_NAME
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
@@ -85,7 +85,7 @@ SITE_SETTINGS_MODEL = 'mainapp.SiteSettings'
 
 ROOT_URLCONF = 'urls'
 
-PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
+
 TEMPLATE_DIRS = ()
     
 for root, dirs, files in os.walk(PROJECT_PATH):
