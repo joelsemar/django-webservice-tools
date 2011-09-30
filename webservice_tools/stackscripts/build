@@ -58,7 +58,7 @@ apt-get -y install gcc
 
 #deps
 cd /var/git
-yes | git clone https://$GITHUB_LOGIN:$GITHUB_PASSWORD@github.com/joelsemar/django-webservice-tools.git
+yes | git clone git://github.com/joelsemar/django-webservice-tools.git
 cd django-webservice-tools
 python setup.py install
 cd webservice_tools/misc
