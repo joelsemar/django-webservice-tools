@@ -636,7 +636,7 @@ def pnormaldist(qn):
     
     if qn > 0.5:
         return math.sqrt(w1 * w3)
-    return - math.sqrt(w1 * w3)
+    return -math.sqrt(w1 * w3)
 
 
 def ci_lower_bound(pos, n, power=0.10):
@@ -858,3 +858,80 @@ def get_traceback_frames(tb):
 def comma_string_split(list_of_strings):
     """ Return list of strings separated by commas"""
     return [i.strip() for i in list_of_strings.split(',') if i.strip()]
+
+
+def comma_sep(bits):
+    count = {}
+    orderedCounts = []
+    for bit in bits:
+        # if key exists
+        if count.has_key(bit):
+            count[bit] += 1
+        else: # key does not exist
+            count[bit] = 1
+    string = ""
+    # sort by count
+    orderedCounts = count.items()
+    orderedCounts.sort(cmp=lambda x, y: cmp(x[1], y[1]))
+    orderedCounts.reverse()
+    for bit in orderedCounts:
+        # concatinate the strings
+        string += ", %s %i" % bit[0], count[bit[0]]
+    return string
+
+def count_and_order(sequence):
+    count = set([{'item':item, 'times': sequence.count(item)} for item in sequence])
+    count.sort(key=lambda k: k['times'], reverse=True)
+    return ', '.join(["%s: %i" % (item['item'], item['times']) for item in count])
+
+def count_and_order(sequence):
+    """
+    Take an iterable sequence, and returns a string telling us
+    how many times each item in the sequence occurs, the string should be sorted
+    from the item with the most occurences to the least.
+    
+    Ror example:
+    >>>count_and_order(['foo','bar','baz','baz','bang','bang','bang'])
+    ...'bang: 3, baz: 2, foo: 1, bar: 1'
+
+    
+    """
+    if not isinstance(sequence, (list, tuple, set)):
+        return "Input squence must be an instance of list, tuple or set"
+    
+    #count the number of occurences of each item
+    count_dict = dict((item, sequence.count(item))  for item in sequence)
+    
+    #now just put it into a list of dicts so we can sort, and rejoin as a string
+    count_list = [{'item': k, 'times': v} for (k,v) in count_dict.iteritems()]
+    count_list.sort(key=lambda k: k['times'], reverse=True)
+    return ', '.join(["%s: %i" % (item['item'], item['times']) for item in count_list])
+
+
+def count_and_order(sequence):
+    """
+    Take an iterable sequence, and returns a string telling us
+    how many times each item in the sequence occurs, the string should be sorted
+    from the item with the most occurences to the least.
+    
+    Ror example:
+    >>>count_and_order(['foo','bar','baz','baz','bang','bang','bang'])
+    ...'bang: 3, baz: 2, foo: 1, bar: 1'
+
+    
+    """
+    if not isinstance(sequence, (list, tuple, set)):
+        return "Input squence must be an instance of list, tuple or set"
+    
+    count_list = list(set((i, sequence.count(i)) for i in sequence))
+    count_list.sort(key=lambda k: k[1], reverse=True)
+    return ', '.join(["%s: %i" % item for item  in count_list])
+
+def count_and_order(sequence):
+    count = []
+    for item in sequence:
+        d = {'item':item, 'times': sequence.count(item)}
+        if d not in count:
+            count.append(d)
+    count.sort(key=lambda k: k['times'], reverse=True)
+    return ', '.join(["%s: %i" % (item['item'], item['times']) for item in count])

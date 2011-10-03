@@ -509,7 +509,7 @@ dbProxySecHosts=None):
         #cp_reconnect=True, poolName=connID,
         #**cursorClassDict)
     #except:
-       #errorutil.triggerFatalError("Could not connect to database for pool \"%s\"" % connID)
+        #errorutil.triggerFatalError("Could not connect to database for pool \"%s\"" % connID)
         
     d = defer.succeed(True)
     singleton.store(connID + 'Type', 'direct')
@@ -835,7 +835,6 @@ def _directProcessExecute(txn, queryString, argList, fetch, connID, useCache, ca
 def _directProcessExecute_onError(failure, queryString, argList, fetch, connID, useCache,
 cacheExpireTime, cacheHashKey, printQuery, _alreadyInBacklog):
     if failure.check(MySQLdb.ProgrammingError) or failure.check(TypeError):
-        import pydevd;pydevd.settrace('127.0.0.1')
         log.msg(u"Database query failure. Error: %s. Failed query was: %s; Args: (%s)"
             % (failure.getErrorMessage(), queryString, ', '.join([x for x in argList]),), lvl='e', ss='ss_db')
         failure.raiseException() #invalid syntax error

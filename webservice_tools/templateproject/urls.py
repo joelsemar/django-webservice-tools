@@ -20,7 +20,7 @@ basepatterns = patterns('',
 )
 
 urlpatterns = patterns('',
-    (r'^cwserver/', include(basepatterns)),
+    (r'^{{servername}}/', include(basepatterns)),
     (r'', include(basepatterns)),
 
 )
