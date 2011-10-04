@@ -99,6 +99,7 @@ class FileWriter(Element):
     set and chunks_per_file is set it will increment the path given by the file
     number
     """
+    path = ''
     def __init__(self, path='', append=False, replace=False, chunks_per_file=None):
         self.file_count = 0
         if chunks_per_file and (not isinstance(chunks_per_file, int) or chunks_per_file < 0):

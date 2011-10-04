@@ -34,7 +34,6 @@ class SocialFriendHandler(BaseHandler):
           @network [string] {twitter|facebook|linkedin}
         """
         network = request.GET.get('network')
-        extra = request.GET.get('extra')
         profile = request.user.get_profile()
 
         try:
@@ -47,6 +46,8 @@ class SocialFriendHandler(BaseHandler):
         except UserNetworkCredentials.DoesNotExist:
             return response.send(errors='Either %s does not exist or we do not have credentials for that user.' % network.name)
 
+        if not hasattr(self, network.name):
+            return response.send(errors="Not implemented")
 
         try:
             #Use the name of the network to call the helper function
@@ -107,7 +108,6 @@ class SocialPostHandler(BaseHandler):
         profile = request.user.get_profile()
         network = request.POST.get('network')
 
-
         try:
             network = SocialNetwork.objects.get(name=network)
         except SocialNetwork.DoesNotExist:
@@ -118,6 +118,8 @@ class SocialPostHandler(BaseHandler):
         except UserNetworkCredentials.DoesNotExist:
             return response.send(errors="This user has not registered us with the network specified")
 
+        if not hasattr(self, network.name):
+            return response.send(errors="Not Implemented")
 
         try:
             #Call the name of the network as a helper method to implement the different posts
@@ -184,24 +186,21 @@ class SocialRegisterHandler(BaseHandler):
 
     model = SocialNetwork
 
-    @login_required
     def read(self, request, network, response=None):
         """
         Handler to allow GETs to this url
         """
         return self.create(request, network, response)
 
-    @login_required
     def create(self, request, network, response=None):
         """
         Attempts to gain permission to a user's data with a social network, if successful, will
         return a redirect to the network's servers, there the user will be prompted to login if
-        necessary, and allow or deny us access. network = {facebook|twitter|linkedin}
+        necessary, and allow or deny us access. network = {facebook|twitter|linkedin|latitude|gowalla|foursquare}
         API handler: POST /social/register/{network}
         Params:
             None
         """
-        profile = request.user.get_profile()
         if request.META.get('HTTP_REFERER') and not 'social/test' in request.META.get('HTTP_REFERER'):
             request.session['last_url'] = request.META['HTTP_REFERER']
         if not response:
@@ -262,20 +261,51 @@ class SocialRegisterHandler(BaseHandler):
         """
         return self.twitter(request, network, response)
 
+    def gowalla(self, request, network, response):
+        """
+        Helper function to redirect the user to gowalla for authorization
+        """
+        args = urllib.urlencode({'client_id' : network.getAppId(),
+                                 'display' : 'touch',
+                                 'scope' : network.scope_string,
+                                 'redirect_uri': network.getCallBackURL(request)})
+
+        return HttpResponseRedirect(network.getAuthURL() + '?' + args)
+
+    def foursquare(self, request, network, response):
+        """
+        Helper function to handle foursquare redirect
+        """
+        args = urllib.urlencode({'client_id' : network.getAppId(),
+                                 'redirect_uri': network.getCallBackURL(request),
+                                 'response_type': 'code',
+                                 'display': 'touch'})
+
+        return HttpResponseRedirect(network.getAuthURL() + '?' + args)
+
+    def latitude(self, request, network, response):
+        """
+        Helper function to handle latitude redirect
+        """
+        args = urllib.urlencode({'client_id' : network.getAppId(),
+                                 'redirect_uri': network.getCallBackURL(request),
+                                 'response_type': 'code',
+                                 'display': 'touch',
+                                 'scope': network.scope_string})
+
+        return HttpResponseRedirect(network.getAuthURL() + '?' + args)
+
 
 class SocialCallbackHandler(BaseHandler):
     allowed_methods = ('GET',)
 
     internal = True
 
-    @login_required
     def read(self, request, network, response=None):
         """
         This is the entrypoint for social network's callbacks
 
         """
-        profile = request.user.get_profile()
-
         if not response:
             response = ResponseObject()
 
@@ -286,12 +316,12 @@ class SocialCallbackHandler(BaseHandler):
 
         #Use the name of the network to call the helper function
         if request.session.get('last_url'):
-            getattr(self, network.name)(request, network, profile, response)
+            getattr(self, network.name)(request, network, response)
             return HttpResponseRedirect(request.session.get('last_url'))
-        return getattr(self, network.name)(request, network, profile, response)
+        return getattr(self, network.name)(request, network, response)
 
 
-    def twitter(self, request, network, profile, response):
+    def twitter(self, request, network, response):
         """
         Helper function to handle the callbacks for twitter
         """
@@ -333,16 +363,16 @@ class SocialCallbackHandler(BaseHandler):
             params['user_id'] = [urlparse.parse_qs(ret['site_standard_profile_request']['url'])['key'][0], '0']
             params['screen_name'] = ['%s %s' % (ret['first_name'], ret['last_name']), '0']
 
-        UserNetworkCredentials.objects.filter(profile=profile, network=network).delete()
-        UserNetworkCredentials.objects.create(access_token=accessToken,
-                                              profile=profile,
-                                              network=network,
-                                              uuid=params['user_id'][0],
-                                              name_in_network=params['screen_name'][0])
-        return response.send()
+        network_dict = {}
+        network_dict['access_token'] = accessToken
+        network_dict['uuid'] = params['user_id']
+        network_dict['name_in_network'] = params['screen_name'][0]
+        network_dict['network'] = network
+
+        self.finish_callback(request, response, network_dict=network_dict)
 
 
-    def facebook(self, request, network, profile, response):
+    def facebook(self, request, network, response):
         """
         Helper function to handle the callbacks for facebook
         """
@@ -368,20 +398,144 @@ class SocialCallbackHandler(BaseHandler):
                                 apiHandler='me?access_token=%s' % access_token,
                                 secure=True)
 
+        network_dict = {}
+        network_dict['access_token'] = access_token
+        network_dict['uuid'] = ret['id']
+        network_dict['name_in_network'] = ret['name']
+        network_dict['network'] = network
 
-        UserNetworkCredentials.objects.filter(profile=profile, network=network).delete()
-        UserNetworkCredentials.objects.create(access_token=access_token,
-                                              profile=profile,
-                                              network=network,
-                                              uuid=ret['id'],
-                                              name_in_network=ret['name'])
-        return response.send()
+        self.finish_callback(request, response, network_dict=network_dict)
 
-    def linkedin(self, request, network, profile, response):
+
+    def linkedin(self, request, network, response):
         """
         Helper function to handle the callbacks for linkedin
         """
-        return self.twitter(request, network, profile, response)
+        return self.twitter(request, network, response)
+
+    def gowalla(self, request, network, response):
+        """
+        Helper function to handle the callbacks for gowalla
+        """
+        verification_string = request.GET.get('code', '')
+        if not verification_string:
+            # probably the user didn't accept our advances
+            return response.send(errors=NETWORK_HTTP_ERROR % network.name)
+
+        token_request_args = {'client_id' :  network.getAppId(),
+                              'client_secret': network.getSecret(),
+                              'redirect_uri': network.getCallBackURL(request),
+                              'grant_type' : 'authorization_code',
+                              'code' : verification_string}
+
+        result = utils.makeAPICall(domain=network.base_url,
+                                   apiHandler=network.access_token_path,
+                                   postData=token_request_args,
+                                   secure=True)
+        network_user  = utils.makeAPICall(domain=network.base_url,
+                                apiHandler='users/me',
+                                queryData={'access_token':result['access_token']},
+                                headers={'Accept':'application/json'},
+                                secure=True)
+        network_dict = {}
+        network_dict['access_token'] = result['access_token']
+        network_dict['refresh_token'] = result['refresh_token']
+        network_dict['timeout'] = datetime.datetime.utcnow() + datetime.timedelta(seconds=result['expires_in'])
+        network_dict['uuid'] = result['username']
+        network_dict['name_in_network'] = '%s %s' % (network_user['first_name'], network_user['last_name'])
+        network_dict['network'] = network
+
+        self.finish_callback(request, response, network_dict=network_dict)
+
+    def foursquare(self, request, network, response):
+        """
+        Helper function to handle the callbacks for foursquare
+        """
+        verification_string = request.GET.get('code', '')
+        if not verification_string:
+            # probably the user didn't accept our advances
+            return response.send(errors=NETWORK_HTTP_ERROR % network.name)
+
+        token_request_args = {'client_id' :  network.getAppId(),
+                              'client_secret': network.getSecret(),
+                              'redirect_uri': network.getCallBackURL(request),
+                              'grant_type' : 'authorization_code',
+                              'code' : verification_string}
+
+        result = utils.makeAPICall(domain=network.base_url,
+                                   apiHandler=network.access_token_path,
+                                   queryData=token_request_args,
+                                   secure=True)
+
+        network_user  = utils.makeAPICall(domain=network.base_url,
+                                apiHandler='v2/users/self',
+                                queryData={'oauth_token':result['access_token']},
+                                headers={'Accept':'application/json'},
+                                secure=True)
+
+        network_dict = {}
+        network_dict['access_token'] = result['access_token']
+        network_dict['uuid'] = network_user['id']
+        network_dict['name_in_network'] = '%s %s' % (network_user['firstName'], network_user['lastName'])
+        network_dict['network'] = network
+
+        self.finish_callback(request, response, network_dict=network_dict)
+
+
+    def latitude(self, request, network, response):
+        """
+        Helper Function to handle the callbacks for Google Latitude
+        """
+        verification_string = request.GET.get('code', '')
+        error = request.GET.get('error', '')
+        if error:
+            return response.send(errors=error)
+        if not verification_string:
+            # probably the user didn't accept our advances
+            return response.send(errors=NETWORK_HTTP_ERROR % network.name)
+
+        token_request_args = {'client_id' :  network.getAppId(),
+                              'client_secret': network.getSecret(),
+                              'redirect_uri': network.getCallBackURL(request),
+                              'grant_type' : 'authorization_code',
+                              'code' : verification_string}
+
+        result = utils.makeAPICall(domain=network.base_url,
+                                   apiHandler=network.access_token_path,
+                                   postData=token_request_args,
+                                   secure=True)
+
+        network_user  = utils.makeAPICall(domain=network.base_url,
+                                apiHandler='users/me',
+                                queryData={'access_token':result['access_token']},
+                                headers={'Accept':'application/json'},
+                                secure=True)
+        network_dict = {}
+        network_dict['access_token'] = result['access_token']
+        network_dict['refresh_token'] = result['refresh_token']
+        network_dict['timeout'] = datetime.datetime.utcnow() + datetime.timedelta(seconds=result['expires_in'])
+        network_dict['uuid'] = result['username']
+        network_dict['name_in_network'] = '%s %s' % (network_user['first_name'], network_user['last_name'])
+        network_dict['network'] = network
+
+        self.finish_callback(request, response, network_dict=network_dict)
+
+    def finish_callback(self, request, response, network_dict):
+        if not request.user.is_authenticated():
+            profile, error = PROFILE_MODEL.create_default()
+            if not profile:
+                return response.send(errors=error)
+        else:
+            profile = request.user.get_profile()
+
+        profile.user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, profile.user)
+
+        UserNetworkCredentials.objects.filter(profile=profile, network=network_dict['network']).delete()
+        UserNetworkCredentials.objects.create(profile=profile, **network_dict)
+
+        return response.send()
+
 
 #ALL DEFINITION EOF
 module_name = globals().get('__name__')
