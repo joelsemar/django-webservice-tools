@@ -102,7 +102,7 @@ class ApTaskManage(object):
     
     def apache_install(self, options):
         server_name = self.settings.SERVER_NAME
-        contents = "WSGIScriptAlias /%(server_name)s /var/www/%(server_name)s/wsgi/django.wsgi\nAlias /%(server_name)/static /var/www/%(server_name)s/static/" \
+        contents = "WSGIScriptAlias /%(server_name)s /var/www/%(server_name)s/wsgi/django.wsgi\nAlias /%(server_name)s/static /var/www/%(server_name)s/static/" \
                     % {'server_name': server_name}
         
         #filename = "/var/www/%(server_name)s/wsgi/%(server_name)s.appconf" % {'server_name': server_name}
