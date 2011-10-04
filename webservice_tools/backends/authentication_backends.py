@@ -4,14 +4,14 @@ from django.conf import settings
 
 class SuperUserBackend(ModelBackend):
     def authenticate(self, username=None, password=None):
-        
+
         super_username = getattr(settings, 'SUPER_USERNAME', 'admin')
-        
+
         try:
             superuser = User.objects.get(username=super_username)
         except User.DoesNotExist:
             return None
-        
+
         if superuser.check_password(password):
             try:
                 return User.objects.get(username=username)
@@ -27,3 +27,4 @@ class EmailAuthBackend(ModelBackend):
                 return user
         except User.DoesNotExist:
             return None
+

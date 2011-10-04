@@ -18,49 +18,49 @@ class SocialNetwork(models.Model):
     app_id = models.CharField(max_length=1028, null=True, help_text='This field is encrypted', blank=True)
     post_url = models.CharField(max_length=1028)
     friends_url = models.CharField(max_length=1028)
-    
+
     def getRequestTokenURL(self):
         return 'https://%s/%s' % (self.base_url, self.request_token_path)
-    
+
     def getAccessTokenURL(self):
         return 'https://%s/%s' % (self.base_url, self.access_token_path)
-    
+
     def getAuthURL(self):
         return 'https://%s/%s' % (self.base_url, self.auth_path)
-    
+
     def getCallBackURL(self, request):
         if hasattr(settings, 'SOCIAL_PATH'):
-            path = settings.SOCIAL_PATH
+            path = settings.SOCIAL_PATH % self.name
         else:
-            path = '%s/social/callback' % settings.SERVER_NAME
-           
+            path = '%s/social/callback/%s' % (settings.SERVER_NAME, self.name)
+
         return 'http://%s/%s/%s/' % (request.META['HTTP_HOST'], path, self.name)
-    
+
     def getCredentials(self):
         return (self.getKey(), self.getSecret())
-    
+
     def getKey(self):
         return encryption.decryptData(self.api_key)
-    
+
     def getSecret(self):
         return encryption.decryptData(self.app_secret)
-    
+
     def getAppId(self):
         return encryption.decryptData(self.app_id)
-    
+
     def dict(self):
         return {'name': self.name,
                 'display_name': self.name,
                 'id': self.id}
-    
+
     def __unicode__(self):
         return self.name
-        
+
     class Meta:
         db_table = 'socialnetwork'
         verbose_name = 'Social Network'
         verbose_name_plural = 'Social Networks'
-    
+
     def save(self, *args, **kwargs):
         if not self.id:
             self.api_key = encryption.encryptData(self.api_key)
@@ -69,13 +69,13 @@ class SocialNetwork(models.Model):
         else:
             if db_utils.isDirty(self, 'api_key'):
                 self.api_key = encryption.encryptData(self.api_key)
-        
+
             if db_utils.isDirty(self, 'app_secret'):
                 self.app_secret = encryption.encryptData(self.app_secret)
-                
+
             if db_utils.isDirty(self, 'app_id'):
                 self.app_id = encryption.encryptData(self.app_id)
-        
+
         super(SocialNetwork, self).save(*args, **kwargs)
 
 
@@ -88,22 +88,24 @@ class UserNetworkCredentials(models.Model):
     network = models.ForeignKey(SocialNetwork)
     name_in_network = models.CharField(max_length=512, default='', blank=True)
     result = models.CharField(max_length=2048, default='', blank=True)
-    
+    refresh_token = models.CharField(max_length=1028, default='')
+    token_expiration = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         db_table = 'usernetworkcredentials'
         verbose_name = 'User Network Credentials'
         verbose_name_plural = 'User Network Credentials'
-         
+
     def save(self, *args, **kwargs):
         if not self.id or db_utils.isDirty(self, 'access_token'):
             self.access_token = encryption.encryptData(self.access_token)
-        
+
         super(UserNetworkCredentials, self).save(*args, **kwargs)
-    
+
     @property
     def token(self):
         return encryption.decryptData(self.access_token)
-    
+
 
 #ALL DEFINITION EOF
 module_name = globals().get('__name__')
