@@ -1,8 +1,8 @@
 import os
 import sys
 import pexpect
-from subprocess import Popen
 import pxssh
+import getpass
 from optparse import OptionParser
 
 class ApTaskManage(object):
@@ -55,14 +55,16 @@ class ApTaskManage(object):
         server_name = self.settings.SERVER_NAME
         sys.stdout.write("Connecting to %s...\n" % domain)
         p = pxssh.pxssh()
-        p.login(domain, username)
+        password = getpass.getpass("Password:")
+        p.login(domain, username, password)
+        p.prompt()
         p.sendline('cd /var/git/')
         p.prompt()
         p.sendline('sudo -u www-data git clone git@github.com:appiction/%s.git' % project_name)
         p.prompt()
-        p.sendline('sudo ln -s /var/git/%s/server/%s /var/www/%s' % (project_name, server_name, server_name))
+        p.sendline('sudo ln -sf /var/git/%s/server/%s /var/www/%s' % (project_name, server_name, server_name))
         p.prompt()
-        p.sendline('sudo ln -s /usr/local/lib/python2.6/dist-packages/django/contrib/admin/media/ /var/www/%s/static/admin-media' % server_name)
+        p.sendline('sudo ln -sf /usr/local/lib/python2.6/dist-packages/django/contrib/admin/media/ /var/www/%s/static/admin-media' % server_name)
         p.prompt()
         print p.before
         os.system('./ap_manage.py createdb -r -d %s -u %s' % (domain, username))
@@ -100,12 +102,13 @@ class ApTaskManage(object):
     
     def apache_install(self, options):
         server_name = self.settings.SERVER_NAME
-        contents = "WSGIScriptAlias /%(server_name)s /var/www/%(server_name)s/wsgi/django.wsgi\nAlias /spserver/static /var/www/%(server_name)s/static/" \
+        contents = "WSGIScriptAlias /%(server_name)s /var/www/%(server_name)s/wsgi/django.wsgi\nAlias /%(server_name)/static /var/www/%(server_name)s/static/" \
                     % {'server_name': server_name}
         
-        filename = "/var/www/%(server_name)s/wsgi/%(server_name)s.appconf" % {'server_name': server_name}
+        #filename = "/var/www/%(server_name)s/wsgi/%(server_name)s.appconf" % {'server_name': server_name}
+        filename = '~/%s.apconf' % server_name
         os.system('sudo echo "%s" > "%s"' % (contents, filename))
-        os.system('sudo ln -s %s /etc/apache2/sites-available/%s' % (filename, filename.rpartition('/')[-1]))
+        os.system('sudo ln -sf %s /etc/apache2/sites-available/%s' % (filename, filename.rpartition('/')[-1]))
         self.restart_apache(options)
     
     def restart_apache(self, options):

@@ -768,13 +768,13 @@ def auto_page(results, page_number=1, limit=10):
         pages.page(page.next_page_number())
         next_page = page.next_page_number()
     except EmptyPage:
-        next_page = 'NO'
+        next_page = None
     
     try:
         pages.page(page.previous_page_number())
         previous_page = page.previous_page_number()
     except EmptyPage:
-        previous_page = 'NO'
+        previous_page = None
         
     page_dict = {'page': page_number,
                  'next_page': next_page,
