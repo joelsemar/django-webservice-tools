@@ -94,11 +94,16 @@ class ApTaskManage(object):
         os.system("echo '%s' | sudo -u postgres psql" % grant_string)
         
         if 'no-sync' not in sys.argv:
-            os.system("./manage.py syncdb")
+            self.syncdb(options)
             
         if 'no-migrate' not in sys.argv:
-            os.system("./manage.py migrate")
+            self.migrate(options)
     
+    def syncdb(self, options):
+        os.system("sudo ./manage.py syncdb")
+
+    def migrate(self, options):
+        os.system("sudo ./manage.py migrate")
     
     def apache_install(self, options):
         server_name = self.settings.SERVER_NAME
@@ -116,8 +121,8 @@ class ApTaskManage(object):
     def update(self, options):
         os.system('sudo -u www-data git reset --hard')
         os.system('sudo -u www-data git pull')
-        os.system('./manage.py syncdb')
-        os.system('./manage.py migrate')
+        os.system('sudo ./manage.py syncdb')
+        os.system('sudo ./manage.py migrate')
         self.restart_apache(options)
     
     
