@@ -105,9 +105,8 @@ class ApTaskManage(object):
         contents = "WSGIScriptAlias /%(server_name)s /var/www/%(server_name)s/wsgi/django.wsgi\nAlias /%(server_name)s/static /var/www/%(server_name)s/static/" \
                     % {'server_name': server_name}
         
-        #filename = "/var/www/%(server_name)s/wsgi/%(server_name)s.appconf" % {'server_name': server_name}
-        filename = '~/%s.apconf' % server_name
-        os.system('sudo echo "%s" > "%s"' % (contents, filename))
+        filename = "/var/www/%(server_name)s/wsgi/%(server_name)s.appconf" % {'server_name': server_name}
+        os.system('sudo sh -c \'echo "%s" > "%s"\'' % (contents, filename))
         os.system('sudo ln -sf %s /etc/apache2/sites-available/%s' % (filename, filename.rpartition('/')[-1]))
         self.restart_apache(options)
     
