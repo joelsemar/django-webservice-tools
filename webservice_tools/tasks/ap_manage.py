@@ -70,11 +70,10 @@ class ApTaskManage(object):
         os.system('./ap_manage.py createdb -r -d %s -u %s' % (domain, username))
         os.system('./ap_manage.py apache_install -r -d %s -u %s' % (domain, username))
 
-        
     
     def resetdb(self, options):
         db_settings = self.settings.DATABASES['default']
-        os.system('sudo -u postgres drobdb %s' % db_settings.get('NAME'))
+        os.system('sudo -u postgres dropdb %s' % db_settings.get('NAME'))
         self.createdb(options)
         
         
