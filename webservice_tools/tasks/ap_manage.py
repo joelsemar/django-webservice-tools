@@ -121,8 +121,8 @@ class ApTaskManage(object):
     def update(self, options):
         os.system('sudo -u www-data git reset --hard')
         os.system('sudo -u www-data git pull')
-        os.system('sudo ./manage.py syncdb')
-        os.system('sudo ./manage.py migrate')
+        os.system('./manage.py syncdb')
+        os.system('./manage.py migrate')
         self.restart_apache(options)
     
     
