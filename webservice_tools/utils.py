@@ -805,7 +805,7 @@ def get_user_from_session(session_key):
 
 
 def location_from_coords(lat, lng):
-    return fromstr("POINT(%.5f %5f)" % (float(lat), float(lng)))
+    return fromstr("POINT(%.5f %5f)" % (float(lng), float(lat)))
 
 def generic_exception_handler(request, exception):
     from webservice_tools.response_util import ResponseObject
